@@ -10,6 +10,8 @@ export type ReportRecord = {
   content: string;
   status: ReportStatus;
   created_at: string;
+  /** report-photos 버킷 안 경로 (예시 모드에서는 브라우저 임시 주소) */
+  photo_path?: string | null;
   facility_name?: string;
   facility_address?: string;
 };

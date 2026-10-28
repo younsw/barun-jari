@@ -1,0 +1,41 @@
+/* 회원가입·로그인 화면. src/index.css의 색·크기 규칙을 따른다. (메인 #176345, 390px 프레임) */
+.auth-screen { display: flex; flex-direction: column; }
+.auth-screen .brand-mark { font-size: 13px; }
+
+.auth-tabs { margin-bottom: 16px; padding: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border-radius: 13px; background: #e7eee9; }
+.auth-tabs button { height: 38px; border: 0; border-radius: 10px; color: #69766f; background: transparent; font-size: 12px; font-weight: 700; }
+.auth-tabs button.active { color: #176345; background: white; box-shadow: 0 2px 8px rgba(30, 74, 53, .09); }
+
+.auth-step { display: flex; flex-direction: column; gap: 12px; }
+.auth-steps { margin: 0 0 4px; padding: 0; display: flex; gap: 6px; list-style: none; }
+.auth-steps li { flex: 1; padding: 8px 0; border-radius: 10px; color: #99a39e; background: #f1f5f2; font-size: 10px; font-weight: 700; text-align: center; }
+.auth-steps li.active { color: white; background: #176345; }
+.auth-steps li.done { color: #176345; background: #dff1e7; }
+
+.auth-notice { padding: 14px; border-radius: 13px; color: #6b562b; background: #fff7e7; }
+.auth-notice strong { display: block; font-size: 12px; }
+.auth-notice p { margin: 4px 0 0; font-size: 10px; line-height: 1.5; }
+
+.auth-field { display: flex; flex-direction: column; gap: 6px; }
+.auth-field > span { color: #55635c; font-size: 11px; font-weight: 700; }
+.auth-field > span em { margin-left: 4px; padding: 2px 6px; border-radius: 6px; color: #8a6b25; background: #fff1d2; font-size: 9px; font-style: normal; }
+.auth-field input, .auth-field select { height: 46px; padding: 0 13px; border: 1px solid #dce5e0; border-radius: 13px; outline: 0; color: #17251f; background: white; font-size: 12px; }
+.auth-field input:focus, .auth-field select:focus { border-color: #397d60; box-shadow: 0 0 0 3px rgba(57, 125, 96, .1); }
+.auth-field small { color: #8b9690; font-size: 9px; }
+
+.auth-verified { align-self: flex-start; padding: 6px 10px; border-radius: 8px; color: #176345; background: #dff1e7; font-size: 10px; font-weight: 800; }
+
+.auth-agree { padding: 12px; display: flex; flex-direction: column; gap: 9px; border: 1px solid #e2e9e5; border-radius: 13px; background: white; }
+.auth-agree label { display: flex; align-items: center; gap: 8px; color: #59665f; font-size: 11px; }
+.auth-agree label.all { padding-bottom: 9px; border-bottom: 1px solid #edf2ef; color: #17251f; font-weight: 800; }
+.auth-agree input { width: 16px; height: 16px; margin: 0; accent-color: #176345; }
+
+.auth-primary { height: 50px; margin-top: 4px; border: 0; border-radius: 14px; color: white; background: #176345; font-size: 13px; font-weight: 800; }
+.auth-primary:disabled { cursor: not-allowed; background: #a9c3b6; }
+.auth-text-button { margin-top: 14px; align-self: center; padding: 0; border: 0; color: #74817b; background: transparent; font-size: 11px; text-decoration: underline; }
+
+.auth-error { margin: 0; padding: 10px 12px; border-radius: 11px; color: #a23b2f; background: #fdecea; font-size: 11px; }
+.auth-success { margin: 0 0 12px; padding: 10px 12px; border-radius: 11px; color: #176345; background: #e4f3ea; font-size: 11px; }
+.auth-mock-note { margin: auto 0 0; padding-top: 16px; color: #929c97; font-size: 9px; text-align: center; }
+
+.auth-loading { width: 28px; height: 28px; margin: 40px auto; border: 3px solid #dff1e7; border-top-color: #176345; border-radius: 50%; animation: spin .7s linear infinite; }

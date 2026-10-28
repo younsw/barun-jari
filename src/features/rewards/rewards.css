@@ -1,0 +1,34 @@
+.reward-summary {
+  padding: 21px;
+  border-radius: 19px;
+  color: #fff;
+  background: linear-gradient(145deg, #176345, #275f49);
+  box-shadow: 0 12px 28px rgba(23, 99, 69, .19);
+}
+.reward-summary > span { color: rgba(255, 255, 255, .74); font-size: 9px; }
+.reward-summary > strong { display: block; margin-top: 8px; font-size: 27px; letter-spacing: -.03em; }
+.today-progress { margin-top: 22px; }
+.today-progress > div:first-child { display: flex; justify-content: space-between; font-size: 9px; }
+.progress-track { height: 7px; margin-top: 8px; overflow: hidden; border-radius: 6px; background: rgba(255, 255, 255, .2); }
+.progress-track span { height: 100%; display: block; border-radius: inherit; background: #a9e2c8; transition: width .25s; }
+.today-progress p { margin: 8px 0 0; color: rgba(255, 255, 255, .8); font-size: 8px; }
+.reward-policy { margin-top: 13px; }
+.section-heading { margin: 20px 1px 9px; display: flex; align-items: center; justify-content: space-between; }
+.section-heading strong { font-size: 14px; }
+.section-heading span { color: #7d8983; font-size: 9px; }
+.point-history { padding: 2px 13px; border: 1px solid #e1e8e4; border-radius: 15px; background: #fff; }
+.point-history > div { min-height: 64px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #edf1ef; }
+.point-history > div:last-child { border: 0; }
+.point-plus, .point-minus { width: 34px; height: 34px; display: grid; place-items: center; flex: none; border-radius: 10px; color: #176345; background: #e4f3ea; }
+.point-minus { color: #8a5f42; background: #f7ece4; }
+.point-history > div > div { min-width: 0; flex: 1; }
+.point-history strong, .point-history small { display: block; }
+.point-history strong { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.point-history small { margin-top: 5px; color: #8c9892; font-size: 8px; }
+.point-history b { font-size: 10px; }
+.point-history b.positive { color: #176345; }
+.point-history b.negative { color: #9a5949; }
+.point-empty { margin: 0; padding: 18px 0; color: #8c9892; font-size: 9px; text-align: center; }
+.point-guide { margin-top: 13px; padding: 14px; border-radius: 13px; background: #eef3f0; }
+.point-guide strong { font-size: 10px; }
+.point-guide p { margin: 6px 0 0; color: #68766f; font-size: 8px; line-height: 1.55; }

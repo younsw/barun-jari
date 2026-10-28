@@ -1,0 +1,10 @@
+{
+  "description": "Find designated smoking areas easily with this location-based service, featuring real-time GPS verification and user-friendly maps to reduce smoking-related issues.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

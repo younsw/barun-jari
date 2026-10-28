@@ -51,6 +51,11 @@ export function buildDirectionsUrl(
   return `https://map.kakao.com/link/by/${mode}/${linkPoint("내 위치", origin)}/${linkPoint(destinationName, destination)}`;
 }
 
+// 좌표가 아직 없는 장소는 주소로 카카오맵 검색을 연다.
+export function buildSearchUrl(address: string): string {
+  return `https://map.kakao.com/?q=${encodeURIComponent(address)}`;
+}
+
 export function getCurrentPosition(timeoutMs = 5000): Promise<LatLng | null> {
   if (!("geolocation" in navigator)) return Promise.resolve(null);
   return new Promise((resolve) => {

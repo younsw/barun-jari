@@ -1,0 +1,34 @@
+.profile-card {
+  padding: 17px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 17px;
+  background: #e8f4ed;
+}
+.profile-avatar { width: 47px; height: 47px; display: grid; place-items: center; border-radius: 15px; color: #fff; background: #176345; }
+.profile-card > div { flex: 1; }
+.profile-card small, .profile-card strong { display: block; }
+.profile-card small { margin-bottom: 4px; color: #688075; font-size: 8px; }
+.profile-card strong { font-size: 15px; }
+.profile-card button { padding: 7px 10px; border: 0; border-radius: 9px; color: #fff; background: #176345; font-size: 9px; font-weight: 800; }
+.profile-card + .demo-notice { margin-top: 11px; }
+.profile-stats { margin: 13px 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.profile-stats button { min-height: 75px; padding: 14px; border: 1px solid #e0e8e3; border-radius: 14px; background: #fff; text-align: left; }
+.profile-stats span, .profile-stats strong { display: block; }
+.profile-stats span { color: #7d8983; font-size: 8px; }
+.profile-stats strong { margin-top: 8px; color: #176345; font-size: 14px; }
+.profile-menu { padding: 2px 14px; border: 1px solid #e0e8e3; border-radius: 16px; background: #fff; }
+.profile-menu button { width: 100%; min-height: 64px; padding: 0; display: flex; align-items: center; gap: 11px; border: 0; border-bottom: 1px solid #edf1ef; background: transparent; text-align: left; }
+.profile-menu button:last-child { border: 0; }
+.profile-menu button > svg { color: #176345; }
+.profile-menu button > span { flex: 1; }
+.profile-menu strong, .profile-menu small { display: block; }
+.profile-menu strong { font-size: 10px; }
+.profile-menu small { margin-top: 5px; color: #8a9690; font-size: 8px; }
+.profile-menu b { color: #9aa49f; font-size: 18px; font-weight: 400; }
+.service-guide { margin-top: 13px; padding: 14px; border-radius: 13px; background: #f0f4f2; }
+.service-guide strong { font-size: 10px; }
+.service-guide p { margin: 6px 0 0; color: #68766f; font-size: 8px; line-height: 1.55; }
+.logout-button { width: 100%; margin-top: 16px; padding: 10px; border: 0; color: #7e8984; background: transparent; font-size: 9px; text-decoration: underline; }
+.profile-stats button:disabled, .profile-menu button:disabled { color: inherit; cursor: default; opacity: 1; }

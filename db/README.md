@@ -28,9 +28,10 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/004_point_ledger.sql` | 포인트 (하루 최대 10점, 신고 반영 시 +3, 중복 적립 방지) |
 | `migrations/005_function_permissions.sql` | 함수 호출 권한 정리 (Supabase 보안 점검 반영) |
 | `migrations/006_adult_verification.sql` | 성인 인증 저장 함수 (임시 출생연도 인증, 서버에서 다시 판단) |
+| `migrations/007_report_photos.sql` | 신고 현장 사진: `reports.photo_path`, 비공개 버킷 `report-photos` (JPEG·5MB, 본인 폴더만) |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~006과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~007과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`

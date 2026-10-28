@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import KakaoMap from "./features/places/KakaoMap";
+import { buildDirectionsUrl, getCurrentPosition, hasKakaoMapKey } from "./features/places/kakaoMap";
 
 type AreaType = "흡연구역" | "흡연부스";
 type PreviewState = "default" | "empty" | "denied";
@@ -100,9 +102,23 @@ function DetailAnnotation() {
 
 function DetailScreen({ place, onBack }: { place: Place; onBack: () => void }) {
   const [message, setMessage] = useState("");
+  const [mapAvailable, setMapAvailable] = useState(hasKakaoMapKey);
+  const [routing, setRouting] = useState(false);
   const showMessage = (text: string) => {
     setMessage(text);
     window.setTimeout(() => setMessage(""), 2400);
+  };
+
+  // 현재 위치를 얻으면 도보 길찾기, 못 얻으면 목적지만 넘겨 카카오맵에서 출발지를 고르게 합니다.
+  const openDirections = async () => {
+    const routeWindow = window.open("", "_blank");  // 팝업 차단을 피하려고 클릭 즉시 창을 엽니다
+    setRouting(true);
+    const origin = await getCurrentPosition();
+    setRouting(false);
+    const url = buildDirectionsUrl(place.name, place, origin, "walk");
+    if (routeWindow) routeWindow.location.href = url;
+    else window.location.href = url;
+    if (!origin) showMessage("현재 위치를 몰라 카카오맵에서 출발지를 선택해 주세요.");
   };
 
   return <section className="phone-frame detail-frame" aria-label="UI-02 흡연구역 상세 모바일 화면">
@@ -124,14 +140,18 @@ function DetailScreen({ place, onBack }: { place: Place; onBack: () => void }) {
         </div>
 
         <div className="detail-map">
-          <div className="map-road road-one" /><div className="map-road road-two" /><div className="map-road road-three" />
-          <span className="mock-label">KAKAO MAP API AREA · MOCKUP</span>
-          <span className="detail-map-pin"><Icon name="pin" size={23} /></span>
+          {mapAvailable
+            ? <KakaoMap center={place} onUnavailable={() => setMapAvailable(false)} />
+            : <>
+              <div className="map-road road-one" /><div className="map-road road-two" /><div className="map-road road-three" />
+              <span className="mock-label">KAKAO MAP 키 설정 전 · MOCKUP</span>
+              <span className="detail-map-pin"><Icon name="pin" size={23} /></span>
+            </>}
           <div className="coordinate"><strong>장소 좌표</strong><span>{place.latitude.toFixed(4)}, {place.longitude.toFixed(4)}</span></div>
         </div>
 
-        <button className="route-button" onClick={() => showMessage("카카오맵 좌표 기반 길찾기 연결 예정입니다.")}>
-          <Icon name="map" size={19} />좌표로 길찾기<span>외부 지도 연동 예정</span>
+        <button className="route-button" onClick={openDirections} disabled={routing}>
+          <Icon name="map" size={19} />{routing ? "현재 위치 확인 중…" : "카카오맵 길찾기"}<span>도보 · 카카오맵에서 열림</span>
         </button>
 
         <div className="info-card">

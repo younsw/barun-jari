@@ -36,6 +36,17 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 - 포인트 적립은 화면에서 직접 할 수 없습니다. 신고가 `accepted`가 되면 DB가 자동으로 적립합니다.
 - 관리자 지정: Supabase 대시보드에서 `users.is_admin`을 `true`로 바꿉니다.
 
+## 좌표 채우기 (지오코딩)
+
+```bash
+# .env에 KAKAO_REST_API_KEY=... 를 넣은 뒤
+python3 db/geocode.py      # SQLite에 위도·경도 저장 + geocode_update.sql 생성
+python3 db/export_seed.py  # seed.sql에도 좌표 반영
+```
+
+`geocode_update.sql`을 Supabase SQL Editor에서 실행하면 실서비스 DB에도 좌표가 들어갑니다.
+`data/geocode_report.csv`에서 `keyword`(시설명으로 찾음)·`failed` 행은 직접 확인하세요.
+
 ## 출처
 
 서울특별시 중랑구 흡연시설 현황 (2026-02-12), 공공데이터포털

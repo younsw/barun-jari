@@ -16,7 +16,9 @@ import {
   createReport,
   getMyReports,
   getReportDetail,
+  getReportPhotoUrl,
 } from "./reportService";
+import { CameraCapture, type CapturedPhoto } from "./CameraCapture";
 import "./reports.css";
 
 export type FacilitySummary = {
@@ -61,7 +63,8 @@ export function ReportCreateScreen({
   const [type, setType] = useState<ReportType>("wrong_info");
   const [content, setContent] = useState("");
   const [error, setError] = useState("");
-  const [preview, setPreview] = useState("");
+  const [photo, setPhoto] = useState<CapturedPhoto | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const facility = facilities.find((item) => item.id === facilityId) ?? facilities[0];
 
@@ -76,7 +79,7 @@ export function ReportCreateScreen({
     }
     setPending(true);
     try {
-      await createReport({ facility_id: facility.id, type, content: content.trim() });
+      await createReport({ facility_id: facility.id, type, content: content.trim(), photo: photo?.blob });
       onComplete();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "신고를 저장하지 못했어요.");
@@ -95,7 +98,7 @@ export function ReportCreateScreen({
               {isMockData
                 ? "Supabase 키가 없어 신고는 브라우저 메모리에만 저장됩니다. "
                 : "신고가 반영되면 3P가 적립돼요 (하루 최대 10P). "}
-              사진은 미리보기만 되고 서버에 저장되지 않습니다.
+              사진은 앱 카메라로 현장에서 찍은 것만 첨부할 수 있어요.
             </div>
             <label className="form-label" htmlFor="report-facility">
               신고할 장소
@@ -143,37 +146,46 @@ export function ReportCreateScreen({
               placeholder="잘못된 장소 정보나 위치를 자세히 알려 주세요."
             />
             {error && <p className="inline-error">{error}</p>}
-            <label className="photo-upload">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) setPreview(URL.createObjectURL(file));
-                }}
-              />
-              {preview ? (
-                <img src={preview} alt="첨부 사진 미리보기" />
+            {/* 갤러리 업로드 금지: 파일 선택(input type=file)을 두지 않고 앱 내 카메라만 연다 */}
+            <button className="photo-upload photo-camera-button" onClick={() => setCameraOpen(true)}>
+              {photo ? (
+                <img src={photo.url} alt="촬영한 현장 사진" />
               ) : (
                 <>
                   <AppIcon name="upload" size={22} />
-                  <strong>사진 1장 첨부 (선택)</strong>
-                  <span>미리보기만 제공 · 서버 저장 안 함</span>
+                  <strong>현장 사진 촬영 (선택)</strong>
+                  <span>앱 카메라로만 찍을 수 있어요 · 갤러리 사진 불가</span>
                 </>
               )}
-            </label>
+            </button>
+            {photo && (
+              <div className="photo-actions">
+                <button onClick={() => setCameraOpen(true)}>다시 찍기</button>
+                <button onClick={() => setPhoto(null)}>사진 빼기</button>
+              </div>
+            )}
             <button className="primary-action report-submit" onClick={submit} disabled={pending}>
               {pending ? "제출 중…" : "신고 제출하기"}
             </button>
           </div>
+          {cameraOpen && (
+            <CameraCapture
+              onClose={() => setCameraOpen(false)}
+              onCapture={(captured) => {
+                if (photo) URL.revokeObjectURL(photo.url);
+                setPhoto(captured);
+                setCameraOpen(false);
+              }}
+            />
+          )}
         </div>
       </section>
       <ScreenAnnotation
         screen="UI-06 오류 신고 작성"
         path="UI-02 정보 수정 요청"
-        elements="시설 선택, 신고 유형, 상세 내용, 사진 미리보기, 제출"
-        data="reports.user_id, facility_id, type, content, status, created_at"
-        action="시설·유형 선택, 내용 입력, 사진 미리보기, 목업 제출"
+        elements="시설 선택, 신고 유형, 상세 내용, 앱 내 카메라 촬영(갤러리 불가), 제출"
+        data="reports.user_id, facility_id, type, content, status, photo_path, created_at / Storage report-photos"
+        action="시설·유형 선택, 내용 입력, 현장 사진 촬영·다시 찍기, 제출"
         link="createReport(), UI-07 내 신고 목록"
       />
     </div>
@@ -293,6 +305,10 @@ export function ReportDetailScreen({
   useEffect(() => {
     getReportDetail(reportId).then(setReport).catch(() => setReport(null));
   }, [reportId]);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (report?.photo_path) getReportPhotoUrl(report.photo_path).then(setPhotoUrl);
+  }, [report?.photo_path]);
   const facility = facilities.find((item) => item.id === report?.facility_id);
   const facilityName = report?.facility_name ?? facility?.name ?? "알 수 없는 시설";
   const facilityAddress = report?.facility_address ?? facility?.address ?? "";
@@ -337,11 +353,14 @@ export function ReportDetailScreen({
                     <dd>{report.content}</dd>
                   </div>
                 </dl>
+                {photoUrl ? (
+                  <img className="report-photo" src={photoUrl} alt="신고에 첨부한 현장 사진" />
+                ) : (
                 <div className="photo-empty">
                   <AppIcon name="upload" size={20} />
-                  <span>저장된 첨부 사진 없음</span>
-                  <small>사진 저장 필드는 현재 DB 구조에 포함되지 않습니다.</small>
+                  <span>{report.photo_path ? "사진을 불러오는 중…" : "첨부한 현장 사진 없음"}</span>
                 </div>
+                )}
                 <div className="demo-notice">
                   관리자 답변이나 처리 사유는 제공된 DB 필드에 없어 표시하지
                   않습니다.

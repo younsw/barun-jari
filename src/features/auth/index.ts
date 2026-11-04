@@ -4,4 +4,4 @@ export { useAuth } from "./useAuth";
 export { RequireAdult } from "./RequireAdult";
 export { AuthScreen } from "./AuthScreen";
 export { getAdultCutoffYear, isAdultBirthYear, getKoreanYear } from "./adultAge";
-export type { AppUser } from "./types";
+export type { AppUser, AdultStatus, PendingAdultRequest } from "./types";

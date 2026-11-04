@@ -5,6 +5,9 @@ import type { AdultVerificationResult, AdultVerificationSuccess } from "./types"
 /**
  * 성인 인증 진입점. 화면은 이 파일의 함수만 부른다.
  *
+ * 현재(admin 모드): 회원이 출생연도를 고르면 "인증 요청"만 보내고, 관리자가 승인해야 인증된다.
+ *   (db/migrations/008_admin_adult_approval.sql)
+ *
  * 포트원 본인인증으로 바꿀 때는 이 파일만 고치면 된다.
  *   1. IMP.certification()으로 인증창을 띄워 imp_uid를 받는다.
  *   2. imp_uid를 서버(Supabase Edge Function)로 보내 포트원 API로 birthday를 조회한다.
@@ -12,14 +15,14 @@ import type { AdultVerificationResult, AdultVerificationSuccess } from "./types"
  *   4. 성공이면 { ok: true, verifiedAt, verificationId: imp_uid }를 돌려준다.
  * 성인 판단은 반드시 서버에서 다시 해야 한다. (브라우저 값은 조작될 수 있음)
  */
-export const ADULT_VERIFICATION_MODE: "mock" | "portone" = "mock";
+export const ADULT_VERIFICATION_MODE: "admin" | "portone" = "admin";
 
 /** 인증 후 가입까지 허용하는 시간 */
 const VERIFICATION_TTL_MS = 10 * 60 * 1000;
 
-/** mock 모드에서는 화면에서 고른 출생연도를 넘긴다. portone 모드에서는 쓰지 않는다. */
-export async function verifyAdult(mockBirthYear: number | null = null): Promise<AdultVerificationResult> {
-  return mockVerifyAdult(mockBirthYear);
+/** admin 모드에서는 화면에서 고른 출생연도를 넘긴다. portone 모드에서는 쓰지 않는다. */
+export async function verifyAdult(birthYear: number | null = null): Promise<AdultVerificationResult> {
+  return mockVerifyAdult(birthYear);
 }
 
 /** 가입 직전 인증 결과가 아직 유효한지 확인 */

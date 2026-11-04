@@ -126,7 +126,7 @@ export function ReportCreateScreen({
             <div className="demo-notice">
               {isMockData
                 ? "Supabase 키가 없어 신고는 브라우저 메모리에만 저장됩니다. "
-                : "신고가 반영되면 3P가 적립돼요 (하루 최대 10P). "}
+                : "신고가 반영되면 2P가 적립돼요 (하루 최대 10P). "}
               현장 인증을 위해 현재 위치 확인과 앱 카메라 사진 촬영이 모두 필요해요.
             </div>
             <label className="form-label" htmlFor="report-facility">

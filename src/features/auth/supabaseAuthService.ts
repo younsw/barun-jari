@@ -1,7 +1,27 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import type { AdultVerificationSuccess, AppUser, AuthService } from "./types";
+import type { AdultStatus, AdultVerificationSuccess, AppUser, AuthService, PendingAdultRequest } from "./types";
 
-type UsersRow = { id: string; nickname: string; is_adult_verified: boolean; verified_at: string | null; created_at: string };
+type UsersRow = {
+  id: string;
+  nickname: string;
+  is_adult_verified: boolean;
+  adult_status: AdultStatus;
+  adult_reject_reason: string | null;
+  verified_at: string | null;
+  is_admin: boolean;
+  created_at: string;
+};
+
+type PendingRow = {
+  user_id: string;
+  nickname: string;
+  email: string;
+  declared_birth_year: number | null;
+  requested_at: string | null;
+  joined_at: string;
+};
+
+const USER_COLUMNS = "id, nickname, is_adult_verified, adult_status, adult_reject_reason, verified_at, is_admin, created_at";
 
 function toAppUser(user: User, row: UsersRow | null): AppUser {
   const meta = user.user_metadata ?? {};
@@ -11,7 +31,10 @@ function toAppUser(user: User, row: UsersRow | null): AppUser {
     nickname: row?.nickname ?? meta.nickname ?? "",
     // 메타데이터는 사용자가 바꿀 수 있으므로 인증 여부는 users 행만 믿는다.
     isAdultVerified: row?.is_adult_verified === true,
+    adultStatus: row?.adult_status ?? "none",
+    adultRejectReason: row?.adult_reject_reason ?? null,
     verifiedAt: row?.verified_at ?? null,
+    isAdmin: row?.is_admin === true,
     createdAt: row?.created_at ?? user.created_at,
   };
 }
@@ -30,15 +53,15 @@ function toKoreanError(message: string): Error {
 
 export function createSupabaseAuthService(supabase: SupabaseClient): AuthService {
   async function loadUser(user: User): Promise<AppUser> {
-    const { data } = await supabase.from("users").select("id, nickname, is_adult_verified, verified_at, created_at").eq("id", user.id).maybeSingle<UsersRow>();
+    const { data } = await supabase.from("users").select(USER_COLUMNS).eq("id", user.id).maybeSingle<UsersRow>();
     return toAppUser(user, data);
   }
 
   // users 행은 가입 시 DB 트리거가 만들고, 성인 인증 여부는 화면에서 직접 쓸 수 없다(RLS).
-  // 서버 함수가 출생연도를 다시 판단해서 저장한다. (db/migrations/006_adult_verification.sql)
-  async function saveVerification(verification: AdultVerificationSuccess) {
-    if (verification.mockBirthYear === undefined) throw new Error("성인 인증 정보가 없어요. 다시 인증해 주세요.");
-    const { error } = await supabase.rpc("complete_adult_verification", { p_birth_year: verification.mockBirthYear });
+  // 회원은 승인 "요청"만 보낼 수 있고, 관리자가 승인해야 인증된다. (db/migrations/008_admin_adult_approval.sql)
+  async function requestVerification(verification: AdultVerificationSuccess) {
+    if (verification.declaredBirthYear === undefined) throw new Error("출생연도 정보가 없어요. 다시 선택해 주세요.");
+    const { error } = await supabase.rpc("request_adult_verification", { p_birth_year: verification.declaredBirthYear });
     if (error) throw toKoreanError(error.message);
   }
 
@@ -50,13 +73,13 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
 
     async signUp({ email, password, nickname, verification }) {
       // 닉네임은 메타데이터로 넘기면 DB 트리거(handle_new_user)가 users 행에 넣는다.
-      // 이메일 확인을 켜 두면 세션이 없어 인증을 저장할 수 없다 → 로그인 후 RequireAdult에서 다시 인증한다.
+      // 이메일 확인을 켜 두면 세션이 없어 요청을 보낼 수 없다 → 로그인 후 RequireAdult에서 다시 요청한다.
       const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { nickname } } });
       if (error) throw toKoreanError(error.message);
       // 이메일 확인이 켜져 있으면 이미 가입된 이메일도 오류 없이 identities가 빈 사용자를 돌려준다(가입 여부 노출 방지).
       if (data.user && data.user.identities?.length === 0) throw new Error("이미 가입된 이메일이에요. 로그인하거나 비밀번호 찾기를 이용해 주세요.");
       if (!data.user || !data.session) return null;
-      await saveVerification(verification);
+      await requestVerification(verification);
       return loadUser(data.user);
     },
 
@@ -71,10 +94,10 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
       if (error) throw toKoreanError(error.message);
     },
 
-    async saveAdultVerification(verification) {
+    async requestAdultVerification(verification) {
       const { data } = await supabase.auth.getUser();
       if (!data.user) throw new Error("로그인이 필요해요.");
-      await saveVerification(verification);
+      await requestVerification(verification);
       return loadUser(data.user);
     },
 
@@ -101,6 +124,24 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
       const { error } = await supabase.rpc("delete_my_account");
       if (error) throw new Error("탈퇴하지 못했어요. 잠시 후 다시 시도해 주세요.");
       await supabase.auth.signOut({ scope: "local" });
+    },
+
+    async listPendingAdultRequests() {
+      const { data, error } = await supabase.rpc("list_pending_adult_verifications");
+      if (error) throw toKoreanError(error.message);
+      return ((data ?? []) as PendingRow[]).map((row): PendingAdultRequest => ({
+        userId: row.user_id,
+        nickname: row.nickname,
+        email: row.email,
+        declaredBirthYear: row.declared_birth_year,
+        requestedAt: row.requested_at,
+        joinedAt: row.joined_at,
+      }));
+    },
+
+    async reviewAdultRequest(userId, approve, reason) {
+      const { error } = await supabase.rpc("review_adult_verification", { p_user_id: userId, p_approve: approve, p_reason: reason ?? null });
+      if (error) throw toKoreanError(error.message);
     },
 
     onAuthChange(callback) {

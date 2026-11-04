@@ -12,9 +12,10 @@ import {
 } from "./features/reports/ReportScreens";
 import RewardsScreen from "./features/rewards/RewardsScreen";
 import CheckinScreen from "./features/checkin/CheckinScreen";
-import { CHECKIN_RADIUS_M, findNearest } from "./features/checkin/checkinService";
+import { CHECKIN_POINTS, CHECKIN_RADIUS_M, findNearest } from "./features/checkin/checkinService";
 import "./features/checkin/checkin.css";
 import ProfileScreen from "./features/profile/ProfileScreen";
+import AdultApprovalScreen from "./features/admin/AdultApprovalScreen";
 import {
   BottomNavigation,
   type MainTab,
@@ -31,7 +32,8 @@ type AppScreen =
   | "reportList"
   | "reportDetail"
   | "rewards"
-  | "profile";
+  | "profile"
+  | "adultApproval";
 
 /** 화면 표시용: 장소 + 현재 위치에서의 거리 */
 type PlaceView = Place & { meters: number | null };
@@ -201,7 +203,7 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
         </div>
 
         <button className="checkin-button" onClick={onCheckin} disabled={!coords}>
-          <Icon name="location" size={19} />{coords ? "현장 인증하기" : "좌표 준비 중이라 인증할 수 없어요"}{coords && <small>위치 + 사진 · 2P</small>}
+          <Icon name="location" size={19} />{coords ? "현장 인증하기" : "좌표 준비 중이라 인증할 수 없어요"}{coords && <small>위치 + 사진 · {CHECKIN_POINTS}P</small>}
         </button>
 
         <button className="route-button" onClick={openDirections} disabled={routing}>
@@ -222,7 +224,7 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
   </section>;
 }
 
-/** 로그인 + 성인 인증 전에는 인증 화면만 보여준다 (src/features/auth/RequireAdult.tsx) */
+/** 로그인 + 관리자 성인 인증 승인 전에는 인증·승인 대기 화면만 보여준다 (src/features/auth/RequireAdult.tsx) */
 function AdultGate({ children }: { children: ReactNode }) {
   const { loading, isLoggedIn, isAdultVerified, passwordRecovery } = useAuth();
   if (loading || !isLoggedIn || !isAdultVerified || passwordRecovery) {
@@ -372,7 +374,11 @@ function MainApp() {
   }
 
   if (activeScreen === "profile") {
-    return <main className="prototype-stage"><ProfileScreen onTab={selectTab} /></main>;
+    return <main className="prototype-stage"><ProfileScreen onTab={selectTab} onOpenAdultApproval={() => navigate("adultApproval")} /></main>;
+  }
+
+  if (activeScreen === "adultApproval") {
+    return <main className="prototype-stage"><AdultApprovalScreen onBack={goBack} onTab={selectTab} /></main>;
   }
 
   return <main className="prototype-stage">

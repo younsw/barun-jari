@@ -26,7 +26,7 @@ export function AuthScreen({ initialMode = "login", onBack }: { initialMode?: "l
 
   return <AuthFrame
     title={mode === "login" ? "다시 오셨네요" : "바른자리 가입하기"}
-    description={mode === "login" ? "로그인하고 내 주변 흡연구역을 확인하세요." : "성인 인증을 마친 분만 가입할 수 있어요."}
+    description={mode === "login" ? "로그인하고 내 주변 흡연구역을 확인하세요." : "성인만 가입할 수 있어요. 관리자 승인 후 이용할 수 있어요."}
     onBack={onBack}
   >
     <div className="auth-tabs" role="tablist">

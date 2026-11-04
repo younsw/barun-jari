@@ -27,13 +27,13 @@ export function SignUpScreen({ onDone }: { onDone: (message: string) => void }) 
     if (password !== passwordCheck) return setError("비밀번호가 서로 달라요.");
     if (!isVerificationFresh(verification)) {
       setVerification(null);
-      return setError("성인 인증 후 10분이 지났어요. 다시 인증해 주세요.");
+      return setError("출생연도 확인 후 10분이 지났어요. 다시 선택해 주세요.");
     }
     setPending(true);
     setError("");
     try {
       const created = await signUp({ email, password, nickname, agreedTerms, agreedPrivacy, verification });
-      onDone(created ? `${created.nickname}님, 가입을 환영해요!` : "가입 확인 메일을 보냈어요. 메일 확인 후 로그인해 주세요.");
+      onDone(created ? `${created.nickname}님, 가입을 환영해요! 관리자 승인 후 이용할 수 있어요.` : "가입 확인 메일을 보냈어요. 메일 확인 후 로그인하면 관리자 승인을 기다리게 돼요.");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "가입에 실패했어요.");
     } finally {
@@ -45,7 +45,7 @@ export function SignUpScreen({ onDone }: { onDone: (message: string) => void }) 
 
   return <form className="auth-step" onSubmit={submit}>
     <StepIndicator step={2} />
-    <div className="auth-verified">성인 인증 완료</div>
+    <div className="auth-verified">출생연도 확인 완료 · 가입 후 관리자 승인이 필요해요</div>
     <label className="auth-field"><span>이메일</span>
       <input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" required />
     </label>
@@ -72,7 +72,8 @@ export function SignUpScreen({ onDone }: { onDone: (message: string) => void }) 
 
 function StepIndicator({ step }: { step: 1 | 2 }) {
   return <ol className="auth-steps">
-    <li className={step === 1 ? "active" : "done"}>1 성인 인증</li>
+    <li className={step === 1 ? "active" : "done"}>1 출생연도 확인</li>
     <li className={step === 2 ? "active" : ""}>2 정보 입력</li>
+    <li>3 관리자 승인</li>
   </ol>;
 }

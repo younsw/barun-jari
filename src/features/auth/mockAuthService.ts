@@ -37,7 +37,7 @@ function strip({ passwordHash: _passwordHash, ...user }: StoredUser): AppUser {
 }
 
 export function createMockAuthService(): AuthService {
-  const listeners = new Set<() => void>();
+  const listeners = new Set<(event?: string) => void>();
   let memoryUsers = read<StoredUser[]>(USERS_KEY, []);
   let memorySession = read<string | null>(SESSION_KEY, null);
 
@@ -86,6 +86,29 @@ export function createMockAuthService(): AuthService {
       saveUsers(memoryUsers.map((user) => (user.id === updated.id ? updated : user)));
       listeners.forEach((fn) => fn());
       return strip(updated);
+    },
+
+    // 예시 모드: 메일 대신 바로 재설정 화면으로 보낸다 (가입된 이메일일 때만)
+    async requestPasswordReset(email) {
+      const user = memoryUsers.find((item) => item.email === email.trim().toLowerCase());
+      if (!user) return;
+      memorySession = user.id;
+      write(SESSION_KEY, user.id);
+      listeners.forEach((fn) => fn("PASSWORD_RECOVERY"));
+    },
+
+    async updatePassword(password) {
+      const current = findCurrent();
+      if (!current) throw new Error("로그인이 필요해요.");
+      const updated = { ...current, passwordHash: await hash(password) };
+      saveUsers(memoryUsers.map((user) => (user.id === updated.id ? updated : user)));
+    },
+
+    async deleteAccount() {
+      const current = findCurrent();
+      if (!current) throw new Error("로그인이 필요해요.");
+      saveUsers(memoryUsers.filter((user) => user.id !== current.id));
+      saveSession(null);
     },
 
     onAuthChange(callback) {

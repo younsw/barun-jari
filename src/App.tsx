@@ -206,8 +206,8 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
 
 /** 로그인 + 성인 인증 전에는 인증 화면만 보여준다 (src/features/auth/RequireAdult.tsx) */
 function AdultGate({ children }: { children: ReactNode }) {
-  const { loading, isLoggedIn, isAdultVerified } = useAuth();
-  if (loading || !isLoggedIn || !isAdultVerified) {
+  const { loading, isLoggedIn, isAdultVerified, passwordRecovery } = useAuth();
+  if (loading || !isLoggedIn || !isAdultVerified || passwordRecovery) {
     return <main className="prototype-stage"><div className="prototype-pair"><RequireAdult>{null}</RequireAdult></div></main>;
   }
   return <>{children}</>;

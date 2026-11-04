@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { AuthFrame, AuthScreen } from "./AuthScreen";
 import { AdultVerifyStep } from "./AdultVerifyStep";
+import { ResetPasswordScreen } from "./ResetPasswordScreen";
 import { useAuth } from "./useAuth";
 
 /**
@@ -10,9 +11,10 @@ import { useAuth } from "./useAuth";
  * <RequireAdult><장소 화면 /></RequireAdult>
  */
 export function RequireAdult({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  const { loading, isLoggedIn, isAdultVerified } = useAuth();
+  const { loading, isLoggedIn, isAdultVerified, passwordRecovery } = useAuth();
 
   if (loading) return <AuthFrame title="잠시만요" description="로그인 상태를 확인하고 있어요."><div className="auth-loading" /></AuthFrame>;
+  if (isLoggedIn && passwordRecovery) return <ResetPasswordScreen />;
   if (!isLoggedIn) return <>{fallback ?? <AuthScreen />}</>;
   if (!isAdultVerified) return <>{fallback ?? <AdultVerifyRequired />}</>;
   return <>{children}</>;

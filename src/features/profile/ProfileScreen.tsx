@@ -13,8 +13,23 @@ import "./profile.css";
 
 // 앱 전체가 RequireAdult 안에 있으므로 이 화면은 항상 로그인·성인 인증을 마친 회원이 본다.
 export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void }) {
-  const { user, isAdultVerified, signOut } = useAuth();
+  const { user, isAdultVerified, signOut, deleteAccount } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [withdrawConfirm, setWithdrawConfirm] = useState("");
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState("");
+
+  const withdraw = async () => {
+    setWithdrawing(true);
+    setWithdrawError("");
+    try {
+      await deleteAccount();
+    } catch (caught) {
+      setWithdrawError(caught instanceof Error ? caught.message : "탈퇴하지 못했어요.");
+      setWithdrawing(false);
+    }
+  };
   useEffect(() => {
     getMyPoints().then((points) => setBalance(points.balance)).catch(() => setBalance(null));
   }, []);
@@ -86,6 +101,28 @@ export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void
             <button className="logout-button" onClick={() => void signOut()}>
               로그아웃
             </button>
+            {withdrawOpen ? (
+              <div className="withdraw-panel" role="dialog" aria-label="회원 탈퇴 확인">
+                <strong>정말 탈퇴할까요?</strong>
+                <p>
+                  포인트{balance !== null ? ` ${balance}P` : ""}, 신고 내역, 현장 인증 기록, 첨부 사진이 모두 지워지고 되돌릴 수 없어요.
+                  같은 이메일로 다시 가입할 수는 있어요.
+                </p>
+                <label>
+                  <span>확인을 위해 <b>탈퇴</b>를 입력해 주세요</span>
+                  <input value={withdrawConfirm} onChange={(e) => setWithdrawConfirm(e.target.value)} placeholder="탈퇴" />
+                </label>
+                {withdrawError && <p className="inline-error">{withdrawError}</p>}
+                <div>
+                  <button onClick={() => { setWithdrawOpen(false); setWithdrawConfirm(""); setWithdrawError(""); }} disabled={withdrawing}>취소</button>
+                  <button className="danger" onClick={() => void withdraw()} disabled={withdrawConfirm.trim() !== "탈퇴" || withdrawing}>
+                    {withdrawing ? "탈퇴 중…" : "탈퇴하기"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button className="withdraw-link" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button>
+            )}
           </div>
           <BottomNavigation active="profile" onSelect={onTab} />
         </div>
@@ -93,10 +130,10 @@ export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void
       <ScreenAnnotation
         screen="UI-10 마이페이지"
         path="하단 마이페이지"
-        elements="닉네임, 인증 상태, 포인트, 신고·리워드·계정 메뉴, 로그아웃"
+        elements="닉네임, 인증 상태, 포인트, 신고·리워드·계정 메뉴, 로그아웃, 회원 탈퇴(확인 입력)"
         data="users.nickname, is_adult_verified, verified_at 및 get_my_point_summary()"
         action="인증 상태 확인, 내 신고 내역(하단 메뉴에서 이동해 옴)·리워드 이동, 로그아웃"
-        link="useAuth(), getMyPoints(), UI-07·09"
+        link="useAuth(), getMyPoints(), delete_my_account(), UI-07·09"
       />
     </div>
   );

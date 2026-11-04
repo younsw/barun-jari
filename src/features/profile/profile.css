@@ -32,3 +32,14 @@
 .service-guide p { margin: 6px 0 0; color: #68766f; font-size: 8px; line-height: 1.55; }
 .logout-button { width: 100%; margin-top: 16px; padding: 10px; border: 0; color: #7e8984; background: transparent; font-size: 9px; text-decoration: underline; }
 .profile-stats button:disabled, .profile-menu button:disabled { color: inherit; cursor: default; opacity: 1; }
+
+.withdraw-link { display: block; margin: 14px auto 0; padding: 6px; border: 0; color: #98a39d; background: none; font: inherit; font-size: 11px; text-decoration: underline; }
+.withdraw-panel { margin-top: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #efc9c3; border-radius: 14px; background: #fdf4f2; }
+.withdraw-panel strong { color: #a23b2f; font-size: 13px; }
+.withdraw-panel p { margin: 0; color: #6c5550; font-size: 11px; line-height: 1.5; }
+.withdraw-panel label { display: flex; flex-direction: column; gap: 6px; color: #6c5550; font-size: 11px; }
+.withdraw-panel input { height: 40px; padding: 0 12px; border: 1px solid #e3c9c4; border-radius: 10px; font: inherit; }
+.withdraw-panel > div { display: flex; gap: 8px; }
+.withdraw-panel > div button { flex: 1; height: 40px; border: 1px solid #dfd2cf; border-radius: 10px; color: #6c5550; background: white; font: inherit; font-weight: 700; }
+.withdraw-panel > div button.danger { border: 0; color: white; background: #b6402f; }
+.withdraw-panel > div button:disabled { opacity: .45; }

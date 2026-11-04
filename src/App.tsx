@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { RequireAdult, useAuth } from "./features/auth";
 import { isMockData } from "./features/auth/supabaseClient";
 import KakaoMap from "./features/places/KakaoMap";
+import NearbyMap from "./features/places/NearbyMap";
 import { buildDirectionsUrl, buildSearchUrl, getCurrentPosition, hasKakaoMapKey, type LatLng } from "./features/places/kakaoSdk";
 import { distanceMeters, formatDistance, getFacilities, placeCoords, type Place } from "./features/places/placeService";
 import {
@@ -44,7 +45,19 @@ function Icon({ name, size = 20 }: { name: "search" | "location" | "refresh" | "
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
-function MapPreview() {
+// 첫 화면 지도: 키가 있으면 내 위치 중심 카카오 지도, 없거나 실패하면 기존 목업
+function MapPreview({ userLocation, places, onSelect }: { userLocation: LatLng | null; places: PlaceView[]; onSelect: (id: number) => void }) {
+  const [mapAvailable, setMapAvailable] = useState(hasKakaoMapKey);
+  const nearby = useMemo(() => places.flatMap((place) => {
+    const coords = placeCoords(place);
+    return coords ? [{ id: place.id, name: place.name, coords }] : [];
+  }), [places]);
+  if (mapAvailable) {
+    return <div className="map-preview live">
+      <NearbyMap userLocation={userLocation} places={nearby} onSelect={onSelect} onUnavailable={() => setMapAvailable(false)} />
+      {!userLocation && <span className="map-hint">위치 권한을 허용하면 내 위치 중심으로 보여드려요</span>}
+    </div>;
+  }
   return <div className="map-preview" aria-label="목업 지도 미리보기">
     <div className="map-road road-one" /><div className="map-road road-two" /><div className="map-road road-three" />
     <span className="map-name name-one">예시로</span><span className="map-name name-two">중앙광장</span>
@@ -329,7 +342,10 @@ function MainApp() {
           <button key={item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)}>{item}</button>
         )}</div>
 
-        <MapPreview />
+        <MapPreview userLocation={located} places={filtered} onSelect={(id) => {
+          const place = filtered.find((item) => item.id === id);
+          if (place) openDetail(place);
+        }} />
 
         <div className="list-heading"><div><strong>주변 흡연시설</strong><span>{filtered.length}곳</span></div><small>{hasDistance ? "가까운 순" : "좌표 준비 중"}</small></div>
         <div className="place-list">

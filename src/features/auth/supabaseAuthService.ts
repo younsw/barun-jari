@@ -20,6 +20,9 @@ function toKoreanError(message: string): Error {
   if (/invalid login credentials/i.test(message)) return new Error("이메일 또는 비밀번호가 맞지 않아요.");
   if (/already registered/i.test(message)) return new Error("이미 가입된 이메일이에요.");
   if (/email not confirmed/i.test(message)) return new Error("이메일 인증을 먼저 완료해 주세요.");
+  if (/rate limit/i.test(message)) return new Error("인증 메일을 너무 많이 보냈어요. 잠시 후(최대 1시간) 다시 시도해 주세요.");
+  if (/should be different/i.test(message)) return new Error("이전과 다른 비밀번호를 입력해 주세요.");
+  if (/password should be at least/i.test(message)) return new Error("비밀번호는 8자 이상이어야 해요.");
   return new Error(message);
 }
 
@@ -48,6 +51,8 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
       // 이메일 확인을 켜 두면 세션이 없어 인증을 저장할 수 없다 → 로그인 후 RequireAdult에서 다시 인증한다.
       const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { nickname } } });
       if (error) throw toKoreanError(error.message);
+      // 이메일 확인이 켜져 있으면 이미 가입된 이메일도 오류 없이 identities가 빈 사용자를 돌려준다(가입 여부 노출 방지).
+      if (data.user && data.user.identities?.length === 0) throw new Error("이미 가입된 이메일이에요. 로그인하거나 비밀번호 찾기를 이용해 주세요.");
       if (!data.user || !data.session) return null;
       await saveVerification(verification);
       return loadUser(data.user);
@@ -71,8 +76,33 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
       return loadUser(data.user);
     },
 
+    async requestPasswordReset(email) {
+      // 링크를 누르면 이 사이트로 돌아오고 PASSWORD_RECOVERY 이벤트가 온다.
+      // Supabase 대시보드 Authentication > URL Configuration의 Redirect URLs에 이 주소가 있어야 한다.
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+      if (error) throw toKoreanError(error.message);
+    },
+
+    async updatePassword(password) {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw toKoreanError(error.message);
+    },
+
+    async deleteAccount() {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) throw new Error("로그인이 필요해요.");
+      // 사진은 SQL로 지울 수 없어 Storage API로 먼저 지운다 (내 폴더만 지울 수 있음)
+      const bucket = supabase.storage.from("report-photos");
+      const { data: files } = await bucket.list(data.user.id, { limit: 1000 });
+      if (files?.length) await bucket.remove(files.map((file) => `${data.user!.id}/${file.name}`));
+      // 계정 삭제: users·신고·포인트·현장 인증 기록이 함께 지워진다 (db/migrations/010_delete_account.sql)
+      const { error } = await supabase.rpc("delete_my_account");
+      if (error) throw new Error("탈퇴하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      await supabase.auth.signOut({ scope: "local" });
+    },
+
     onAuthChange(callback) {
-      const { data } = supabase.auth.onAuthStateChange(() => callback());
+      const { data } = supabase.auth.onAuthStateChange((event) => callback(event));
       return () => data.subscription.unsubscribe();
     },
   };

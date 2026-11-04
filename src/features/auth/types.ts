@@ -44,5 +44,12 @@ export interface AuthService {
   signOut(): Promise<void>;
   /** 이미 가입했지만 인증 기록이 없는 사용자의 인증 결과 저장 */
   saveAdultVerification(verification: AdultVerificationSuccess): Promise<AppUser>;
-  onAuthChange(callback: () => void): () => void;
+  /** 비밀번호 재설정 메일 보내기. 가입 여부는 알려주지 않는다 */
+  requestPasswordReset(email: string): Promise<void>;
+  /** 재설정 메일 링크로 들어온 뒤(또는 로그인 상태에서) 새 비밀번호 저장 */
+  updatePassword(password: string): Promise<void>;
+  /** 회원 탈퇴: 사진·신고·포인트·인증 기록과 계정을 모두 지운다 */
+  deleteAccount(): Promise<void>;
+  /** event는 "PASSWORD_RECOVERY"처럼 Supabase Auth 이벤트 이름 */
+  onAuthChange(callback: (event?: string) => void): () => void;
 }

@@ -31,9 +31,10 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/007_report_photos.sql` | 신고 현장 사진: `reports.photo_path`, 비공개 버킷 `report-photos` (JPEG·5MB, 본인 폴더만) |
 | `migrations/008_report_onsite_verification.sql` | 신고 현장 인증: 위치(GPS 정확도 100m 이내)와 사진 둘 다 필수, 시설 좌표가 있으면 150m 이내만 접수 |
 | `migrations/009_facility_checkins.sql` | 현장 인증(장소 확인): 위치 150m·정확도 100m 이내 + 사진, 같은 장소 하루 1번, 1회 +2P. `complete_onsite_checkin()`으로만 인증 |
+| `migrations/010_delete_account.sql` | 회원 탈퇴: `delete_my_account()`가 본인 계정을 지우면 신고·포인트·현장 인증이 함께 삭제 (사진은 화면이 Storage API로 먼저 삭제) |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~009와 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~010과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`

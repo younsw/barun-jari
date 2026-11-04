@@ -46,6 +46,18 @@ export default function NearbyMap({ userLocation, places, onSelect, onUnavailabl
     };
   }, []);
 
+  // 전체 화면 전환처럼 지도 칸 크기가 바뀌면 다시 그리고, 보던 가운데를 유지한다
+  useEffect(() => {
+    if (!kakao || !mapRef.current || !containerRef.current) return;
+    const observer = new ResizeObserver(() => {
+      const center = mapRef.current.getCenter();
+      mapRef.current.relayout();
+      mapRef.current.setCenter(center);
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [kakao]);
+
   // 내 위치: 파란 점, 위치가 바뀌면 지도도 따라간다
   useEffect(() => {
     if (!kakao || !mapRef.current) return;

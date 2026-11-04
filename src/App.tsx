@@ -36,7 +36,7 @@ type AppScreen =
 /** 화면 표시용: 장소 + 현재 위치에서의 거리 */
 type PlaceView = Place & { meters: number | null };
 
-function Icon({ name, size = 20 }: { name: "search" | "location" | "refresh" | "pin" | "chevron" | "info" | "map"; size?: number }) {
+function Icon({ name, size = 20 }: { name: "search" | "location" | "refresh" | "pin" | "chevron" | "info" | "map" | "expand" | "close"; size?: number }) {
   const paths = {
     search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4.5 4.5" /></>,
     location: <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
@@ -45,6 +45,8 @@ function Icon({ name, size = 20 }: { name: "search" | "location" | "refresh" | "
     chevron: <path d="m9 18 6-6-6-6" />,
     info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5m0-8h.01" /></>,
     map: <><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z" /><path d="M9 3v15m6-12v15" /></>,
+    expand: <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />,
+    close: <path d="M6 6l12 12M18 6 6 18" />,
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -52,13 +54,29 @@ function Icon({ name, size = 20 }: { name: "search" | "location" | "refresh" | "
 // 첫 화면 지도: 키가 있으면 내 위치 중심 카카오 지도, 없거나 실패하면 기존 목업
 function MapPreview({ userLocation, places, onSelect }: { userLocation: LatLng | null; places: PlaceView[]; onSelect: (id: number) => void }) {
   const [mapAvailable, setMapAvailable] = useState(hasKakaoMapKey);
+  const [fullscreen, setFullscreen] = useState(false);
+  // 전체 화면일 때 Esc로 닫고, 뒤 화면이 스크롤되지 않게 막는다
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setFullscreen(false);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = overflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [fullscreen]);
   const nearby = useMemo(() => places.flatMap((place) => {
     const coords = placeCoords(place);
     return coords ? [{ id: place.id, name: place.name, coords }] : [];
   }), [places]);
   if (mapAvailable) {
-    return <div className="map-preview live">
-      <NearbyMap userLocation={userLocation} places={nearby} onSelect={onSelect} onUnavailable={() => setMapAvailable(false)} />
+    return <div className={`map-preview live ${fullscreen ? "fullscreen" : ""}`}>
+      <NearbyMap userLocation={userLocation} places={nearby} onSelect={(id) => { setFullscreen(false); onSelect(id); }} onUnavailable={() => setMapAvailable(false)} />
+      <button className="map-fullscreen-toggle" onClick={() => setFullscreen(!fullscreen)} aria-label={fullscreen ? "전체 화면 닫기" : "지도 전체 화면으로 보기"}>
+        <Icon name={fullscreen ? "close" : "expand"} size={fullscreen ? 20 : 17} />
+      </button>
       {!userLocation && <span className="map-hint">위치 권한을 허용하면 내 위치 중심으로 보여드려요</span>}
     </div>;
   }
@@ -196,7 +214,7 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
         </div>
 
         <button className="report-button" onClick={onReport}>
-          <Icon name="info" size={17} />장소 정보나 위치가 잘못되었나요?<span>오류 신고</span>
+          <Icon name="info" size={19} />오류 신고<small>장소 정보·위치가 잘못되었나요?</small>
         </button>
       </div>
       {message && <div className="toast">{message}</div>}
@@ -302,7 +320,7 @@ function MainApp() {
 
   const facilities = (places ?? []).map(({ id, name, address }) => ({ id, name, address }));
 
-  // 인증하기: GPS로 현재 위치를 받아 150m 안의 가장 가까운 흡연구역 상세 화면을 띄운다
+  // 인증하기: GPS로 현재 위치를 받아 인증 반경(30m) 안의 가장 가까운 흡연구역 상세 화면을 띄운다
   const findNearbyForCheckin = async () => {
     setScreenStack(["list"]);
     setFinding({ message: "현재 위치로 가까운 흡연구역을 찾는 중…" });

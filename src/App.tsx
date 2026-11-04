@@ -3,7 +3,7 @@ import { RequireAdult, useAuth } from "./features/auth";
 import { isMockData } from "./features/auth/supabaseClient";
 import KakaoMap from "./features/places/KakaoMap";
 import NearbyMap from "./features/places/NearbyMap";
-import { buildDirectionsUrl, buildSearchUrl, getCurrentPosition, hasKakaoMapKey, type LatLng } from "./features/places/kakaoSdk";
+import { buildDirectionsUrl, buildSearchUrl, getCurrentPosition, getGpsFix, hasKakaoMapKey, type LatLng } from "./features/places/kakaoSdk";
 import { distanceMeters, formatDistance, getFacilities, placeCoords, type Place } from "./features/places/placeService";
 import {
   ReportCreateScreen,
@@ -11,6 +11,9 @@ import {
   ReportListScreen,
 } from "./features/reports/ReportScreens";
 import RewardsScreen from "./features/rewards/RewardsScreen";
+import CheckinScreen from "./features/checkin/CheckinScreen";
+import { CHECKIN_RADIUS_M, findNearest } from "./features/checkin/checkinService";
+import "./features/checkin/checkin.css";
 import ProfileScreen from "./features/profile/ProfileScreen";
 import {
   BottomNavigation,
@@ -23,6 +26,7 @@ type PreviewState = "default" | "empty" | "denied";
 type AppScreen =
   | "list"
   | "detail"
+  | "checkin"
   | "reportCreate"
   | "reportList"
   | "reportDetail"
@@ -121,7 +125,7 @@ function DetailAnnotation() {
   </aside>;
 }
 
-function DetailScreen({ place, userLocation, onBack, onReport }: { place: PlaceView; userLocation: LatLng | null; onBack: () => void; onReport: () => void }) {
+function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { place: PlaceView; userLocation: LatLng | null; onBack: () => void; onReport: () => void; onCheckin: () => void }) {
   const [message, setMessage] = useState("");
   const [mapAvailable, setMapAvailable] = useState(hasKakaoMapKey);
   const [routing, setRouting] = useState(false);
@@ -178,6 +182,10 @@ function DetailScreen({ place, userLocation, onBack, onReport }: { place: PlaceV
           <div className="coordinate"><strong>장소 좌표</strong><span>{coords ? `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}` : "주소→좌표 변환 전"}</span></div>
         </div>
 
+        <button className="checkin-button" onClick={onCheckin} disabled={!coords}>
+          <Icon name="location" size={19} />{coords ? "현장 인증하기" : "좌표 준비 중이라 인증할 수 없어요"}{coords && <small>위치 + 사진 · 2P</small>}
+        </button>
+
         <button className="route-button" onClick={openDirections} disabled={routing}>
           <Icon name="map" size={19} />{routing ? "현재 위치 확인 중…" : coords ? "카카오맵 길찾기" : "카카오맵에서 주소 검색"}<span>{coords ? "도보 · 카카오맵에서 열림" : "좌표 준비 중"}</span>
         </button>
@@ -221,6 +229,8 @@ function MainApp() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
   const [screenStack, setScreenStack] = useState<AppScreen[]>(["list"]);
   const [selectedReportId, setSelectedReportId] = useState("");
+  // 하단 "인증하기": 현재 위치로 가장 가까운 흡연구역을 찾는 중이거나, 못 찾았을 때 안내
+  const [finding, setFinding] = useState<null | { message: string; nearestId?: number; done?: boolean }>(null);
   const activeScreen = screenStack[screenStack.length - 1] ?? "list";
 
   useEffect(() => {
@@ -269,7 +279,11 @@ function MainApp() {
   };
 
   const selectTab = (tab: MainTab) => {
-    const screens: Record<MainTab, AppScreen> = {
+    if (tab === "checkin") {
+      void findNearbyForCheckin();
+      return;
+    }
+    const screens: Record<Exclude<MainTab, "checkin">, AppScreen> = {
       map: "list",
       reports: "reportList",
       rewards: "rewards",
@@ -287,6 +301,38 @@ function MainApp() {
   };
 
   const facilities = (places ?? []).map(({ id, name, address }) => ({ id, name, address }));
+
+  // 인증하기: GPS로 현재 위치를 받아 150m 안의 가장 가까운 흡연구역 상세 화면을 띄운다
+  const findNearbyForCheckin = async () => {
+    setScreenStack(["list"]);
+    setFinding({ message: "현재 위치로 가까운 흡연구역을 찾는 중…" });
+    try {
+      const fix = await getGpsFix();
+      setUserLocation(fix);
+      if (previewState === "denied") setPreviewState("default");
+      const nearest = findNearest(places ?? [], fix);
+      if (!nearest) {
+        setFinding({ message: "위치 정보가 있는 흡연구역이 없어요.", done: true });
+      } else if (nearest.distance > CHECKIN_RADIUS_M) {
+        setFinding({
+          message: `${CHECKIN_RADIUS_M}m 안에 등록된 흡연구역이 없어요. 가장 가까운 곳은 ${nearest.place.name}(${formatDistance(nearest.distance)})이에요.`,
+          nearestId: nearest.place.id,
+          done: true,
+        });
+      } else {
+        setFinding(null);
+        setSelectedPlaceId(nearest.place.id);
+        setScreenStack(["list", "detail"]);
+        window.setTimeout(() => document.getElementById("ui-02")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+      }
+    } catch (caught) {
+      setFinding({ message: caught instanceof Error ? caught.message : "현재 위치를 확인하지 못했어요.", done: true });
+    }
+  };
+
+  if (activeScreen === "checkin" && selectedPlace) {
+    return <main className="prototype-stage"><CheckinScreen place={selectedPlace} onBack={goBack} onRewards={() => setScreenStack(["rewards"])} onDone={() => setScreenStack(["list"])} /></main>;
+  }
 
   if (activeScreen === "reportCreate") {
     return <main className="prototype-stage"><ReportCreateScreen facilities={facilities} initialFacilityId={selectedPlace?.id ?? facilities[0]?.id ?? 0} onBack={goBack} onComplete={() => setScreenStack(["reportList"])} /></main>;
@@ -361,13 +407,24 @@ function MainApp() {
         </div>
         <div className="data-note"><Icon name="info" size={14} />{isMockData ? "화면의 모든 장소와 주소는 예시 데이터입니다." : "서울 중랑구 흡연시설 현황(2026-02-12) 공공데이터 기준입니다."}</div>
       </div>
-      <BottomNavigation active="map" onSelect={selectTab} />
+      <BottomNavigation active={finding ? "checkin" : "map"} onSelect={selectTab} />
       {notice && <div className="toast">{notice}</div>}
+      {finding && <div className="checkin-finding" role="status">
+        <strong>{finding.done ? "현장 인증" : "가까운 흡연구역 찾는 중"}</strong>
+        <p>{finding.message}</p>
+        {finding.nearestId !== undefined && <button onClick={() => {
+          const id = finding.nearestId!;
+          setFinding(null);
+          setSelectedPlaceId(id);
+          setScreenStack(["list", "detail"]);
+        }}>가장 가까운 곳 보기</button>}
+        {finding.done && <button onClick={() => setFinding(null)}>닫기</button>}
+      </div>}
     </section>
     <ListAnnotation state={previewState} onState={setPreviewState} />
     </div>
     {selectedPlace && <div className={`prototype-pair ${activeScreen !== "detail" ? "mobile-hidden" : ""}`} id="ui-02">
-      <DetailScreen place={selectedPlace} userLocation={located} onReport={() => navigate("reportCreate")} onBack={() => {
+      <DetailScreen place={selectedPlace} userLocation={located} onReport={() => navigate("reportCreate")} onCheckin={() => navigate("checkin")} onBack={() => {
         goBack();
         window.setTimeout(() => document.getElementById("ui-01")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
       }} />

@@ -269,7 +269,7 @@ export function ReportListScreen({
     <div className="feature-pair">
       <section className="phone-frame" aria-label="UI-07 내 신고 목록 모바일 화면">
         <div className="feature-screen">
-          <ScreenHeader title="내 신고 내역" />
+          <ScreenHeader title="내 신고 내역" onBack={() => onTab("profile")} />
           <div className="feature-body">
             <div className="status-filters">
               {filters.map(([value, label]) => (
@@ -322,12 +322,12 @@ export function ReportListScreen({
               </div>
             )}
           </div>
-          <BottomNavigation active="reports" onSelect={onTab} />
+          <BottomNavigation active="profile" onSelect={onTab} />
         </div>
       </section>
       <ScreenAnnotation
         screen="UI-07 내 신고 목록"
-        path="하단 신고 내역, UI-06 제출 완료"
+        path="마이페이지 > 내 신고 내역, UI-06 제출 완료"
         elements="상태 필터, 신고 카드, 상태 배지, 빈 화면"
         data="reports 중 로그인한 회원의 신고 (RLS로 내 신고만 조회)"
         action="상태 필터, 신고 상세보기, 하단 메뉴 이동"

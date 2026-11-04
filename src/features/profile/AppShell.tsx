@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-export type MainTab = "map" | "reports" | "rewards" | "profile";
+// "reports"(내 신고 내역)는 하단 메뉴에서 빠지고 마이페이지에서 들어간다
+export type MainTab = "map" | "checkin" | "reports" | "rewards" | "profile";
 
 type IconName =
   | "back"
@@ -107,7 +108,7 @@ export function BottomNavigation({
 }) {
   const items: Array<[MainTab, IconName, string]> = [
     ["map", "map", "지도"],
-    ["reports", "document", "신고 내역"],
+    ["checkin", "check", "인증하기"],
     ["rewards", "gift", "리워드"],
     ["profile", "person", "마이페이지"],
   ];

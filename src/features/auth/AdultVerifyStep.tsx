@@ -3,7 +3,7 @@ import { ADULT_VERIFICATION_MODE, verifyAdult } from "./adultVerification";
 import { getAdultCutoffLabel, getAdultCutoffYear, getKoreanYear } from "./adultAge";
 import type { AdultVerificationSuccess } from "./types";
 
-export function AdultVerifyStep({ onVerified }: { onVerified: (result: AdultVerificationSuccess) => void }) {
+export function AdultVerifyStep({ onVerified, submitLabel = "다음" }: { onVerified: (result: AdultVerificationSuccess) => void | Promise<void>; submitLabel?: string }) {
   const [birthYear, setBirthYear] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -16,10 +16,10 @@ export function AdultVerifyStep({ onVerified }: { onVerified: (result: AdultVeri
     setError("");
     try {
       const result = await verifyAdult(birthYear);
-      if (result.ok) onVerified(result);
+      if (result.ok) await onVerified(result);
       else setError(result.message);
-    } catch {
-      setError("인증 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "인증 요청 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setPending(false);
     }
@@ -28,19 +28,19 @@ export function AdultVerifyStep({ onVerified }: { onVerified: (result: AdultVeri
   return <div className="auth-step">
     <div className="auth-notice">
       <strong>성인만 가입할 수 있어요</strong>
-      <p>{getAdultCutoffLabel()} · 매년 1월 1일 기준이 1년씩 바뀌어요.</p>
+      <p>{getAdultCutoffLabel()} · 관리자가 확인한 뒤 승인되면 이용할 수 있어요.</p>
     </div>
 
-    {ADULT_VERIFICATION_MODE === "mock" && <label className="auth-field">
-      <span>출생연도 <em>테스트용 가짜 인증</em></span>
+    {ADULT_VERIFICATION_MODE === "admin" && <label className="auth-field">
+      <span>출생연도 <em>관리자 승인 필요</em></span>
       <select value={birthYear ?? ""} onChange={(event) => setBirthYear(event.target.value ? Number(event.target.value) : null)}>
         <option value="">선택해 주세요</option>
         {years.map((year) => <option key={year} value={year}>{year}년{year === cutoffYear ? " (가입 가능 마지막 연도)" : ""}</option>)}
       </select>
-      <small>출생연도는 성인 여부 확인에만 쓰고 저장하지 않아요.</small>
+      <small>출생연도는 관리자 확인에만 쓰고, 승인·반려 후 바로 지워요.</small>
     </label>}
 
     {error && <p className="auth-error" role="alert">{error}</p>}
-    <button className="auth-primary" onClick={submit} disabled={pending}>{pending ? "확인 중…" : "성인 인증하기"}</button>
+    <button className="auth-primary" onClick={submit} disabled={pending}>{pending ? "확인 중…" : submitLabel}</button>
   </div>;
 }

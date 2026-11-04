@@ -165,7 +165,7 @@ export default function CheckinScreen({ place, onBack, onRewards, onDone }: {
         path="하단 인증하기 → 가까운 장소 상세 → 현장 인증하기"
         elements="장소 정보, 현재 위치·거리 확인, 앱 카메라 촬영(갤러리 불가), 인증 버튼, 완료 화면"
         data="facility_checkins (위치·정확도·거리·사진 경로), point_ledger onsite_checkin / Storage report-photos"
-        action="위치 확인, 촬영·다시 찍기, 인증 → +2P (같은 장소 하루 1번, 하루 최대 10P)"
+        action="위치 확인, 촬영·다시 찍기, 인증 → +1P (같은 장소 하루 1번, 하루 최대 10P)"
         link="complete_onsite_checkin(), UI-09 리워드"
       />
     </div>

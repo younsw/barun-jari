@@ -183,8 +183,9 @@ button { color: inherit; cursor: pointer; }
 .info-card > div { min-height: 42px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #edf1ef; font-size: 9px; }
 .info-card > div:last-child { border: 0; }
 .info-card span { color: #7c8982; }.info-card strong { font-size: 9px; }
-.report-button { width: 100%; height: 44px; margin-top: 10px; padding: 0 4px; display: flex; align-items: center; gap: 6px; border: 0; color: #68766f; background: transparent; font-size: 9px; text-align: left; }
-.report-button span { margin-left: auto; color: #176345; font-weight: 700; text-decoration: underline; }
+/* 오류 신고: 현장 인증 버튼과 같은 크기, 아주 연한 초록 보조 버튼 */
+.report-button { width: 100%; height: 52px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #d3e7db; border-radius: 15px; color: #176345; background: #f2f9f5; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.report-button small { color: #5f8a75; font-size: 11px; font-weight: 600; }
 .detail-bottom { padding: 12px 20px 22px; position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; background: linear-gradient(0deg, white 78%, rgba(255,255,255,0)); }
 .detail-bottom > button { width: 100%; height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; border-radius: 15px; color: white; background: #176345; box-shadow: 0 9px 22px rgba(23, 99, 69, .22); font-size: 14px; font-weight: 800; }
 .detail-bottom small { color: rgba(255,255,255,.72); font-size: 8px; font-weight: 500; }
@@ -198,5 +199,9 @@ button { color: inherit; cursor: pointer; }
   .annotation { display: none; }
 }
 .map-preview.live { height: 220px; }
+/* 지도 전체 화면: 확대 버튼을 누르면 화면 전체를 덮는다 */
+.map-preview.fullscreen { position: fixed; z-index: 1000; inset: 0; height: auto; border-radius: 0; }
+.map-fullscreen-toggle { position: absolute; z-index: 5; top: 10px; right: 10px; width: 36px; height: 36px; display: grid; place-items: center; padding: 0; border: 1px solid #d5e3db; border-radius: 10px; color: #176345; background: rgba(255, 255, 255, .95); box-shadow: 0 2px 8px rgba(26, 61, 45, .14); cursor: pointer; }
+.map-preview.fullscreen .map-fullscreen-toggle { top: max(14px, env(safe-area-inset-top)); right: 14px; width: 44px; height: 44px; border-radius: 22px; }
 .kakao-user-dot { display: block; width: 16px; height: 16px; border: 3px solid white; border-radius: 50%; background: #3c79db; box-shadow: 0 0 0 7px rgba(60, 121, 219, .2), 0 1px 4px rgba(0, 0, 0, .25); }
 .map-hint { position: absolute; z-index: 4; left: 10px; right: 10px; bottom: 10px; padding: 6px 9px; border-radius: 8px; color: #44524a; background: rgba(255,255,255,.92); font-size: 11px; text-align: center; }

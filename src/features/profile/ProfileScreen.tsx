@@ -12,8 +12,8 @@ import {
 import "./profile.css";
 
 // 앱 전체가 RequireAdult 안에 있으므로 이 화면은 항상 로그인·성인 인증을 마친 회원이 본다.
-export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void }) {
-  const { user, isAdultVerified, signOut, deleteAccount } = useAuth();
+export default function ProfileScreen({ onTab, onOpenAdultApproval }: { onTab: (tab: MainTab) => void; onOpenAdultApproval?: () => void }) {
+  const { user, isAdultVerified, isAdmin, signOut, deleteAccount } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [withdrawConfirm, setWithdrawConfirm] = useState("");
@@ -52,7 +52,7 @@ export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void
             <div className="profile-stats">
               <button disabled>
                 <span>성인인증</span>
-                <strong>{isAdultVerified ? "완료" : "미완료"}</strong>
+                <strong>{isAdultVerified ? "승인 완료" : "미승인"}</strong>
               </button>
               <button onClick={() => onTab("rewards")}>
                 <span>현재 포인트</span>
@@ -76,13 +76,23 @@ export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void
                 </span>
                 <b>›</b>
               </button>
+              {isAdmin && onOpenAdultApproval && (
+                <button onClick={onOpenAdultApproval}>
+                  <AppIcon name="check" />
+                  <span>
+                    <strong>성인 인증 승인 (관리자)</strong>
+                    <small>승인 대기 중인 회원 확인·승인·반려</small>
+                  </span>
+                  <b>›</b>
+                </button>
+              )}
               <button disabled>
                 <AppIcon name="shield" />
                 <span>
                   <strong>계정 정보</strong>
                   <small>
                     {isAdultVerified && user?.verifiedAt
-                      ? `성인인증 완료 · ${new Date(user.verifiedAt).toLocaleDateString("ko-KR")}`
+                      ? `성인인증 승인 · ${new Date(user.verifiedAt).toLocaleDateString("ko-KR")}`
                       : "성인인증 상태 확인"}
                   </small>
                 </span>
@@ -98,10 +108,12 @@ export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void
                 방문 전 현장 정보를 다시 확인해 주세요.
               </p>
             </div>
-            <button className="logout-button" onClick={() => void signOut()}>
-              로그아웃
-            </button>
-            {withdrawOpen ? (
+            {/* 계정 버튼: 로그아웃과 회원 탈퇴를 같은 크기로 나란히 둔다 */}
+            <div className="account-actions">
+              <button onClick={() => void signOut()} disabled={withdrawing}>로그아웃</button>
+              <button className="withdraw" onClick={() => setWithdrawOpen(true)} disabled={withdrawOpen}>회원 탈퇴</button>
+            </div>
+            {withdrawOpen && (
               <div className="withdraw-panel" role="dialog" aria-label="회원 탈퇴 확인">
                 <strong>정말 탈퇴할까요?</strong>
                 <p>
@@ -120,8 +132,6 @@ export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void
                   </button>
                 </div>
               </div>
-            ) : (
-              <button className="withdraw-link" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button>
             )}
           </div>
           <BottomNavigation active="profile" onSelect={onTab} />
@@ -132,7 +142,7 @@ export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void
         path="하단 마이페이지"
         elements="닉네임, 인증 상태, 포인트, 신고·리워드·계정 메뉴, 로그아웃, 회원 탈퇴(확인 입력)"
         data="users.nickname, is_adult_verified, verified_at 및 get_my_point_summary()"
-        action="인증 상태 확인, 내 신고 내역(하단 메뉴에서 이동해 옴)·리워드 이동, 로그아웃"
+        action="인증 상태 확인, 내 신고 내역·리워드 이동, 로그아웃, 회원 탈퇴, (관리자) 성인 인증 승인 화면 이동"
         link="useAuth(), getMyPoints(), delete_my_account(), UI-07·09"
       />
     </div>

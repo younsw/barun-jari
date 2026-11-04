@@ -30,10 +30,13 @@
 .service-guide { margin-top: 13px; padding: 14px; border-radius: 13px; background: #f0f4f2; }
 .service-guide strong { font-size: 10px; }
 .service-guide p { margin: 6px 0 0; color: #68766f; font-size: 8px; line-height: 1.55; }
-.logout-button { width: 100%; margin-top: 16px; padding: 10px; border: 0; color: #7e8984; background: transparent; font-size: 9px; text-decoration: underline; }
+/* 계정 버튼: 로그아웃 · 회원 탈퇴 (같은 크기) */
+.account-actions { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.account-actions button { height: 42px; border: 1px solid #dce5e0; border-radius: 12px; color: #4f5d56; background: #fff; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.account-actions button.withdraw { color: #b6402f; border-color: #efd3ce; }
+.account-actions button:disabled { opacity: .5; cursor: default; }
 .profile-stats button:disabled, .profile-menu button:disabled { color: inherit; cursor: default; opacity: 1; }
 
-.withdraw-link { display: block; margin: 14px auto 0; padding: 6px; border: 0; color: #98a39d; background: none; font: inherit; font-size: 11px; text-decoration: underline; }
 .withdraw-panel { margin-top: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #efc9c3; border-radius: 14px; background: #fdf4f2; }
 .withdraw-panel strong { color: #a23b2f; font-size: 13px; }
 .withdraw-panel p { margin: 0; color: #6c5550; font-size: 11px; line-height: 1.5; }

@@ -19,6 +19,7 @@ import {
   getReportPhotoUrl,
 } from "./reportService";
 import { CameraCapture, type CapturedPhoto } from "./CameraCapture";
+import { getGpsFix, type GpsFix } from "../places/kakaoSdk";
 import "./reports.css";
 
 export type FacilitySummary = {
@@ -66,7 +67,25 @@ export function ReportCreateScreen({
   const [photo, setPhoto] = useState<CapturedPhoto | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [location, setLocation] = useState<GpsFix | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const facility = facilities.find((item) => item.id === facilityId) ?? facilities[0];
+
+  // 현장 인증 1단계: 지금 위치 확인 (정확도 100m 이내만 서버가 받음)
+  const locate = async () => {
+    setLocating(true);
+    setLocationError("");
+    try {
+      setLocation(await getGpsFix());
+    } catch (caught) {
+      setLocation(null);
+      setLocationError(caught instanceof Error ? caught.message : "현재 위치를 확인하지 못했어요.");
+    } finally {
+      setLocating(false);
+    }
+  };
+  useEffect(() => { void locate(); }, []);
 
   const submit = async () => {
     if (!facility) {
@@ -77,9 +96,19 @@ export function ReportCreateScreen({
       setError("수정이 필요한 내용을 입력해 주세요.");
       return;
     }
+    if (!location) {
+      setError("현장 위치를 먼저 확인해 주세요.");
+      return;
+    }
+    if (!photo) {
+      setError("현장 사진을 촬영해 주세요.");
+      return;
+    }
     setPending(true);
     try {
-      await createReport({ facility_id: facility.id, type, content: content.trim(), photo: photo?.blob });
+      // 촬영 직후 위치를 한 번 더 받아 사진과 같은 시점의 위치로 보낸다
+      const fresh = await getGpsFix().catch(() => location);
+      await createReport({ facility_id: facility.id, type, content: content.trim(), photo: photo.blob, location: fresh });
       onComplete();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "신고를 저장하지 못했어요.");
@@ -98,7 +127,7 @@ export function ReportCreateScreen({
               {isMockData
                 ? "Supabase 키가 없어 신고는 브라우저 메모리에만 저장됩니다. "
                 : "신고가 반영되면 3P가 적립돼요 (하루 최대 10P). "}
-              사진은 앱 카메라로 현장에서 찍은 것만 첨부할 수 있어요.
+              현장 인증을 위해 현재 위치 확인과 앱 카메라 사진 촬영이 모두 필요해요.
             </div>
             <label className="form-label" htmlFor="report-facility">
               신고할 장소
@@ -145,6 +174,23 @@ export function ReportCreateScreen({
               }}
               placeholder="잘못된 장소 정보나 위치를 자세히 알려 주세요."
             />
+            <span className="form-label">현장 인증 (위치 + 사진 필수)</span>
+            <div className={`onsite-location ${location ? "ok" : ""}`}>
+              <AppIcon name="map" size={20} />
+              <div>
+                <strong>
+                  {locating ? "현재 위치 확인 중…" : location ? "현재 위치 확인됨" : "현재 위치 확인 필요"}
+                </strong>
+                <span>
+                  {location
+                    ? `정확도 약 ${Math.round(location.accuracy)}m${location.accuracy > 100 ? " · 100m 이내여야 해요. 실외에서 다시 확인해 주세요" : ""}`
+                    : locationError || "장소에서 150m 이내에 있어야 신고할 수 있어요."}
+                </span>
+              </div>
+              <button onClick={() => void locate()} disabled={locating}>
+                {location ? "다시 확인" : "위치 확인"}
+              </button>
+            </div>
             {error && <p className="inline-error">{error}</p>}
             {/* 갤러리 업로드 금지: 파일 선택(input type=file)을 두지 않고 앱 내 카메라만 연다 */}
             <button className="photo-upload photo-camera-button" onClick={() => setCameraOpen(true)}>
@@ -153,7 +199,7 @@ export function ReportCreateScreen({
               ) : (
                 <>
                   <AppIcon name="upload" size={22} />
-                  <strong>현장 사진 촬영 (선택)</strong>
+                  <strong>현장 사진 촬영 (필수)</strong>
                   <span>앱 카메라로만 찍을 수 있어요 · 갤러리 사진 불가</span>
                 </>
               )}
@@ -161,10 +207,9 @@ export function ReportCreateScreen({
             {photo && (
               <div className="photo-actions">
                 <button onClick={() => setCameraOpen(true)}>다시 찍기</button>
-                <button onClick={() => setPhoto(null)}>사진 빼기</button>
               </div>
             )}
-            <button className="primary-action report-submit" onClick={submit} disabled={pending}>
+            <button className="primary-action report-submit" onClick={submit} disabled={pending || !location || !photo}>
               {pending ? "제출 중…" : "신고 제출하기"}
             </button>
           </div>
@@ -183,9 +228,9 @@ export function ReportCreateScreen({
       <ScreenAnnotation
         screen="UI-06 오류 신고 작성"
         path="UI-02 정보 수정 요청"
-        elements="시설 선택, 신고 유형, 상세 내용, 앱 내 카메라 촬영(갤러리 불가), 제출"
-        data="reports.user_id, facility_id, type, content, status, photo_path, created_at / Storage report-photos"
-        action="시설·유형 선택, 내용 입력, 현장 사진 촬영·다시 찍기, 제출"
+        elements="시설 선택, 신고 유형, 상세 내용, 현재 위치 확인, 앱 내 카메라 촬영(갤러리 불가), 제출"
+        data="reports.user_id, facility_id, type, content, status, photo_path, reporter_latitude·longitude, location_accuracy_m / Storage report-photos"
+        action="시설·유형 선택, 내용 입력, 위치 확인, 현장 사진 촬영·다시 찍기, 제출 (위치·사진 둘 다 있어야 제출)"
         link="createReport(), UI-07 내 신고 목록"
       />
     </div>
@@ -224,7 +269,7 @@ export function ReportListScreen({
     <div className="feature-pair">
       <section className="phone-frame" aria-label="UI-07 내 신고 목록 모바일 화면">
         <div className="feature-screen">
-          <ScreenHeader title="내 신고 내역" />
+          <ScreenHeader title="내 신고 내역" onBack={() => onTab("profile")} />
           <div className="feature-body">
             <div className="status-filters">
               {filters.map(([value, label]) => (
@@ -277,12 +322,12 @@ export function ReportListScreen({
               </div>
             )}
           </div>
-          <BottomNavigation active="reports" onSelect={onTab} />
+          <BottomNavigation active="profile" onSelect={onTab} />
         </div>
       </section>
       <ScreenAnnotation
         screen="UI-07 내 신고 목록"
-        path="하단 신고 내역, UI-06 제출 완료"
+        path="마이페이지 > 내 신고 내역, UI-06 제출 완료"
         elements="상태 필터, 신고 카드, 상태 배지, 빈 화면"
         data="reports 중 로그인한 회원의 신고 (RLS로 내 신고만 조회)"
         action="상태 필터, 신고 상세보기, 하단 메뉴 이동"
@@ -347,6 +392,16 @@ export function ReportDetailScreen({
                   <div>
                     <dt>신고 날짜</dt>
                     <dd>{formatDate(report.created_at)}</dd>
+                  </div>
+                  <div>
+                    <dt>현장 위치</dt>
+                    <dd>
+                      {report.location_verified
+                        ? `인증됨 · 장소에서 ${Math.round(report.distance_m ?? 0)}m`
+                        : report.reporter_latitude != null
+                          ? "기록됨 · 장소 좌표가 없어 관리자가 확인해요"
+                          : "기록 없음"}
+                    </dd>
                   </div>
                   <div className="detail-content-row">
                     <dt>신고 내용</dt>

@@ -11,6 +11,7 @@ export type PointLedgerRecord = {
 /** DB의 reason 코드를 화면 문구로 바꾼다 (db/migrations/004_point_ledger.sql) */
 export const reasonLabels: Record<string, string> = {
   report_accepted: "오류 신고 반영",
+  onsite_checkin: "현장 인증",
   attendance: "출석",
 };
 

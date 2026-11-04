@@ -29,13 +29,16 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/005_function_permissions.sql` | 함수 호출 권한 정리 (Supabase 보안 점검 반영) |
 | `migrations/006_adult_verification.sql` | 성인 인증 저장 함수 (임시 출생연도 인증, 서버에서 다시 판단) |
 | `migrations/007_report_photos.sql` | 신고 현장 사진: `reports.photo_path`, 비공개 버킷 `report-photos` (JPEG·5MB, 본인 폴더만) |
+| `migrations/008_report_onsite_verification.sql` | 신고 현장 인증: 위치(GPS 정확도 100m 이내)와 사진 둘 다 필수, 시설 좌표가 있으면 150m 이내만 접수 |
+| `migrations/009_facility_checkins.sql` | 현장 인증(장소 확인): 위치 150m·정확도 100m 이내 + 사진, 같은 장소 하루 1번, 1회 +2P. `complete_onsite_checkin()`으로만 인증 |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~007과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~009와 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`
-- 포인트 적립은 화면에서 직접 할 수 없습니다. 신고가 `accepted`가 되면 DB가 자동으로 적립합니다.
+- 현장 인증: `supabase.rpc('complete_onsite_checkin', { p_facility_id, p_photo_path, p_latitude, p_longitude, p_accuracy_m })` → `{ checkin_id, distance_m, points_awarded, today_points }`
+- 포인트 적립은 화면에서 직접 할 수 없습니다. 현장 인증 함수(+2)와 신고 `accepted`(+3)일 때 DB가 적립합니다.
 - 관리자 지정: Supabase 대시보드에서 `users.is_admin`을 `true`로 바꿉니다.
 
 ## 좌표 채우기 (지오코딩)

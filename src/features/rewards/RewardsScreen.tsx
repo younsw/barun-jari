@@ -65,7 +65,7 @@ export default function RewardsScreen({
             </div>
             {error && <p className="inline-error">{error}</p>}
             <div className="demo-notice reward-policy">
-              오류 신고가 반영되면 3P가 적립돼요. 하루(한국 시간)에 최대
+              현장 인증 1번에 2P(같은 장소는 하루 한 번), 오류 신고가 반영되면 3P가 적립돼요. 하루(한국 시간)에 최대
               {` ${limit}P`}까지 받을 수 있어요.
               {isMockData && " 지금은 Supabase 키가 없어 예시 내역을 보여줘요."}
             </div>
@@ -75,7 +75,7 @@ export default function RewardsScreen({
             </div>
             <div className="point-history">
               {history.length === 0 && !error && points && (
-                <p className="point-empty">아직 적립 내역이 없어요. 장소 정보 오류를 신고해 보세요.</p>
+                <p className="point-empty">아직 적립 내역이 없어요. 하단 인증하기로 가까운 흡연구역을 인증해 보세요.</p>
               )}
               {history.map((entry) => (
                 <div key={entry.id}>
@@ -94,7 +94,7 @@ export default function RewardsScreen({
               <strong>포인트 이용 안내</strong>
               <p>
                 현금화, 지역화폐 전환, 상품 구매, 랭킹 기능은 제공하지 않습니다.
-                흡연 행위 자체에는 포인트를 주지 않습니다.
+                흡연 행위 자체에는 포인트를 주지 않습니다. 현장 인증은 장소가 실제로 있는지 확인해 준 데 대한 보상이에요.
               </p>
             </div>
           </div>

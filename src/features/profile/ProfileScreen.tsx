@@ -95,7 +95,7 @@ export default function ProfileScreen({ onTab }: { onTab: (tab: MainTab) => void
         path="하단 마이페이지"
         elements="닉네임, 인증 상태, 포인트, 신고·리워드·계정 메뉴, 로그아웃"
         data="users.nickname, is_adult_verified, verified_at 및 get_my_point_summary()"
-        action="인증 상태 확인, 신고·리워드 이동, 로그아웃"
+        action="인증 상태 확인, 내 신고 내역(하단 메뉴에서 이동해 옴)·리워드 이동, 로그아웃"
         link="useAuth(), getMyPoints(), UI-07·09"
       />
     </div>

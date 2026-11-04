@@ -1,9 +1,11 @@
 import { supabase } from "../auth/supabaseClient";
+import type { GpsFix } from "../places/kakaoSdk";
 import { mockReports, type ReportRecord, type ReportType } from "./mockReports";
 
 // Supabase 키가 있으면 reports 테이블, 없으면 브라우저 메모리의 예시 데이터를 쓴다.
 // 내 신고만 보이는 것과 성인 인증 회원만 작성하는 것은 DB 권한(RLS)이 막는다.
-// 현장 사진은 앱 내 카메라(CameraCapture) 촬영본만 받아 비공개 버킷 report-photos에 저장한다.
+// 현장 인증: 앱 내 카메라(CameraCapture) 사진과 GPS 위치가 둘 다 있어야 하고,
+// 서버 트리거(008)가 사진 업로드 여부·GPS 정확도·시설까지 거리를 다시 확인한다.
 
 const PHOTO_BUCKET = "report-photos";
 const PHOTO_URL_SECONDS = 60 * 60;
@@ -13,7 +15,7 @@ type ReportRow = Omit<ReportRecord, "id" | "facility_name" | "facility_address">
   smoking_facilities: { name: string; address: string } | null;
 };
 
-const SELECT = "id, user_id, facility_id, type, content, status, created_at, photo_path, smoking_facilities(name, address)";
+const SELECT = "id, user_id, facility_id, type, content, status, created_at, photo_path, reporter_latitude, reporter_longitude, location_accuracy_m, distance_m, location_verified, smoking_facilities(name, address)";
 
 function toRecord(row: ReportRow): ReportRecord {
   const { smoking_facilities: facility, ...rest } = row;
@@ -21,6 +23,8 @@ function toRecord(row: ReportRow): ReportRecord {
 }
 
 function toKoreanError(message: string): Error {
+  const onsite = message.match(/onsite: (.+)/);
+  if (onsite) return new Error(onsite[1]);
   if (/row-level security/i.test(message)) return new Error("성인 인증을 마친 회원만 신고할 수 있어요.");
   if (/foreign key/i.test(message)) return new Error("존재하지 않는 장소예요. 장소를 다시 선택해 주세요.");
   if (/mime|file size|payload too large|exceeded/i.test(message)) return new Error("사진을 올리지 못했어요. 다시 촬영해 주세요.");
@@ -29,27 +33,30 @@ function toKoreanError(message: string): Error {
 
 let memoryReports = [...mockReports];
 
-export async function createReport(input: { facility_id: number; type: ReportType; content: string; photo?: Blob | null }): Promise<ReportRecord> {
-  const { photo, ...fields } = input;
+export async function createReport(input: { facility_id: number; type: ReportType; content: string; photo: Blob; location: GpsFix }): Promise<ReportRecord> {
+  const { photo, location, ...base } = input;
+  const fields = {
+    ...base,
+    reporter_latitude: location.latitude,
+    reporter_longitude: location.longitude,
+    location_accuracy_m: Math.round(location.accuracy),
+  };
   if (!supabase) {
-    const photo_path = photo ? URL.createObjectURL(photo) : null;
-    const report: ReportRecord = { ...fields, photo_path, id: `mock-${Date.now()}`, user_id: "mock", status: "received", created_at: new Date().toISOString() };
+    const photo_path = URL.createObjectURL(photo);
+    const report: ReportRecord = { ...fields, photo_path, distance_m: null, location_verified: false, id: `mock-${Date.now()}`, user_id: "mock", status: "received", created_at: new Date().toISOString() };
     memoryReports = [report, ...memoryReports];
     return report;
   }
 
-  let photo_path: string | null = null;
-  if (photo) {
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) throw new Error("로그인이 필요해요.");
-    photo_path = `${auth.user.id}/${crypto.randomUUID()}.jpg`;
-    const { error } = await supabase.storage.from(PHOTO_BUCKET).upload(photo_path, photo, { contentType: "image/jpeg", upsert: false });
-    if (error) throw toKoreanError(error.message);
-  }
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error("로그인이 필요해요.");
+  const photo_path = `${auth.user.id}/${crypto.randomUUID()}.jpg`;
+  const upload = await supabase.storage.from(PHOTO_BUCKET).upload(photo_path, photo, { contentType: "image/jpeg", upsert: false });
+  if (upload.error) throw toKoreanError(upload.error.message);
 
   const { data, error } = await supabase.from("reports").insert({ ...fields, photo_path }).select(SELECT).single<ReportRow>();
   if (error) {
-    if (photo_path) await supabase.storage.from(PHOTO_BUCKET).remove([photo_path]);
+    await supabase.storage.from(PHOTO_BUCKET).remove([photo_path]);
     throw toKoreanError(error.message);
   }
   return toRecord(data);

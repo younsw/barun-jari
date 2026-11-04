@@ -66,3 +66,21 @@ export function getCurrentPosition(timeoutMs = 5000): Promise<LatLng | null> {
     );
   });
 }
+
+export type GpsFix = LatLng & { accuracy: number };
+
+/** 신고 현장 인증용: 정확도(m)까지 받고, 실패 사유를 한국어로 돌려준다. 캐시된 위치는 쓰지 않는다. */
+export function getGpsFix(timeoutMs = 15000): Promise<GpsFix> {
+  if (!("geolocation" in navigator)) return Promise.reject(new Error("이 기기에서는 위치를 확인할 수 없어요."));
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => resolve({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy }),
+      (error) => reject(new Error(
+        error.code === error.PERMISSION_DENIED ? "위치 권한을 허용해야 신고할 수 있어요. 브라우저 설정에서 위치를 허용해 주세요."
+          : error.code === error.TIMEOUT ? "위치 확인 시간이 지났어요. 실외에서 다시 시도해 주세요."
+          : "현재 위치를 확인하지 못했어요. 다시 시도해 주세요.",
+      )),
+      { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 0 },
+    );
+  });
+}

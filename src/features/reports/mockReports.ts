@@ -12,6 +12,12 @@ export type ReportRecord = {
   created_at: string;
   /** report-photos 버킷 안 경로 (예시 모드에서는 브라우저 임시 주소) */
   photo_path?: string | null;
+  /** 신고 당시 GPS 위치와 서버가 계산한 시설까지 거리 */
+  reporter_latitude?: number;
+  reporter_longitude?: number;
+  location_accuracy_m?: number;
+  distance_m?: number | null;
+  location_verified?: boolean;
   facility_name?: string;
   facility_address?: string;
 };

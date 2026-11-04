@@ -1,0 +1,18 @@
+.checkin-done { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 4px 8px; text-align: center; }
+.checkin-done > strong { font-size: 18px; }
+.checkin-done > p { margin: 0; color: #66736b; font-size: 13px; }
+.checkin-done .primary-action, .checkin-done .secondary-action { width: 100%; }
+.checkin-done-icon { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; color: white; background: #176345; }
+.checkin-points { width: 100%; margin: 8px 0 6px; padding: 16px; border-radius: 16px; color: #176345; background: #eef8f2; font-size: 20px; font-weight: 800; }
+.checkin-points small { display: block; margin-top: 4px; color: #66736b; font-size: 11px; font-weight: 500; }
+.photo-camera-button:disabled { opacity: .5; }
+
+/* 상세 화면의 현장 인증 버튼 */
+.checkin-button { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; height: 52px; margin-top: 12px; border: 0; border-radius: 15px; color: white; background: #176345; font: inherit; font-size: 15px; font-weight: 800; box-shadow: 0 6px 16px rgba(23, 99, 69, .22); }
+.checkin-button small { font-size: 11px; font-weight: 600; opacity: .85; }
+
+/* 인증하기 탭: 가까운 장소 찾는 중 */
+.checkin-finding { position: absolute; z-index: 30; inset: 0; display: grid; place-content: center; gap: 10px; padding: 24px; text-align: center; background: rgba(255, 255, 255, .92); }
+.checkin-finding strong { font-size: 15px; }
+.checkin-finding p { margin: 0; color: #66736b; font-size: 12px; line-height: 1.5; }
+.checkin-finding button { justify-self: center; padding: 10px 16px; border: 1px solid #bfd2c8; border-radius: 12px; color: #176345; background: white; font: inherit; font-weight: 700; }

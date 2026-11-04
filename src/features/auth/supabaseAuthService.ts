@@ -20,6 +20,8 @@ function toKoreanError(message: string): Error {
   if (/invalid login credentials/i.test(message)) return new Error("이메일 또는 비밀번호가 맞지 않아요.");
   if (/already registered/i.test(message)) return new Error("이미 가입된 이메일이에요.");
   if (/email not confirmed/i.test(message)) return new Error("이메일 인증을 먼저 완료해 주세요.");
+  // Supabase 대시보드에서 Email 로그인 방식(Enable Email provider)이 꺼져 있을 때
+  if (/(signups|logins) are disabled|email_provider_disabled/i.test(message)) return new Error("지금은 이메일 로그인·가입이 꺼져 있어요. 관리자에게 알려 주세요.");
   if (/rate limit/i.test(message)) return new Error("인증 메일을 너무 많이 보냈어요. 잠시 후(최대 1시간) 다시 시도해 주세요.");
   if (/should be different/i.test(message)) return new Error("이전과 다른 비밀번호를 입력해 주세요.");
   if (/password should be at least/i.test(message)) return new Error("비밀번호는 8자 이상이어야 해요.");

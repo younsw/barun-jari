@@ -152,3 +152,8 @@
 .admin-budget .bar i.low { background: #d08a2c; }
 .admin-budget span { color: #5f6c66; font-size: 11px; }
 .admin-budget b { color: #176345; }
+.admin-alert-box.danger { border-color: #efc4bc; color: #8f2f22; background: #fdeeea; }
+.admin-alert-box .admin-link { margin-top: 4px; align-self: flex-start; }
+.admin-alert-box .admin-compact-list { width: 100%; }
+.admin-summary strong.minus, .admin-budget b.minus { color: #b6402f; }
+.admin-budget .bar i.low { background: #d08a2c; }

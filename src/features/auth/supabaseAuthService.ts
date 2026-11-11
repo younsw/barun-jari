@@ -75,6 +75,13 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
       if (error) throw toKoreanError(error.message);
     },
 
+    async updateNickname(nickname) {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) throw new Error("로그인이 필요해요.");
+      const { error } = await supabase.from("users").update({ nickname }).eq("id", data.user.id);
+      if (error) throw new Error("닉네임을 바꾸지 못했어요. 잠시 후 다시 시도해 주세요.");
+    },
+
     async deleteAccount() {
       const { data } = await supabase.auth.getUser();
       if (!data.user) throw new Error("로그인이 필요해요.");

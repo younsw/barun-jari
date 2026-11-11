@@ -24,6 +24,8 @@ export type AuthContextValue = {
   /** 새 비밀번호 저장. 재설정 중이었다면 재설정 상태를 끝낸다 */
   updatePassword: (password: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
+  /** 닉네임 변경 (한글·영문·숫자 2~12자) 후 내 정보를 다시 읽는다 */
+  updateNickname: (nickname: string) => Promise<void>;
   listMembers: () => Promise<Member[]>;
   /** 나 자신을 일반 회원으로 바꾸면 내 정보도 다시 읽는다 */
   setMemberAdmin: (userId: string, isAdmin: boolean) => Promise<void>;

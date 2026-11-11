@@ -57,3 +57,28 @@
 .view-as-user input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .2); transition: transform .15s; }
 .view-as-user input:checked { background: #176345; }
 .view-as-user input:checked::after { transform: translateX(18px); }
+
+/* UI-11 계정 정보 */
+.account-section-title { margin: 20px 2px 8px; color: #44524a; font-size: 13px; }
+.account-section-title:first-child { margin-top: 0; }
+.account-list { margin: 0; padding: 2px 14px; border: 1px solid #e1e8e4; border-radius: 15px; background: #fff; }
+.account-list > div { min-height: 46px; display: grid; grid-template-columns: 82px 1fr; align-items: center; gap: 8px; border-bottom: 1px solid #edf1ef; }
+.account-list > div:last-of-type { border: 0; }
+.account-list dt { color: #7c8982; font-size: 11px; }
+.account-list dd { margin: 0; display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 12px; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+.account-list dd small { color: #8a9690; font-size: 10px; font-weight: 500; }
+.account-link { padding: 0; border: 0; color: #176345; background: transparent; font: inherit; font-size: 11px; font-weight: 800; text-decoration: underline; cursor: pointer; }
+.account-inline-edit { width: 100%; display: flex; gap: 5px; }
+.account-inline-edit input { min-width: 0; flex: 1; height: 32px; padding: 0 9px; border: 1px solid #cfdcd5; border-radius: 9px; font: inherit; font-size: 12px; }
+.account-inline-edit button { flex: none; height: 32px; padding: 0 10px; border: 0; border-radius: 9px; color: #fff; background: #176345; font: inherit; font-size: 11px; font-weight: 800; }
+.account-inline-edit button.ghost { color: #5f6c66; background: #eef2f0; }
+.account-inline-edit button:disabled { opacity: .5; }
+.account-list .inline-error { margin: 0 0 8px; }
+.account-wide { width: 100%; height: 44px; border: 1px solid #cfe3d7; border-radius: 12px; color: #176345; background: #f2f9f5; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.account-password { padding: 13px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #e1e8e4; border-radius: 15px; background: #fff; }
+.account-password label { display: flex; flex-direction: column; gap: 5px; color: #5f6c66; font-size: 11px; font-weight: 700; }
+.account-password input { height: 40px; padding: 0 11px; border: 1px solid #dce5e0; border-radius: 11px; font: inherit; font-size: 13px; }
+.account-password .account-actions { margin-top: 2px; }
+.account-password .account-actions .primary { border-color: #176345; color: #fff; background: #176345; }
+.account-ok { margin: 0 0 8px; padding: 9px 11px; border-radius: 10px; color: #176345; background: #e8f4ed; font-size: 11px; }
+.account-note { margin: 12px 2px 0; color: #8a9690; font-size: 11px; line-height: 1.5; }

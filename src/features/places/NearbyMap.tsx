@@ -9,8 +9,10 @@ const MAX_MARKERS = 30;
 
 export type NearbyPlace = { id: number; name: string; coords: LatLng };
 
-export default function NearbyMap({ userLocation, places, onSelect, onUnavailable }: {
+export default function NearbyMap({ userLocation, focus, places, onSelect, onUnavailable }: {
   userLocation: LatLng | null;
+  /** 메인 화면에서 검색한 위치. 있으면 지도를 그곳으로 옮기고 표시한다 */
+  focus?: (LatLng & { label: string }) | null;
   /** 가까운 순으로 정렬된 장소. 앞에서부터 MAX_MARKERS곳만 마커로 그린다 */
   places: NearbyPlace[];
   onSelect?: (id: number) => void;
@@ -20,6 +22,7 @@ export default function NearbyMap({ userLocation, places, onSelect, onUnavailabl
   const mapRef = useRef<any>(null);
   const userOverlayRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const focusOverlayRef = useRef<any>(null);
   const [kakao, setKakao] = useState<any>(null);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
@@ -69,8 +72,26 @@ export default function NearbyMap({ userLocation, places, onSelect, onUnavailabl
     dot.className = "kakao-user-dot";
     dot.title = "현재 위치";
     userOverlayRef.current = new kakao.maps.CustomOverlay({ position, content: dot, map: mapRef.current, zIndex: 3 });
-    mapRef.current.setCenter(position);
+    if (!focus) mapRef.current.setCenter(position); // 검색한 위치를 보고 있으면 내 위치로 끌고 오지 않는다
   }, [kakao, userLocation?.latitude, userLocation?.longitude]);
+
+  // 검색한 위치로 이동하고 이름표를 띄운다. 검색을 지우면 내 위치로 돌아간다
+  useEffect(() => {
+    if (!kakao || !mapRef.current) return;
+    focusOverlayRef.current?.setMap(null);
+    focusOverlayRef.current = null;
+    if (!focus) {
+      if (userLocation) mapRef.current.setCenter(new kakao.maps.LatLng(userLocation.latitude, userLocation.longitude));
+      return;
+    }
+    const position = new kakao.maps.LatLng(focus.latitude, focus.longitude);
+    const label = document.createElement("span");
+    label.className = "kakao-search-label";
+    label.textContent = focus.label;
+    focusOverlayRef.current = new kakao.maps.CustomOverlay({ position, content: label, map: mapRef.current, yAnchor: 1.3, zIndex: 4 });
+    mapRef.current.setLevel(5);
+    mapRef.current.setCenter(position);
+  }, [kakao, focus?.latitude, focus?.longitude, focus?.label]);
 
   // 주변 흡연시설 마커, 누르면 상세 화면으로
   const placeKey = places.slice(0, MAX_MARKERS).map((place) => place.id).join(",");

@@ -31,7 +31,4 @@ export const actionLabels: Record<string, string> = {
 export const formatDateTime = (value: string) =>
   new Intl.DateTimeFormat("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Seoul" }).format(new Date(value));
 
-export const formatDay = (value: string) =>
-  new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "Asia/Seoul" }).format(new Date(value));
-
 export const errorText = (caught: unknown, fallback: string) => (caught instanceof Error ? caught.message : fallback);

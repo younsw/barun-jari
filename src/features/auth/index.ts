@@ -2,5 +2,4 @@
 export { AuthProvider } from "./AuthProvider";
 export { useAuth } from "./useAuth";
 export { RequireLogin } from "./RequireLogin";
-export { AuthScreen } from "./AuthScreen";
-export type { AppUser, Member } from "./types";
+export type { Member } from "./types";

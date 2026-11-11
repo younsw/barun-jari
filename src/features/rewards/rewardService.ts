@@ -2,7 +2,7 @@ import { supabase } from "../auth/supabaseClient";
 import { mockPoints, type PointLedgerRecord } from "./mockPoints";
 
 // 포인트 적립은 화면에서 하지 않는다. 현장 인증(+1)과 신고 반영(+2) (012)을 DB가 적립하고 하루 10P에서 멈춘다.
-export const DAILY_POINT_LIMIT = 10;
+const DAILY_POINT_LIMIT = 10;
 
 export type PointSummary = { balance: number; todayEarned: number; dailyLimit: number };
 

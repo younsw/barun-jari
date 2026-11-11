@@ -9,7 +9,7 @@ declare global {
 }
 
 export type LatLng = { latitude: number; longitude: number };
-export type RouteMode = "walk" | "car" | "traffic" | "bicycle";
+type RouteMode = "walk" | "car" | "traffic" | "bicycle";
 
 const JS_KEY = import.meta.env.VITE_KAKAO_MAP_JS_KEY as string | undefined;
 let sdkPromise: Promise<any> | null = null;

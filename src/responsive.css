@@ -103,12 +103,8 @@
   .info-card strong { font-size: 11px; }
 
   /* 기능 화면 공통 */
-  .feature-title { font-size: 34px; }
-  .feature-description { font-size: 15px; }
-  .feature-kicker,
   .form-label { font-size: 12px; }
   .inline-error { font-size: 11px; }
-  .form-input,
   .form-select,
   .form-textarea { font-size: 14px; }
   .primary-action,

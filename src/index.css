@@ -170,9 +170,6 @@ button { color: inherit; cursor: pointer; }
 /* 오류 신고: 현장 인증 버튼과 같은 크기, 아주 연한 초록 보조 버튼 */
 .report-button { width: 100%; height: 52px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #d3e7db; border-radius: 15px; color: #176345; background: #f2f9f5; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
 .report-button small { color: #5f8a75; font-size: 11px; font-weight: 600; }
-.detail-bottom { padding: 12px 20px 22px; position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; background: linear-gradient(0deg, white 78%, rgba(255,255,255,0)); }
-.detail-bottom > button { width: 100%; height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; border-radius: 15px; color: white; background: #176345; box-shadow: 0 9px 22px rgba(23, 99, 69, .22); font-size: 14px; font-weight: 800; }
-.detail-bottom small { color: rgba(255,255,255,.72); font-size: 8px; font-weight: 500; }
 
 .map-preview.live { height: 220px; }
 /* 지도 전체 화면: 확대 버튼을 누르면 화면 전체를 덮는다 */

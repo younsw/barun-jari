@@ -21,7 +21,7 @@ import { CameraCapture, type CapturedPhoto } from "./CameraCapture";
 import { getGpsFix, type GpsFix } from "../places/kakaoSdk";
 import "./reports.css";
 
-export type FacilitySummary = {
+type FacilitySummary = {
   id: number;
   name: string;
   address: string;

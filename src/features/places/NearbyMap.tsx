@@ -7,7 +7,7 @@ import { hasKakaoMapKey, loadKakaoMaps, type LatLng } from "./kakaoSdk";
 const FALLBACK_CENTER: LatLng = { latitude: 37.6066, longitude: 127.0927 }; // 중랑구청
 const MAX_MARKERS = 30;
 
-export type NearbyPlace = { id: number; name: string; coords: LatLng };
+type NearbyPlace = { id: number; name: string; coords: LatLng };
 
 export default function NearbyMap({ userLocation, focus, places, onSelect, onUnavailable }: {
   userLocation: LatLng | null;

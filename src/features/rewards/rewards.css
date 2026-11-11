@@ -19,15 +19,13 @@
 .point-history { padding: 2px 13px; border: 1px solid #e1e8e4; border-radius: 15px; background: #fff; }
 .point-history > div { min-height: 64px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #edf1ef; }
 .point-history > div:last-child { border: 0; }
-.point-plus, .point-minus { width: 34px; height: 34px; display: grid; place-items: center; flex: none; border-radius: 10px; color: #176345; background: #e4f3ea; }
-.point-minus { color: #8a5f42; background: #f7ece4; }
+.point-plus { width: 34px; height: 34px; display: grid; place-items: center; flex: none; border-radius: 10px; color: #176345; background: #e4f3ea; }
 .point-history > div > div { min-width: 0; flex: 1; }
 .point-history strong, .point-history small { display: block; }
 .point-history strong { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 .point-history small { margin-top: 5px; color: #8c9892; font-size: 8px; }
 .point-history b { font-size: 10px; }
 .point-history b.positive { color: #176345; }
-.point-history b.negative { color: #9a5949; }
 .point-empty { margin: 0; padding: 18px 0; color: #8c9892; font-size: 9px; text-align: center; }
 .point-guide { margin-top: 13px; padding: 14px; border-radius: 13px; background: #eef3f0; }
 .point-guide strong { font-size: 10px; }

@@ -11,7 +11,7 @@ import AdminSponsorsScreen from "./AdminSponsorsScreen";
 import "../profile/profile.css";
 import "./admin.css";
 
-export type AdminTab = "home" | "reports" | "rewards" | "members" | "more";
+type AdminTab = "home" | "reports" | "rewards" | "members" | "more";
 export type AdminPage =
   | { kind: "home" }
   | { kind: "reports" }

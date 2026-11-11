@@ -20,6 +20,9 @@ export type ReportRecord = {
   location_verified?: boolean;
   facility_name?: string;
   facility_address?: string;
+  /** 관리자가 처리하며 남긴 답변과 처리 시각 (014) */
+  admin_reply?: string | null;
+  handled_at?: string | null;
 };
 
 /** Supabase 키가 없을 때만 쓰는 예시 신고 (예시 장소 id 1~5 기준) */

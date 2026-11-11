@@ -15,7 +15,7 @@ import CheckinScreen from "./features/checkin/CheckinScreen";
 import { CHECKIN_POINTS, CHECKIN_RADIUS_M, findNearest } from "./features/checkin/checkinService";
 import "./features/checkin/checkin.css";
 import ProfileScreen from "./features/profile/ProfileScreen";
-import AdminMembersScreen from "./features/admin/AdminMembersScreen";
+import AdminApp from "./features/admin/AdminApp";
 import {
   BottomNavigation,
   type MainTab,
@@ -33,7 +33,7 @@ type AppScreen =
   | "reportDetail"
   | "rewards"
   | "profile"
-  | "adminMembers";
+  | "admin";
 
 /** 화면 표시용: 장소 + 현재 위치에서의 거리 */
 type PlaceView = Place & { meters: number | null };
@@ -374,11 +374,11 @@ function MainApp() {
   }
 
   if (activeScreen === "profile") {
-    return <main className="prototype-stage"><ProfileScreen onTab={selectTab} onOpenAdmin={() => navigate("adminMembers")} /></main>;
+    return <main className="prototype-stage"><ProfileScreen onTab={selectTab} onOpenAdmin={() => navigate("admin")} /></main>;
   }
 
-  if (activeScreen === "adminMembers") {
-    return <main className="prototype-stage"><AdminMembersScreen onBack={goBack} onTab={selectTab} /></main>;
+  if (activeScreen === "admin") {
+    return <main className="prototype-stage"><AdminApp onExit={goBack} onFacilitiesChanged={() => { getFacilities().then(setPlaces).catch(() => undefined); }} /></main>;
   }
 
   return <main className="prototype-stage">

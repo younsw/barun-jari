@@ -416,10 +416,17 @@ export function ReportDetailScreen({
                   <span>{report.photo_path ? "사진을 불러오는 중…" : "첨부한 현장 사진 없음"}</span>
                 </div>
                 )}
-                <div className="demo-notice">
-                  관리자 답변이나 처리 사유는 제공된 DB 필드에 없어 표시하지
-                  않습니다.
-                </div>
+                {report.admin_reply ? (
+                  <div className="admin-reply-box">
+                    <strong>관리자 답변</strong>
+                    <p>{report.admin_reply}</p>
+                    {report.handled_at && <small>{formatDate(report.handled_at)} 처리</small>}
+                  </div>
+                ) : (
+                  <div className="demo-notice">
+                    {report.status === "received" ? "관리자가 확인하면 처리 결과와 답변이 여기에 표시돼요." : "아직 관리자 답변이 없어요."}
+                  </div>
+                )}
                 <button className="secondary-action" onClick={onBack}>
                   목록으로 돌아가기
                 </button>
@@ -431,7 +438,7 @@ export function ReportDetailScreen({
       <ScreenAnnotation
         screen="UI-08 신고 상세"
         path="UI-07 신고 상세보기"
-        elements="시설 정보, 유형, 내용, 날짜, 상태, 첨부 영역"
+        elements="시설 정보, 유형, 내용, 날짜, 상태, 첨부 영역, 관리자 답변"
         data="reports 단건과 smoking_facilities 표시 정보"
         action="내용 확인, 목록으로 돌아가기"
         link="getReportDetail(), UI-07 내 신고 목록"

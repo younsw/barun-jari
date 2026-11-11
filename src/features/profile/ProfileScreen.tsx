@@ -81,8 +81,8 @@ export default function ProfileScreen({ onTab, onOpenAdmin }: { onTab: (tab: Mai
                 <button onClick={onOpenAdmin}>
                   <AppIcon name="shield" />
                   <span>
-                    <strong>관리자 · 회원 관리</strong>
-                    <small>회원 목록, 관리자 지정·해제</small>
+                    <strong>관리자 모드로 전환</strong>
+                    <small>대시보드, 신고·리워드·회원·시설·후원 예산 관리</small>
                   </span>
                   <b>›</b>
                 </button>

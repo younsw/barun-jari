@@ -12,7 +12,7 @@ export type Place = {
 };
 
 /** Supabase 키가 없을 때만 쓰는 예시 장소 */
-const mockPlaces: Place[] = [
+let mockPlaces: Place[] = [
   { id: 1, name: "예시 데이터 · 중앙광장 흡연구역", address: "예시 데이터 · 중앙광장 인근", category: "공공청사", latitude: 37.6066, longitude: 127.0927 },
   { id: 2, name: "예시 데이터 · 1번 출구 흡연부스", address: "예시 데이터 · 1번 출구 앞", category: "복합건축물", latitude: 37.5966, longitude: 127.0851 },
   { id: 3, name: "예시 데이터 · 공원 입구 흡연구역", address: "예시 데이터 · 시민공원 동문", category: "체육시설업", latitude: 37.6013, longitude: 127.0779 },
@@ -21,7 +21,7 @@ const mockPlaces: Place[] = [
 ];
 
 export async function getFacilities(): Promise<Place[]> {
-  if (!supabase) return mockPlaces;
+  if (!supabase) return [...mockPlaces];
   const { data, error } = await supabase
     .from("smoking_facilities")
     .select("id, name, address, category, latitude, longitude")
@@ -47,4 +47,9 @@ export function distanceMeters(a: LatLng, b: LatLng): number {
 export function formatDistance(meters: number | null): string {
   if (meters === null) return "거리 정보 없음";
   return meters < 1000 ? `${Math.round(meters / 10) * 10}m` : `${(meters / 1000).toFixed(1)}km`;
+}
+
+/** 예시 모드 전용: 관리자 시설 수정 화면이 예시 장소를 고친다 */
+export function updateMockPlace(place: Place) {
+  mockPlaces = mockPlaces.map((item) => (item.id === place.id ? place : item));
 }

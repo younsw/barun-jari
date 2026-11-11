@@ -384,7 +384,7 @@ function MainApp() {
   return <main className="prototype-stage">
     <div className={`prototype-pair ${activeScreen !== "list" ? "screen-hidden" : ""}`} id="ui-01">
     <section className="phone-frame" aria-label="UI-01 흡연구역 목록 모바일 화면">
-      <div className="phone-content with-bottom-navigation">
+      <div className="phone-content with-bottom-navigation list-page">
         <header className="service-header">
           <div className="brand"><span className="brand-mark"><Icon name="location" size={18} /></span>바른자리</div>
           <div className="hero-title">내 주변 흡연구역 찾기</div>

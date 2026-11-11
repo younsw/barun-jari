@@ -15,7 +15,7 @@ type ReportRow = Omit<ReportRecord, "id" | "facility_name" | "facility_address">
   smoking_facilities: { name: string; address: string } | null;
 };
 
-const SELECT = "id, user_id, facility_id, type, content, status, created_at, photo_path, reporter_latitude, reporter_longitude, location_accuracy_m, distance_m, location_verified, smoking_facilities(name, address)";
+const SELECT = "id, user_id, facility_id, type, content, status, created_at, photo_path, reporter_latitude, reporter_longitude, location_accuracy_m, distance_m, location_verified, admin_reply, handled_at, smoking_facilities(name, address)";
 
 function toRecord(row: ReportRow): ReportRecord {
   const { smoking_facilities: facility, ...rest } = row;
@@ -82,3 +82,13 @@ export async function getReportPhotoUrl(photoPath: string): Promise<string | nul
   const { data, error } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrl(photoPath, PHOTO_URL_SECONDS);
   return error ? null : data.signedUrl;
 }
+
+/** 예시 모드 전용: 관리자 화면이 같은 메모리 신고를 보고 처리하도록 연결한다 (실제 DB에서는 admin_* 함수가 처리) */
+export const mockReportStore = {
+  list: () => [...memoryReports].sort((a, b) => b.created_at.localeCompare(a.created_at)),
+  update(reportId: string, status: ReportRecord["status"], reply: string | null) {
+    memoryReports = memoryReports.map((report) => report.id === reportId
+      ? { ...report, status, admin_reply: reply, handled_at: new Date().toISOString() }
+      : report);
+  },
+};

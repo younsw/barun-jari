@@ -5,7 +5,6 @@ import { getMyPoints } from "../rewards/rewardService";
 import {
   AppIcon,
   BottomNavigation,
-  ScreenAnnotation,
   ScreenHeader,
   type MainTab,
 } from "./AppShell";
@@ -144,14 +143,6 @@ export default function ProfileScreen({ onTab, onOpenAdmin, onOpenAccount }: { o
           <BottomNavigation active="profile" onSelect={onTab} />
         </div>
       </section>
-      <ScreenAnnotation
-        screen="UI-10 마이페이지"
-        path="하단 마이페이지"
-        elements="닉네임, 회원 구분, 포인트, 신고·리워드·계정 메뉴, (관리자) 회원 관리·사용자 화면으로 보기, 로그아웃·회원 탈퇴"
-        data="users.nickname, is_admin, created_at 및 get_my_point_summary()"
-        action="내 신고 내역·리워드 이동, (관리자) 회원 관리·사용자 화면 전환, 로그아웃, 회원 탈퇴"
-        link="useAuth(), getMyPoints(), delete_my_account(), UI-07·09"
-      />
     </div>
   );
 }

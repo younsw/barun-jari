@@ -1,0 +1,149 @@
+/*
+ * 기기에 따라 화면 구성을 자동으로 바꾼다.
+ *  - 폭 820px 이하(휴대폰): 화면 전체를 앱처럼 채운다 (바른자리_APP 디자인)
+ *  - 폭 821px 이상(PC·태블릿 가로): 넓은 웹 화면 (바른자리_WEB 디자인)
+ * 이 파일은 index.css와 기능별 css 뒤에 불러와서 같은 선택자를 덮어쓴다.
+ */
+
+/* 한 번에 한 화면만 보여준다 (목록 ↔ 상세) */
+.screen-hidden { display: none !important; }
+
+/* iPhone 홈 인디케이터·사파리 하단 바에 메뉴가 가리지 않도록 아래 안전 영역만큼 띄운다 */
+.bottom-navigation {
+  height: calc(74px + env(safe-area-inset-bottom));
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+.admin-navigation {
+  height: calc(72px + env(safe-area-inset-bottom));
+  padding-bottom: calc(11px + env(safe-area-inset-bottom));
+}
+.phone-content.with-bottom-navigation { padding-bottom: calc(94px + env(safe-area-inset-bottom)); }
+.feature-body { padding-bottom: calc(102px + env(safe-area-inset-bottom)); }
+.admin-body { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+.detail-body { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+
+/* ───────── 모바일 ───────── */
+@media (max-width: 820px) {
+  .prototype-stage { min-height: 100vh; min-height: 100dvh; padding: 0; display: block; background: #fff; }
+  .prototype-pair,
+  .feature-pair { display: block; }
+  /*
+   * 사파리에서 100vh는 주소창·탭 바가 숨겨졌을 때 기준이라 화면보다 길어져 하단 메뉴가 바 뒤로 숨는다.
+   * 100dvh(지금 실제로 보이는 높이)를 쓰고, 작은 폰에서 넘치게 만들던 min-height도 없앤다.
+   */
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .phone-content { padding-top: max(24px, env(safe-area-inset-top)); }
+  .feature-header,
+  .detail-header,
+  .admin-header { padding-top: env(safe-area-inset-top); height: auto; min-height: calc(62px + env(safe-area-inset-top)); }
+}
+
+/* ───────── PC·웹 ───────── */
+@media (min-width: 821px) {
+  .prototype-stage { padding: 24px; align-items: stretch; }
+  .prototype-pair,
+  .feature-pair { max-width: 1120px; margin: 0 auto; }
+
+  .phone-frame {
+    width: min(1080px, 100%);
+    height: calc(100vh - 48px);
+    height: calc(100dvh - 48px);
+    min-height: 640px;
+    border-radius: 24px;
+  }
+
+  /* 내용은 가운데 820px 폭으로 */
+  .phone-content,
+  .detail-body,
+  .feature-body {
+    width: 100%;
+    max-width: 820px;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+  .phone-content { padding-top: 36px; }
+  .feature-body { padding-top: 38px; }
+
+  /* 목록 화면 */
+  .service-header { margin-top: 6px; }
+  .hero-title { font-size: 34px; }
+  .service-header p { font-size: 15px; }
+  .location-card strong,
+  .route-button { font-size: 14px; }
+  .location-card small,
+  .filters button,
+  .place-copy > strong { font-size: 13px; }
+  .search-field input { font-size: 14px; }
+  .map-preview,
+  .map-preview.live { height: 320px; }
+  .place-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .place-list > .empty-state { grid-column: 1 / -1; }
+  .place-copy > span,
+  .place-copy > small { font-size: 11px; }
+  .list-heading strong { font-size: 19px; }
+
+  /* 상세 화면 */
+  .detail-header,
+  .feature-header { padding-right: max(18px, calc((100% - 820px) / 2 + 18px)); padding-left: max(18px, calc((100% - 820px) / 2 + 18px)); }
+  .detail-title { max-width: 680px; font-size: 34px; }
+  .detail-map { height: 340px; }
+  .detail-meta strong { font-size: 13px; }
+  .detail-meta small,
+  .info-card span,
+  .info-card strong { font-size: 11px; }
+
+  /* 기능 화면 공통 */
+  .feature-title { font-size: 34px; }
+  .feature-description { font-size: 15px; }
+  .feature-kicker,
+  .form-label { font-size: 12px; }
+  .inline-error { font-size: 11px; }
+  .form-input,
+  .form-select,
+  .form-textarea { font-size: 14px; }
+  .primary-action,
+  .secondary-action { min-height: 54px; font-size: 14px; }
+
+  /* 하단 메뉴: 가운데 떠 있는 탭 막대 */
+  .bottom-navigation {
+    left: 50%;
+    right: auto;
+    width: min(760px, 100%);
+    transform: translateX(-50%);
+    border: 1px solid #e4ebe7;
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+  }
+  .bottom-navigation button { font-size: 11px; }
+
+  /* 로그인·가입: 너무 넓으면 읽기 어려워 폭을 줄인다 */
+  .auth-screen { max-width: 520px; }
+
+  /* 관리자 */
+  .admin-body { width: 100%; max-width: 900px; margin: 0 auto; padding: 30px 34px calc(112px + env(safe-area-inset-bottom)); }
+  .admin-header { padding-right: 34px; padding-left: 34px; }
+  .admin-header span strong { font-size: 17px; }
+  .admin-intro h1 { font-size: 30px; }
+  .admin-metrics { grid-template-columns: repeat(3, 1fr); }
+  .admin-metrics strong { font-size: 24px; }
+  .admin-navigation {
+    left: 50%;
+    right: auto;
+    width: min(820px, 100%);
+    transform: translateX(-50%);
+    border: 1px solid #dfe8e3;
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+  }
+  .admin-navigation button { font-size: 11px; }
+}

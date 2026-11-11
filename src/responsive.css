@@ -147,3 +147,38 @@
   }
   .admin-navigation button { font-size: 11px; }
 }
+
+/*
+ * 넓은 PC(1024px 이상): 흡연구역 목록 화면을 왼쪽 목록 + 오른쪽 지도로 나눠
+ * 스크롤하지 않아도 리스트와 지도가 함께 보이게 한다.
+ */
+@media (min-width: 1024px) {
+  .prototype-pair,
+  .feature-pair { max-width: 1320px; }
+  .phone-frame { width: min(1280px, 100%); }
+
+  .phone-content.list-page {
+    max-width: none;
+    padding: 28px 28px calc(100px + env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: minmax(360px, 440px) minmax(0, 1fr);
+    column-gap: 24px;
+    align-content: start;
+  }
+  .list-page > * { grid-column: 1; min-width: 0; }
+  .list-page > .map-preview:not(.fullscreen) {
+    grid-column: 2;
+    grid-row: 1 / span 40;
+    align-self: start;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 48px - 128px);
+    height: calc(100dvh - 48px - 128px);
+    min-height: 480px;
+  }
+  .list-page .hero-title { font-size: 28px; }
+  .list-page .service-header p { font-size: 14px; }
+  .list-page .filters { flex-wrap: wrap; }
+  .list-page .list-heading { margin-top: 6px; }
+  .list-page .place-list { display: flex; flex-direction: column; gap: 8px; }
+}

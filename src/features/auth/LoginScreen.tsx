@@ -1,7 +1,12 @@
+/**
+ * 이메일·비밀번호 로그인 폼과 비밀번호 찾기 메일 보내기.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-04
+ */
 import { useState, type FormEvent } from "react";
 import { isMockAuth } from "./authService";
 import { useAuth } from "./useAuth";
 
+/** 로그인 폼 (실패 시 한국어 안내) (만든 날: 2026-10-28) */
 export function LoginScreen() {
   const { signIn, requestPasswordReset, linkError } = useAuth();
   const [mode, setMode] = useState<"login" | "forgot">(linkError ? "forgot" : "login");

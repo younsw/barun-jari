@@ -1,3 +1,7 @@
+/**
+ * 로그인 기능에서 쓰는 타입: 사용자, 회원, 가입·로그인 입력, 로그인 서비스 인터페이스.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 /** 화면에서 쓰는 로그인 사용자. users 테이블(id, nickname, is_admin, created_at) 기준. */
 export type AppUser = {
   id: string;
@@ -18,6 +22,7 @@ export type Member = {
   points: number;
 };
 
+/** 회원가입 입력값 (만든 날: 2026-10-28) */
 export type SignUpInput = {
   email: string;
   password: string;
@@ -26,8 +31,10 @@ export type SignUpInput = {
   agreedPrivacy: boolean;
 };
 
+/** 로그인 입력값 (만든 날: 2026-10-28) */
 export type SignInInput = { email: string; password: string };
 
+/** 로그인 서비스가 갖춰야 할 기능 (Supabase·가짜 로그인 공통) (만든 날: 2026-10-28) */
 export interface AuthService {
   getCurrentUser(): Promise<AppUser | null>;
   signUp(input: SignUpInput): Promise<AppUser | null>;

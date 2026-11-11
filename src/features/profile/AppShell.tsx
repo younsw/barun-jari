@@ -1,8 +1,13 @@
+/**
+ * 여러 화면이 같이 쓰는 틀: 아이콘, 상단 헤더(뒤로가기), 하단 메뉴(지도·인증하기·리워드·마이페이지).
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import type { ReactNode } from "react";
 
 // "reports"(내 신고 내역)는 하단 메뉴에서 빠지고 마이페이지에서 들어간다
 export type MainTab = "map" | "checkin" | "reports" | "rewards" | "profile";
 
+/** AppIcon에서 쓸 수 있는 아이콘 이름 (만든 날: 2026-10-28) */
 type IconName =
   | "back"
   | "check"
@@ -13,6 +18,7 @@ type IconName =
   | "shield"
   | "upload";
 
+/** 공통 SVG 아이콘 (만든 날: 2026-10-28) */
 export function AppIcon({
   name,
   size = 20,
@@ -77,6 +83,7 @@ export function AppIcon({
   );
 }
 
+/** 화면 위 제목 줄 (뒤로가기 버튼 선택) (만든 날: 2026-10-28) */
 export function ScreenHeader({
   title,
   onBack,
@@ -99,6 +106,7 @@ export function ScreenHeader({
   );
 }
 
+/** 하단 메뉴. 누르면 onSelect로 탭 이름을 넘긴다 (만든 날: 2026-10-28) */
 export function BottomNavigation({
   active,
   onSelect,

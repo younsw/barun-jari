@@ -1,9 +1,16 @@
+/**
+ * Supabase Auth를 쓰는 실제 로그인 서비스. users 테이블의 닉네임·관리자 여부를 함께 읽는다.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { AppUser, AuthService, Member } from "./types";
 
+/** users 테이블 한 행 (만든 날: 2026-10-28) */
 type UsersRow = { id: string; nickname: string; is_admin: boolean; created_at: string };
+/** admin_list_members() 결과 한 행 (만든 날: 2026-11-11) */
 type MemberRow = { user_id: string; email: string; nickname: string; is_admin: boolean; joined_at: string; points: number };
 
+/** Supabase 사용자 + users 행 → 화면용 사용자 (만든 날: 2026-10-28) */
 function toAppUser(user: User, row: UsersRow | null): AppUser {
   const meta = user.user_metadata ?? {};
   return {
@@ -16,6 +23,7 @@ function toAppUser(user: User, row: UsersRow | null): AppUser {
   };
 }
 
+/** Supabase 오류 메시지를 한국어 안내로 바꾼다 (만든 날: 2026-10-28) */
 function toKoreanError(message: string): Error {
   if (/invalid login credentials/i.test(message)) return new Error("이메일 또는 비밀번호가 맞지 않아요.");
   if (/already registered/i.test(message)) return new Error("이미 가입된 이메일이에요.");
@@ -30,6 +38,7 @@ function toKoreanError(message: string): Error {
   return new Error(message);
 }
 
+/** Supabase 로그인 서비스 만들기 (만든 날: 2026-10-28) */
 export function createSupabaseAuthService(supabase: SupabaseClient): AuthService {
   async function loadUser(user: User): Promise<AppUser> {
     const { data } = await supabase.from("users").select("id, nickname, is_admin, created_at").eq("id", user.id).maybeSingle<UsersRow>();

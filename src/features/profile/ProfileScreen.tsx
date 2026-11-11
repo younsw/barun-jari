@@ -1,3 +1,7 @@
+/**
+ * UI-10 마이페이지: 프로필·포인트 요약, 계정 정보·내 신고·리워드 메뉴, 관리자 모드 전환, 로그아웃·회원 탈퇴.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth";
 import { isMockData } from "../auth/supabaseClient";

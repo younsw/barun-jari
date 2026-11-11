@@ -1,14 +1,22 @@
+/**
+ * UI-01 목록 화면의 카카오 지도. 내 위치와 주변 흡연시설 핀을 보여주고, 위치 검색 시 그 지역으로 이동한다.
+ * 만든 날: 2026-11-04 · 마지막 수정: 2026-11-11
+ */
 import { useEffect, useRef, useState } from "react";
 import { hasKakaoMapKey, loadKakaoMaps, type LatLng } from "./kakaoSdk";
 
 // 첫 화면(UI-01)용 지도: 내 현재 위치를 가운데에 두고 주변 흡연시설을 마커로 보여준다.
 // 위치를 모르면 중랑구청을 가운데로 둔다. 키가 없거나 SDK를 못 불러오면 onUnavailable을 호출한다(목업이 보이게).
 
+/** 위치를 모를 때 지도 가운데 (중랑구청) (만든 날: 2026-11-04) */
 const FALLBACK_CENTER: LatLng = { latitude: 37.6066, longitude: 127.0927 }; // 중랑구청
+/** 지도에 한 번에 찍는 핀 최대 개수 (만든 날: 2026-11-04) */
 const MAX_MARKERS = 30;
 
+/** 지도에 찍을 장소 (id·이름·좌표) (만든 날: 2026-11-04) */
 type NearbyPlace = { id: number; name: string; coords: LatLng };
 
+/** 주변 흡연시설 지도. 핀을 누르면 그 장소 상세로 이동한다 (만든 날: 2026-11-04) */
 export default function NearbyMap({ userLocation, focus, places, onSelect, onUnavailable }: {
   userLocation: LatLng | null;
   /** 메인 화면에서 검색한 위치. 있으면 지도를 그곳으로 옮기고 표시한다 */

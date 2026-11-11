@@ -1,3 +1,7 @@
+/**
+ * 흡연시설 데이터. Supabase smoking_facilities에서 불러오고, 키가 없으면 예시 데이터를 쓴다. 거리 계산 도구 포함.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { supabase } from "../auth/supabaseClient";
 import type { LatLng } from "./kakaoSdk";
 
@@ -20,6 +24,7 @@ let mockPlaces: Place[] = [
   { id: 5, name: "예시 데이터 · 업무지구 흡연구역", address: "예시 데이터 · 업무지구 보행로", category: "의료기관", latitude: 37.6131, longitude: 127.0983 },
 ];
 
+/** 흡연시설 목록 불러오기 (Supabase 또는 예시 데이터) (만든 날: 2026-10-28) */
 export async function getFacilities(): Promise<Place[]> {
   if (!supabase) return [...mockPlaces];
   const { data, error } = await supabase
@@ -31,6 +36,7 @@ export async function getFacilities(): Promise<Place[]> {
   return data;
 }
 
+/** 장소의 좌표. 좌표가 아직 없으면 null (만든 날: 2026-10-28) */
 export function placeCoords(place: Place): LatLng | null {
   return place.latitude === null || place.longitude === null ? null : { latitude: place.latitude, longitude: place.longitude };
 }
@@ -44,6 +50,7 @@ export function distanceMeters(a: LatLng, b: LatLng): number {
   return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
 }
 
+/** 거리를 '120m' / '1.2km' 형태로 표시 (만든 날: 2026-10-28) */
 export function formatDistance(meters: number | null): string {
   if (meters === null) return "거리 정보 없음";
   return meters < 1000 ? `${Math.round(meters / 10) * 10}m` : `${(meters / 1000).toFixed(1)}km`;

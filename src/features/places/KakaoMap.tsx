@@ -1,3 +1,7 @@
+/**
+ * UI-02 상세 화면의 카카오 지도. 장소 한 곳을 가운데에 핀으로 보여준다.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-10-28
+ */
 import { useEffect, useRef, useState } from "react";
 import { hasKakaoMapKey, loadKakaoMaps, type LatLng } from "./kakaoSdk";
 

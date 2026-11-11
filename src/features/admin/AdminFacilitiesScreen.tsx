@@ -1,9 +1,15 @@
+/**
+ * ADMIN-05 흡연시설 관리: 시설 검색·목록, 시설 상세에서 이름·주소·업종·좌표 수정과 관련 신고·수정 기록.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AdminNavigate } from "./AdminApp";
 import { listActions, listFacilities, listReports, updateFacility, type AdminAction, type AdminFacility, type AdminReport, type FacilityInput } from "./adminService";
 import { errorText, formatDateTime, reportStatusLabels, reportTypeLabels } from "./adminLabels";
 
+/** 목록에 한 번에 보여줄 시설 수 (만든 날: 2026-11-11) */
 const PAGE_SIZE = 30;
+/** 아직 처리 안 된 신고인지 (접수·확인 중) (만든 날: 2026-11-11) */
 const isOpen = (r: AdminReport) => r.status === "received" || r.status === "reviewing";
 
 /** ADMIN-06 흡연시설 정보 관리: 목록 */
@@ -64,6 +70,7 @@ export default function AdminFacilitiesScreen({ navigate }: { navigate: AdminNav
   );
 }
 
+/** 시설 → 수정 폼 입력값 (만든 날: 2026-11-11) */
 const toForm = (f: AdminFacility) => ({
   name: f.name, address: f.address, category: f.category, roomCount: String(f.roomCount),
   latitude: f.latitude === null ? "" : String(f.latitude), longitude: f.longitude === null ? "" : String(f.longitude),

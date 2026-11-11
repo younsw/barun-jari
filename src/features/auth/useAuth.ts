@@ -1,3 +1,7 @@
+/**
+ * 로그인 상태를 꺼내 쓰는 훅 useAuth().
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { useContext } from "react";
 import { AuthContext, type AuthContextValue } from "./AuthContext";
 

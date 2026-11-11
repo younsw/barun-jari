@@ -1,4 +1,5 @@
 """SQLite DB(db/barun-jari.db)의 흡연시설을 Supabase용 seed SQL로 내보냅니다.
+만든 날: 2026-10-28
 
 사용법:
     python3 db/export_seed.py

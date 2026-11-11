@@ -1,3 +1,7 @@
+/**
+ * 오류 신고 화면 3개: UI-06 신고 작성(위치+사진 필수), UI-07 내 신고 목록, UI-08 신고 상세(관리자 답변 포함).
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { useEffect, useState } from "react";
 import { isMockData } from "../auth/supabaseClient";
 import {
@@ -21,12 +25,14 @@ import { CameraCapture, type CapturedPhoto } from "./CameraCapture";
 import { getGpsFix, type GpsFix } from "../places/kakaoSdk";
 import "./reports.css";
 
-export type FacilitySummary = {
+/** 신고 화면에서 쓰는 흡연시설 요약 (만든 날: 2026-10-28) */
+type FacilitySummary = {
   id: number;
   name: string;
   address: string;
 };
 
+/** 신고 종류 한국어 이름 (만든 날: 2026-10-28) */
 const typeLabels: Record<ReportType, string> = {
   closed: "장소 없어짐",
   wrong_location: "위치 틀림",
@@ -34,6 +40,7 @@ const typeLabels: Record<ReportType, string> = {
   etc: "기타",
 };
 
+/** 신고 처리 상태 한국어 이름 (만든 날: 2026-10-28) */
 const statusLabels: Record<ReportStatus, string> = {
   received: "접수",
   reviewing: "확인 중",
@@ -41,6 +48,7 @@ const statusLabels: Record<ReportStatus, string> = {
   rejected: "반려",
 };
 
+/** 날짜·시간 표시 (만든 날: 2026-10-28) */
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("ko-KR", {
     year: "numeric",
@@ -48,6 +56,7 @@ const formatDate = (value: string) =>
     day: "2-digit",
   }).format(new Date(value));
 
+/** UI-06 오류 신고 작성: 시설·종류·내용 + 현재 위치와 현장 사진 (만든 날: 2026-10-28) */
 export function ReportCreateScreen({
   facilities,
   initialFacilityId,
@@ -228,6 +237,7 @@ export function ReportCreateScreen({
   );
 }
 
+/** UI-07 내 신고 목록 (내가 쓴 신고만) (만든 날: 2026-10-28) */
 export function ReportListScreen({
   facilities,
   onOpenDetail,
@@ -320,6 +330,7 @@ export function ReportListScreen({
   );
 }
 
+/** UI-08 신고 상세: 내용·사진·처리 상태·관리자 답변 (만든 날: 2026-10-28) */
 export function ReportDetailScreen({
   reportId,
   facilities,

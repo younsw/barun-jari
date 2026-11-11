@@ -1,3 +1,7 @@
+/**
+ * ADMIN-01 관리자 홈: 회원 수, 오늘 신고·포인트·인증, 미처리 신고, 의심 인증, 후원 부족 알림, 최근 신고.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth";
 import type { AdminNavigate } from "./AdminApp";

@@ -1,4 +1,5 @@
 """흡연시설 CSV를 SQLite DB(db/barun-jari.db)에 적재합니다.
+만든 날: 2026-10-28
 
 사용법:
     python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv

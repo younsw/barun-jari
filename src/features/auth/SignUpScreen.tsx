@@ -1,6 +1,11 @@
+/**
+ * 회원가입 폼: 이메일·비밀번호·닉네임·필수 동의(서비스 안내, 개인정보).
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { useState, type FormEvent } from "react";
 import { useAuth } from "./useAuth";
 
+/** 회원가입 폼. 가입되면 onDone으로 안내 문구를 넘긴다 (만든 날: 2026-10-28) */
 export function SignUpScreen({ onDone }: { onDone: (message: string) => void }) {
   const { signUp } = useAuth();
   const [email, setEmail] = useState("");

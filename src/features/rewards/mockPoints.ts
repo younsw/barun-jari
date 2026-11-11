@@ -1,3 +1,7 @@
+/**
+ * 포인트 내역 타입, 적립 사유 이름, 모의 모드용 예시 포인트.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 /** point_ledger 테이블 한 행 */
 export type PointLedgerRecord = {
   id: string;

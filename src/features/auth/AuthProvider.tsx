@@ -1,3 +1,7 @@
+/**
+ * 로그인 상태 관리. 가입·로그인·로그아웃·비밀번호 찾기/변경·닉네임 변경·탈퇴, 관리자의 '사용자 화면으로 보기'.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { AuthContext, type AuthContextValue } from "./AuthContext";
 import { authService } from "./authService";
@@ -5,14 +9,19 @@ import type { AppUser, SignUpInput } from "./types";
 
 // 메일 링크로 들어온 주소(#type=recovery, #error_code=...)는 Supabase가 곧 지우므로 처음에 읽어 둔다
 const initialHash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+/** 비밀번호 재설정 메일 링크로 들어왔는지 (만든 날: 2026-11-04) */
 const openedFromRecoveryLink = initialHash.get("type") === "recovery";
+/** 메일 링크가 만료됐을 때 보여줄 안내 (만든 날: 2026-11-04) */
 const initialLinkError = initialHash.get("error_code") === "otp_expired"
   ? "메일 링크가 만료됐거나 이미 사용됐어요. 다시 요청해 주세요."
   : initialHash.get("error") ? "메일 링크를 확인하지 못했어요. 다시 요청해 주세요." : "";
 
+/** 닉네임 규칙: 한글·영문·숫자·_ 2~12자 (만든 날: 2026-10-28) */
 const NICKNAME_PATTERN = /^[가-힣a-zA-Z0-9_]{2,12}$/;
+/** 이메일 형식 검사 (만든 날: 2026-10-28) */
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** 가입 입력값 검사 (이메일·비밀번호 8자·닉네임·필수 동의) (만든 날: 2026-10-28) */
 function validateSignUp(input: SignUpInput) {
   if (!EMAIL_PATTERN.test(input.email.trim())) throw new Error("이메일 형식을 확인해 주세요.");
   if (input.password.length < 8) throw new Error("비밀번호는 8자 이상이어야 해요.");
@@ -22,6 +31,7 @@ function validateSignUp(input: SignUpInput) {
 
 // "사용자 화면으로 보기"는 이 브라우저에만 기억한다 (권한은 바뀌지 않고 화면만 숨김)
 const viewAsUserKey = (userId: string) => `barunjari.viewAsUser.${userId}`;
+/** 관리자가 '사용자 화면으로 보기'를 켜 두었는지 브라우저에서 읽는다 (만든 날: 2026-11-11) */
 function readViewAsUser(userId: string | undefined) {
   if (!userId) return false;
   try {
@@ -31,6 +41,7 @@ function readViewAsUser(userId: string | undefined) {
   }
 }
 
+/** 로그인 상태를 만들어 앱 전체에 제공하는 컴포넌트 (만든 날: 2026-10-28) */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);

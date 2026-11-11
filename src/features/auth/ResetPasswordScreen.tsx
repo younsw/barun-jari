@@ -1,3 +1,7 @@
+/**
+ * 메일 링크로 들어와 새 비밀번호를 정하는 화면.
+ * 만든 날: 2026-11-04 · 마지막 수정: 2026-11-04
+ */
 import { useState, type FormEvent } from "react";
 import { AuthFrame } from "./AuthScreen";
 import { useAuth } from "./useAuth";

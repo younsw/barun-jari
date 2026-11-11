@@ -1,6 +1,11 @@
+/**
+ * 로그인 상태를 앱 전체에 나눠 주는 React Context와 그 값의 모양.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { createContext } from "react";
 import type { AppUser, Member, SignInInput, SignUpInput } from "./types";
 
+/** useAuth()로 꺼내 쓰는 값: 로그인 사용자, 관리자 여부, 로그인·가입·탈퇴 등 동작 (만든 날: 2026-10-28) */
 export type AuthContextValue = {
   user: AppUser | null;
   loading: boolean;
@@ -31,4 +36,5 @@ export type AuthContextValue = {
   setMemberAdmin: (userId: string, isAdmin: boolean) => Promise<void>;
 };
 
+/** 로그인 상태 Context (AuthProvider가 값을 채운다) (만든 날: 2026-10-28) */
 export const AuthContext = createContext<AuthContextValue | null>(null);

@@ -1,3 +1,7 @@
+/*
+ * 현장 인증 화면 스타일.
+ * 만든 날: 2026-11-04 · 마지막 수정: 2026-11-04
+ */
 .checkin-done { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 4px 8px; text-align: center; }
 .checkin-done > strong { font-size: 18px; }
 .checkin-done > p { margin: 0; color: #66736b; font-size: 13px; }

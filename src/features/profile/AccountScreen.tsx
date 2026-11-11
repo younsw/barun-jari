@@ -1,3 +1,7 @@
+/**
+ * UI-11 계정 정보 (마이페이지 > 계정 정보): 닉네임 변경, 이메일·가입일·회원 구분, 포인트·활동 요약, 비밀번호 변경.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth";
 import { getMyReports } from "../reports/reportService";
@@ -5,9 +9,11 @@ import { getMyPoints, getPointHistory, type PointSummary } from "../rewards/rewa
 import { BottomNavigation, ScreenHeader, type MainTab } from "./AppShell";
 import "./profile.css";
 
+/** 날짜를 '2026년 11월 11일' 형태로 (만든 날: 2026-11-11) */
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Seoul" }).format(new Date(value));
 
+/** 활동 요약: 신고 수, 반영된 신고 수, 현장 인증 횟수 (만든 날: 2026-11-11) */
 type Activity = { reports: number; acceptedReports: number; checkins: number };
 
 /** UI-11 계정 정보: 마이페이지 > 계정 정보 */

@@ -1,3 +1,7 @@
+/**
+ * Supabase 키가 없을 때 쓰는 가짜 로그인. 회원·세션을 브라우저 localStorage에 저장한다 (개발·테스트용).
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import type { AppUser, AuthService, Member } from "./types";
 
 /**
@@ -7,10 +11,13 @@ import type { AppUser, AuthService, Member } from "./types";
  * 관리자 기능을 시험할 수 있도록 이 브라우저에서 처음 가입한 계정을 관리자로 만든다.
  */
 const USERS_KEY = "barunjari.mockAuth.users";
+/** 가짜 로그인 세션 저장 키 (만든 날: 2026-10-28) */
 const SESSION_KEY = "barunjari.mockAuth.session";
 
+/** localStorage에 저장하는 회원 (비밀번호는 해시만) (만든 날: 2026-10-28) */
 type StoredUser = AppUser & { passwordHash: string };
 
+/** localStorage에서 JSON 읽기 (없거나 깨졌으면 기본값) (만든 날: 2026-10-28) */
 function read<T>(key: string, fallback: T): T {
   try {
     const raw = window.localStorage.getItem(key);
@@ -20,6 +27,7 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 
+/** localStorage에 JSON 쓰기 (만든 날: 2026-10-28) */
 function write(key: string, value: unknown) {
   try {
     if (value === null) window.localStorage.removeItem(key);
@@ -29,11 +37,13 @@ function write(key: string, value: unknown) {
   }
 }
 
+/** 비밀번호 SHA-256 해시 (만든 날: 2026-10-28) */
 async function hash(text: string): Promise<string> {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(bytes), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** 저장 회원에서 비밀번호 해시를 뺀 화면용 사용자 (만든 날: 2026-10-28) */
 function strip({ passwordHash: _passwordHash, ...user }: StoredUser): AppUser {
   return user;
 }
@@ -43,6 +53,7 @@ function normalize(user: StoredUser & { isAdmin?: boolean }): StoredUser {
   return { id: user.id, email: user.email, nickname: user.nickname, isAdmin: user.isAdmin === true, createdAt: user.createdAt, passwordHash: user.passwordHash };
 }
 
+/** 가짜 로그인 서비스 만들기. 첫 가입자는 관리자가 된다 (만든 날: 2026-10-28) */
 export function createMockAuthService(): AuthService {
   const listeners = new Set<(event?: string) => void>();
   let memoryUsers = read<StoredUser[]>(USERS_KEY, []).map(normalize);

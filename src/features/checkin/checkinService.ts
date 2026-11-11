@@ -1,3 +1,7 @@
+/**
+ * 현장 인증 처리: 가장 가까운 시설 찾기, 사진 업로드, 서버 함수로 인증·포인트 적립.
+ * 만든 날: 2026-11-04 · 마지막 수정: 2026-11-11
+ */
 import { supabase } from "../auth/supabaseClient";
 import type { GpsFix, LatLng } from "../places/kakaoSdk";
 import { distanceMeters } from "../places/placeService";
@@ -7,14 +11,20 @@ import { mockPoints } from "../rewards/mockPoints";
 // 규칙은 서버 함수 complete_onsite_checkin(009, 반경은 011)이 다시 확인한다:
 // 로그인 회원, GPS 정확도 30m 이내, 시설에서 30m 이내, 같은 장소 하루 1번, 1회 1P (012, 하루 최대 10P).
 
+/** 인증 가능 거리(m): 시설에서 30m 안 (만든 날: 2026-11-04) */
 export const CHECKIN_RADIUS_M = 30;
+/** 허용하는 GPS 오차(m) (만든 날: 2026-11-04) */
 export const CHECKIN_MAX_ACCURACY_M = 30;
+/** 인증 1회 포인트 (만든 날: 2026-11-04) */
 export const CHECKIN_POINTS = 1;
 
+/** 인증 사진을 저장하는 Storage 버킷 (만든 날: 2026-11-04) */
 const PHOTO_BUCKET = "report-photos";
 
+/** 인증 결과: 거리, 받은 포인트, 오늘 받은 포인트 (만든 날: 2026-11-04) */
 export type CheckinResult = { distance: number; pointsAwarded: number; todayPoints: number };
 
+/** 좌표가 있을 수 있는 장소 (만든 날: 2026-11-04) */
 type Locatable = { id: number; latitude: number | null; longitude: number | null };
 
 /** 현재 위치에서 가장 가까운 장소(좌표 있는 곳만)와 거리. 인증 버튼이 장소를 자동으로 고를 때 쓴다 */
@@ -28,9 +38,12 @@ export function findNearest<T extends Locatable>(places: T[], here: LatLng): { p
   return best;
 }
 
+/** 모의 모드: 오늘 인증한 장소 기록 (만든 날: 2026-11-04) */
 const mockCheckins = new Set<string>();
+/** 한국 시간 기준 오늘 날짜 (만든 날: 2026-11-04) */
 const seoulToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
 
+/** 현장 인증 완료: 사진 업로드 후 서버에서 거리·하루 1번 규칙을 확인하고 포인트 적립 (만든 날: 2026-11-04) */
 export async function completeOnsiteCheckin(input: {
   facility: Locatable;
   photo: Blob;

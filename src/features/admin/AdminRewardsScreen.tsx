@@ -1,8 +1,14 @@
+/**
+ * ADMIN-04 리워드 모니터링: 의심 현장 인증 검토(정상/의심), 회원별 적립, 최근 7일 적립 내역.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { listCheckins, listPointActivity, reviewCheckin, type AdminCheckin, type CheckinReview, type PointActivity } from "./adminService";
 import { errorText, formatDateTime, pointReasonLabels } from "./adminLabels";
 
+/** 화면 안 보기 전환: 인증 검토·회원별·내역 (만든 날: 2026-11-11) */
 type View = "review" | "members" | "history";
+/** 인증 검토 상태 한국어 이름 (만든 날: 2026-11-11) */
 const reviewLabels: Record<CheckinReview, string> = { none: "검토 전", normal: "정상", suspicious: "의심" };
 
 /** ADMIN-04 리워드 모니터링. 포인트 회수·이용 제한은 추후 협의 — 지금은 확인과 검토 기록만 한다. */
@@ -108,6 +114,7 @@ export default function AdminRewardsScreen() {
   );
 }
 
+/** 현장 인증 한 건 카드: 거리·GPS 오차·의심 사유와 검토 버튼 (만든 날: 2026-11-11) */
 function CheckinCard({ checkin, onSaved }: { checkin: AdminCheckin; onSaved: () => Promise<void> }) {
   const [note, setNote] = useState(checkin.reviewNote ?? "");
   const [busy, setBusy] = useState(false);

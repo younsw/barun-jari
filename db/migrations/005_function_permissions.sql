@@ -1,4 +1,5 @@
 -- 005: 함수 권한 정리 (Supabase 보안 점검 반영)
+-- 만든 날: 2026-10-28
 
 -- 트리거 전용 함수: API로 직접 호출 불가
 revoke execute on function public.handle_new_user() from public, anon, authenticated;

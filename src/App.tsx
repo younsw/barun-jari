@@ -1,3 +1,8 @@
+/**
+ * 앱 진입 화면과 화면 이동 관리.
+ * UI-01 흡연구역 목록(검색·필터·지도·리스트), UI-02 흡연구역 상세, 하단 메뉴로 각 기능 화면(인증·신고·리워드·마이페이지·관리자) 전환.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { RequireLogin, useAuth } from "./features/auth";
 import { isMockData } from "./features/auth/supabaseClient";
@@ -24,6 +29,7 @@ import {
 import "./features/profile/appShell.css";
 
 
+/** 앱 안에서 이동할 수 있는 화면 목록 (만든 날: 2026-10-28) */
 type AppScreen =
   | "list"
   | "detail"
@@ -39,6 +45,7 @@ type AppScreen =
 /** 화면 표시용: 장소 + 현재 위치에서의 거리 */
 type PlaceView = Place & { meters: number | null };
 
+/** 목록·상세 화면에서 쓰는 SVG 아이콘 (만든 날: 2026-10-28) */
 function Icon({ name, size = 20 }: { name: "search" | "location" | "refresh" | "pin" | "chevron" | "info" | "map" | "expand" | "close"; size?: number }) {
   const paths = {
     search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4.5 4.5" /></>,
@@ -94,6 +101,7 @@ function MapPreview({ userLocation, focus, places, onSelect }: { userLocation: L
   </div>;
 }
 
+/** 검색 결과나 데이터가 없을 때 보여주는 빈 화면 (만든 날: 2026-10-28) */
 function EmptyState({ message = "검색 결과가 없습니다" }: { message?: string }) {
   return <div className="empty-state">
     <span><Icon name="search" size={25} /></span>
@@ -102,6 +110,7 @@ function EmptyState({ message = "검색 결과가 없습니다" }: { message?: s
   </div>;
 }
 
+/** UI-02 흡연구역 상세: 주소·거리·카카오 지도·현장 인증·길찾기·오류 신고 (만든 날: 2026-10-28) */
 function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { place: PlaceView; userLocation: LatLng | null; onBack: () => void; onReport: () => void; onCheckin: () => void }) {
   const [message, setMessage] = useState("");
   const [mapAvailable, setMapAvailable] = useState(hasKakaoMapKey);
@@ -190,10 +199,12 @@ function LoginGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+/** 앱 최상위 컴포넌트. 로그인해야 본 화면(MainApp)을 보여준다 (만든 날: 2026-10-28) */
 export default function App() {
   return <LoginGate><MainApp /></LoginGate>;
 }
 
+/** 로그인 후 본 화면. 장소 불러오기, 현재 위치, 검색·필터, 화면 이동(스택)을 관리한다 (만든 날: 2026-10-28) */
 function MainApp() {
   const [places, setPlaces] = useState<Place[] | null>(null);
   const [loadError, setLoadError] = useState("");

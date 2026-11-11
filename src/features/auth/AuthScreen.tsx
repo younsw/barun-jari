@@ -1,3 +1,7 @@
+/**
+ * 로그인·회원가입 화면 틀(AuthFrame)과 로그인/가입 탭 전환.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { useState, type ReactNode } from "react";
 import { LoginScreen } from "./LoginScreen";
 import { SignUpScreen } from "./SignUpScreen";
@@ -20,6 +24,7 @@ export function AuthFrame({ title, description, children, onBack }: { title: str
   </section>;
 }
 
+/** 로그인·회원가입 탭 화면 (만든 날: 2026-10-28) */
 export function AuthScreen({ initialMode = "login", onBack }: { initialMode?: "login" | "signup"; onBack?: () => void }) {
   const [mode, setMode] = useState(initialMode);
   const [message, setMessage] = useState("");

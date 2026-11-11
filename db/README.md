@@ -39,7 +39,7 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/015_sponsor_deficit.sql` | 후원 예산이 모자라도 진행 중 기업에서 차감(마이너스 허용), 진행 중 기업이 없으면 후원 대기로 쌓고 예산 추가 시 오래된 것부터 정산 |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~014와 seed가 적용되어 있습니다 (015는 PR 머지 때 적용). 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~015와 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`

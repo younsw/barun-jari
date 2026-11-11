@@ -103,7 +103,6 @@ export default function AccountScreen({ onBack, onTab }: { onBack: () => void; o
               <div><dt>로그인 방식</dt><dd>이메일 · 비밀번호</dd></div>
               <div><dt>가입일</dt><dd>{formatDate(user.createdAt)}</dd></div>
               <div><dt>회원 구분</dt><dd>{isAdmin ? `관리자${viewAsUser ? " (사용자 화면으로 보는 중)" : ""}` : "일반 회원"}</dd></div>
-              <div><dt>성인 인증</dt><dd>완료 <small>가입 시 자동 확인</small></dd></div>
             </dl>
 
             <h2 className="account-section-title">포인트·활동</h2>
@@ -136,7 +135,7 @@ export default function AccountScreen({ onBack, onTab }: { onBack: () => void; o
       <ScreenAnnotation
         screen="UI-11 계정 정보"
         path="마이페이지 > 계정 정보"
-        elements="닉네임(변경), 이메일, 로그인 방식, 가입일, 회원 구분, 성인 인증, 포인트·활동 요약, 비밀번호 변경"
+        elements="닉네임(변경), 이메일, 로그인 방식, 가입일, 회원 구분, 포인트·활동 요약, 비밀번호 변경"
         data="users.nickname·is_admin·created_at, auth 이메일, get_my_point_summary(), reports·point_ledger(내 것)"
         action="닉네임 변경, 비밀번호 변경"
         link="useAuth().updateNickname / updatePassword, UI-10 마이페이지"

@@ -3,7 +3,7 @@ import type { GpsFix } from "../places/kakaoSdk";
 import { mockReports, type ReportRecord, type ReportType } from "./mockReports";
 
 // Supabase 키가 있으면 reports 테이블, 없으면 브라우저 메모리의 예시 데이터를 쓴다.
-// 내 신고만 보이는 것과 성인 인증 회원만 작성하는 것은 DB 권한(RLS)이 막는다.
+// 내 신고만 보이는 것과 로그인 회원만 작성하는 것은 DB 권한(RLS)이 막는다.
 // 현장 인증: 앱 내 카메라(CameraCapture) 사진과 GPS 위치가 둘 다 있어야 하고,
 // 서버 트리거(008)가 사진 업로드 여부·GPS 정확도·시설까지 거리를 다시 확인한다.
 
@@ -25,7 +25,7 @@ function toRecord(row: ReportRow): ReportRecord {
 function toKoreanError(message: string): Error {
   const onsite = message.match(/onsite: (.+)/);
   if (onsite) return new Error(onsite[1]);
-  if (/row-level security/i.test(message)) return new Error("성인 인증을 마친 회원만 신고할 수 있어요.");
+  if (/row-level security/i.test(message)) return new Error("로그인한 회원만 신고할 수 있어요. 다시 로그인해 주세요.");
   if (/foreign key/i.test(message)) return new Error("존재하지 않는 장소예요. 장소를 다시 선택해 주세요.");
   if (/mime|file size|payload too large|exceeded/i.test(message)) return new Error("사진을 올리지 못했어요. 다시 촬영해 주세요.");
   return new Error("신고를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");

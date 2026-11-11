@@ -27,20 +27,24 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/003_reports.sql` | 오류 신고 (성인 인증 회원만 작성, 상태 변경은 관리자만) |
 | `migrations/004_point_ledger.sql` | 포인트 (하루 최대 10점, 신고 반영 시 +3, 중복 적립 방지) |
 | `migrations/005_function_permissions.sql` | 함수 호출 권한 정리 (Supabase 보안 점검 반영) |
-| `migrations/006_adult_verification.sql` | 성인 인증 저장 함수 (임시 출생연도 인증, 서버에서 다시 판단) |
+| `migrations/006_adult_verification.sql` | 성인 인증 저장 함수 (임시 출생연도 인증) — **013에서 삭제** (성인 인증 단계 없앰) |
 | `migrations/007_report_photos.sql` | 신고 현장 사진: `reports.photo_path`, 비공개 버킷 `report-photos` (JPEG·5MB, 본인 폴더만) |
 | `migrations/008_report_onsite_verification.sql` | 신고 현장 인증: 위치(GPS 정확도 100m 이내)와 사진 둘 다 필수, 시설 좌표가 있으면 150m 이내만 접수 |
 | `migrations/009_facility_checkins.sql` | 현장 인증(장소 확인): 위치 150m·정확도 100m 이내 + 사진, 같은 장소 하루 1번, 1회 +2P. `complete_onsite_checkin()`으로만 인증 |
 | `migrations/010_delete_account.sql` | 회원 탈퇴: `delete_my_account()`가 본인 계정을 지우면 신고·포인트·현장 인증이 함께 삭제 (사진은 화면이 Storage API로 먼저 삭제) |
+| `migrations/011_checkin_radius_30m.sql` | 현장 인증 반경을 30m·GPS 정확도 30m 이내로 줄임 (신고는 150m 유지) |
+| `migrations/012_point_amounts.sql` | 포인트 조정: 현장 인증 +1P, 오류 신고 반영 +2P (하루 최대 10P 그대로) |
+| `migrations/013_admin_roles.sql` | 성인 인증 단계 없앰(가입 시 자동 통과, 006 함수 삭제), 관리자 회원 목록·관리자 지정/해제 (관리자 최소 1명 유지) |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~010과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~013과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`
 - 현장 인증: `supabase.rpc('complete_onsite_checkin', { p_facility_id, p_photo_path, p_latitude, p_longitude, p_accuracy_m })` → `{ checkin_id, distance_m, points_awarded, today_points }`
-- 포인트 적립은 화면에서 직접 할 수 없습니다. 현장 인증 함수(+2)와 신고 `accepted`(+3)일 때 DB가 적립합니다.
-- 관리자 지정: Supabase 대시보드에서 `users.is_admin`을 `true`로 바꿉니다.
+- 포인트 적립은 화면에서 직접 할 수 없습니다. 현장 인증 함수(+1)와 신고 `accepted`(+2)일 때 (012) DB가 적립합니다.
+- 관리자 지정·해제: 앱에서 관리자 계정으로 마이페이지 → "관리자 · 회원 관리". 관리자가 0명이면 SQL Editor에서 `update public.users set is_admin = true where id = (select id from auth.users where email = '이메일');`
+- 새로 가입한 회원은 일반 회원입니다. 관리자는 마이페이지의 "사용자 화면으로 보기"로 관리자 메뉴를 숨길 수 있습니다(이 브라우저에만 저장, 권한은 그대로).
 
 ## 좌표 채우기 (지오코딩)
 

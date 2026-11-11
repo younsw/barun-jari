@@ -30,10 +30,13 @@
 .service-guide { margin-top: 13px; padding: 14px; border-radius: 13px; background: #f0f4f2; }
 .service-guide strong { font-size: 10px; }
 .service-guide p { margin: 6px 0 0; color: #68766f; font-size: 8px; line-height: 1.55; }
-.logout-button { width: 100%; margin-top: 16px; padding: 10px; border: 0; color: #7e8984; background: transparent; font-size: 9px; text-decoration: underline; }
+/* 계정 버튼: 로그아웃 · 회원 탈퇴 (같은 크기) */
+.account-actions { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.account-actions button { height: 42px; border: 1px solid #dce5e0; border-radius: 12px; color: #4f5d56; background: #fff; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.account-actions button.withdraw { color: #b6402f; border-color: #efd3ce; }
+.account-actions button:disabled { opacity: .5; cursor: default; }
 .profile-stats button:disabled, .profile-menu button:disabled { color: inherit; cursor: default; opacity: 1; }
 
-.withdraw-link { display: block; margin: 14px auto 0; padding: 6px; border: 0; color: #98a39d; background: none; font: inherit; font-size: 11px; text-decoration: underline; }
 .withdraw-panel { margin-top: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #efc9c3; border-radius: 14px; background: #fdf4f2; }
 .withdraw-panel strong { color: #a23b2f; font-size: 13px; }
 .withdraw-panel p { margin: 0; color: #6c5550; font-size: 11px; line-height: 1.5; }
@@ -43,3 +46,14 @@
 .withdraw-panel > div button { flex: 1; height: 40px; border: 1px solid #dfd2cf; border-radius: 10px; color: #6c5550; background: white; font: inherit; font-weight: 700; }
 .withdraw-panel > div button.danger { border: 0; color: white; background: #b6402f; }
 .withdraw-panel > div button:disabled { opacity: .45; }
+
+/* 관리자: 사용자 화면으로 보기 스위치 */
+.view-as-user { margin-top: 12px; padding: 13px 14px; display: flex; align-items: center; gap: 12px; border: 1px solid #e0e8e3; border-radius: 16px; background: #fff; cursor: pointer; }
+.view-as-user > span { flex: 1; }
+.view-as-user strong, .view-as-user small { display: block; }
+.view-as-user strong { font-size: 12px; }
+.view-as-user small { margin-top: 4px; color: #8a9690; font-size: 10px; }
+.view-as-user input { width: 42px; height: 24px; margin: 0; appearance: none; position: relative; border-radius: 12px; background: #d7e0db; transition: background .15s; cursor: pointer; }
+.view-as-user input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .2); transition: transform .15s; }
+.view-as-user input:checked { background: #176345; }
+.view-as-user input:checked::after { transform: translateX(18px); }

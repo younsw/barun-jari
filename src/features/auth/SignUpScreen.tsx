@@ -1,12 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { AdultVerifyStep } from "./AdultVerifyStep";
-import { isVerificationFresh } from "./adultVerification";
 import { useAuth } from "./useAuth";
-import type { AdultVerificationSuccess } from "./types";
 
 export function SignUpScreen({ onDone }: { onDone: (message: string) => void }) {
   const { signUp } = useAuth();
-  const [verification, setVerification] = useState<AdultVerificationSuccess | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordCheck, setPasswordCheck] = useState("");
@@ -16,23 +12,13 @@ export function SignUpScreen({ onDone }: { onDone: (message: string) => void }) 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
-  if (!verification) return <>
-    <StepIndicator step={1} />
-    {error && <p className="auth-error" role="alert">{error}</p>}
-    <AdultVerifyStep onVerified={(result) => { setError(""); setVerification(result); }} />
-  </>;
-
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (password !== passwordCheck) return setError("비밀번호가 서로 달라요.");
-    if (!isVerificationFresh(verification)) {
-      setVerification(null);
-      return setError("성인 인증 후 10분이 지났어요. 다시 인증해 주세요.");
-    }
     setPending(true);
     setError("");
     try {
-      const created = await signUp({ email, password, nickname, agreedTerms, agreedPrivacy, verification });
+      const created = await signUp({ email, password, nickname, agreedTerms, agreedPrivacy });
       onDone(created ? `${created.nickname}님, 가입을 환영해요!` : "가입 확인 메일을 보냈어요. 메일 확인 후 로그인해 주세요.");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "가입에 실패했어요.");
@@ -44,8 +30,6 @@ export function SignUpScreen({ onDone }: { onDone: (message: string) => void }) 
   const allAgreed = agreedTerms && agreedPrivacy;
 
   return <form className="auth-step" onSubmit={submit}>
-    <StepIndicator step={2} />
-    <div className="auth-verified">성인 인증 완료</div>
     <label className="auth-field"><span>이메일</span>
       <input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="example@email.com" required />
     </label>
@@ -70,9 +54,3 @@ export function SignUpScreen({ onDone }: { onDone: (message: string) => void }) 
   </form>;
 }
 
-function StepIndicator({ step }: { step: 1 | 2 }) {
-  return <ol className="auth-steps">
-    <li className={step === 1 ? "active" : "done"}>1 성인 인증</li>
-    <li className={step === 2 ? "active" : ""}>2 정보 입력</li>
-  </ol>;
-}

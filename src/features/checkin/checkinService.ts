@@ -4,12 +4,12 @@ import { distanceMeters } from "../places/placeService";
 import { mockPoints } from "../rewards/mockPoints";
 
 // 현장 인증: 흡연시설 현장에서 위치 + 앱 카메라 사진으로 "이 장소가 실제로 있다"를 확인하고 포인트를 받는다.
-// 규칙은 서버 함수 complete_onsite_checkin(009)이 다시 확인한다:
-// 성인 인증 회원, GPS 정확도 100m 이내, 시설에서 150m 이내, 같은 장소 하루 1번, 1회 2P (하루 최대 10P).
+// 규칙은 서버 함수 complete_onsite_checkin(009, 반경은 011)이 다시 확인한다:
+// 로그인 회원, GPS 정확도 30m 이내, 시설에서 30m 이내, 같은 장소 하루 1번, 1회 1P (012, 하루 최대 10P).
 
-export const CHECKIN_RADIUS_M = 150;
-export const CHECKIN_MAX_ACCURACY_M = 100;
-export const CHECKIN_POINTS = 2;
+export const CHECKIN_RADIUS_M = 30;
+export const CHECKIN_MAX_ACCURACY_M = 30;
+export const CHECKIN_POINTS = 1;
 
 const PHOTO_BUCKET = "report-photos";
 
@@ -40,9 +40,9 @@ export async function completeOnsiteCheckin(input: {
 
   if (!supabase) {
     if (facility.latitude === null || facility.longitude === null) throw new Error("아직 위치 정보가 없는 장소라 현장 인증을 할 수 없어요.");
-    if (location.accuracy > CHECKIN_MAX_ACCURACY_M) throw new Error(`GPS 정확도가 낮아요 (${Math.round(location.accuracy)}m). 실외에서 다시 시도해 주세요.`);
+    if (location.accuracy > CHECKIN_MAX_ACCURACY_M) throw new Error(`GPS 정확도가 낮아요 (${Math.round(location.accuracy)}m, ${CHECKIN_MAX_ACCURACY_M}m 이내여야 해요). 하늘이 트인 곳에서 다시 시도해 주세요.`);
     const distance = distanceMeters(location, { latitude: facility.latitude, longitude: facility.longitude });
-    if (distance > CHECKIN_RADIUS_M) throw new Error(`장소에서 ${Math.round(distance)}m 떨어져 있어요. 현장(150m 이내)에서 인증해 주세요.`);
+    if (distance > CHECKIN_RADIUS_M) throw new Error(`장소에서 ${Math.round(distance)}m 떨어져 있어요. 현장(${CHECKIN_RADIUS_M}m 이내)에서 인증해 주세요.`);
     const key = `${facility.id}:${seoulToday()}`;
     if (mockCheckins.has(key)) throw new Error("오늘 이미 인증한 장소예요. 내일 다시 인증할 수 있어요.");
     mockCheckins.add(key);

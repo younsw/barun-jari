@@ -1,3 +1,7 @@
+/*
+ * 로그인·회원가입 화면 스타일.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 /* 회원가입·로그인 화면. src/index.css의 색·크기 규칙을 따른다. (메인 #176345, 390px 프레임) */
 .auth-screen { display: flex; flex-direction: column; }
 .auth-screen .brand-mark { font-size: 13px; }

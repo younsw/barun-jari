@@ -1,3 +1,7 @@
+/**
+ * 관리자 모드 틀 (ADMIN-01~07): 상단 제목·뒤로가기·'사용자 화면으로', 화면 이동 스택, 하단 관리자 메뉴 5개.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { useState, type ReactNode } from "react";
 import { useAuth } from "../auth";
 import { isMockData } from "../auth/supabaseClient";
@@ -11,7 +15,9 @@ import AdminSponsorsScreen from "./AdminSponsorsScreen";
 import "../profile/profile.css";
 import "./admin.css";
 
+/** 관리자 하단 메뉴 탭 (만든 날: 2026-11-11) */
 type AdminTab = "home" | "reports" | "rewards" | "members" | "more";
+/** 관리자 모드 안의 화면 (목록·상세 등) (만든 날: 2026-11-11) */
 export type AdminPage =
   | { kind: "home" }
   | { kind: "reports" }
@@ -23,8 +29,10 @@ export type AdminPage =
   | { kind: "facility"; id: number }
   | { kind: "sponsors" };
 
+/** 관리자 화면 이동 함수 모양 (만든 날: 2026-11-11) */
 export type AdminNavigate = (page: AdminPage) => void;
 
+/** 화면별 상단 제목 (만든 날: 2026-11-11) */
 const titles: Record<AdminPage["kind"], string> = {
   home: "운영 대시보드",
   reports: "신고 관리",
@@ -37,12 +45,14 @@ const titles: Record<AdminPage["kind"], string> = {
   sponsors: "기업 후원·예산 관리",
 };
 
+/** 지금 화면이 어느 하단 탭에 속하는지 (만든 날: 2026-11-11) */
 const tabOf = (page: AdminPage): AdminTab => {
   if (page.kind === "report") return "reports";
   if (page.kind === "facilities" || page.kind === "facility" || page.kind === "sponsors") return "more";
   return page.kind as AdminTab;
 };
 
+/** 하단 관리자 메뉴: 탭·아이콘·이름 (만든 날: 2026-11-11) */
 const navItems: Array<[AdminTab, "map" | "document" | "gift" | "person" | "shield", string]> = [
   ["home", "map", "홈"],
   ["reports", "document", "신고"],

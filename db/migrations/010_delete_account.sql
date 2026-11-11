@@ -1,4 +1,5 @@
 -- 010: 회원 탈퇴
+-- 만든 날: 2026-11-04
 -- 로그인한 본인 계정(auth.users)을 지웁니다. on delete cascade로 아래가 함께 지워집니다:
 --   public.users → reports, point_ledger, facility_checkins
 -- 사진(Storage report-photos/{user_id}/...)은 SQL로 지울 수 없어 화면이 Storage API로 먼저 지웁니다.

@@ -1,4 +1,5 @@
 """카카오 로컬 API로 흡연시설 주소를 위도·경도로 바꿉니다.
+만든 날: 2026-10-28
 
 사용법:
     KAKAO_REST_API_KEY=... python3 db/geocode.py

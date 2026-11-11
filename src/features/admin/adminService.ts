@@ -1,3 +1,7 @@
+/**
+ * 관리자 데이터: Supabase 관리자 함수(admin_*) 호출. 모의 모드에서는 같은 동작을 메모리 데이터로 흉내 낸다.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { supabase } from "../auth/supabaseClient";
 import { getFacilities, updateMockPlace } from "../places/placeService";
 import type { ReportStatus, ReportType } from "../reports/mockReports";
@@ -8,8 +12,10 @@ import { mockPoints } from "../rewards/mockPoints";
 // Supabase 키가 있으면 admin_* 서버 함수를 부르고, 함수 안에서 관리자인지 다시 확인한다.
 // 키가 없으면(예시 모드) 브라우저 메모리의 예시 데이터로 같은 흐름을 보여 준다.
 
+/** 관리자 홈의 최근 신고 (만든 날: 2026-11-11) */
 export type AdminRecentReport = { id: string; type: ReportType; status: ReportStatus; createdAt: string; facilityName: string; nickname: string | null };
 
+/** 관리자 홈 숫자 모음 (만든 날: 2026-11-11) */
 export type AdminDashboard = {
   totalUsers: number;
   adminUsers: number;
@@ -24,6 +30,7 @@ export type AdminDashboard = {
   recentReports: AdminRecentReport[];
 };
 
+/** 관리자 신고 목록·상세 한 건 (만든 날: 2026-11-11) */
 export type AdminReport = {
   id: string;
   userId: string | null;
@@ -42,11 +49,15 @@ export type AdminReport = {
   createdAt: string;
 };
 
+/** 관리자 작업 기록 한 건 (만든 날: 2026-11-11) */
 export type AdminAction = { id: string; action: string; detail: Record<string, unknown>; createdAt: string };
 
+/** 포인트 적립 한 건 (어느 후원 예산에서 나갔는지 포함) (만든 날: 2026-11-11) */
 export type PointActivity = { id: string; userId: string; nickname: string | null; amount: number; reason: string; refId: string | null; createdAt: string; sponsorName: string | null };
 
+/** 현장 인증 검토 상태 (만든 날: 2026-11-11) */
 export type CheckinReview = "none" | "normal" | "suspicious";
+/** 현장 인증 한 건과 의심 사유 (만든 날: 2026-11-11) */
 export type AdminCheckin = {
   id: string;
   userId: string;
@@ -66,19 +77,26 @@ export type AdminCheckin = {
   reviewedAt: string | null;
 };
 
+/** 관리자용 흡연시설 (만든 날: 2026-11-11) */
 export type AdminFacility = { id: number; district: string; name: string; address: string; category: string; roomCount: number; latitude: number | null; longitude: number | null };
+/** 시설 수정 입력값 (만든 날: 2026-11-11) */
 export type FacilityInput = Omit<AdminFacility, "id" | "district">;
 
+/** 후원 기업과 예산 현황 (만든 날: 2026-11-11) */
 export type Sponsor = { id: string; name: string; description: string; startsOn: string; endsOn: string; active: boolean; budget: number; paid: number; remaining: number; createdAt: string };
+/** 후원 기업 등록·수정 입력값 (만든 날: 2026-11-11) */
 export type SponsorInput = { name: string; description: string; startsOn: string; endsOn: string; initialBudget?: number };
+/** 후원이 필요한 포인트: 후원 대기 + 적자 (만든 날: 2026-11-11) */
 export type SponsorShortfall = { waitingPoints: number; waitingCount: number; deficitPoints: number };
 /** 어느 기업에도 배정되지 않은 지급분(후원 대기)을 볼 때 쓰는 id */
 export const WAITING_SPONSOR_ID = "waiting";
+/** 후원 예산 추가·지급 한 건 (만든 날: 2026-11-11) */
 export type SponsorTransaction = { id: string; sponsorId: string | null; kind: "budget" | "payout"; amount: number; note: string; createdAt: string };
 
 /** 잔여 예산이 전체의 20% 아래면 부족 알림 */
 export const LOW_BUDGET_RATIO = 0.2;
 
+/** 서버의 'admin: ...' 오류를 화면용 문구로 바꾼다 (만든 날: 2026-11-11) */
 function toAdminError(message: string, fallback: string): Error {
   const admin = message.match(/admin: (.+)/);
   if (admin) return new Error(admin[1]);
@@ -86,6 +104,7 @@ function toAdminError(message: string, fallback: string): Error {
   return new Error(fallback);
 }
 
+/** Supabase 서버 함수 호출 공통 처리 (만든 날: 2026-11-11) */
 async function rpc<T>(name: string, args: Record<string, unknown> | undefined, fallback: string): Promise<T> {
   if (!supabase) throw new Error(fallback);
   const { data, error } = await supabase.rpc(name, args);
@@ -93,11 +112,14 @@ async function rpc<T>(name: string, args: Record<string, unknown> | undefined, f
   return data as T;
 }
 
+/** 한국 시간 기준 날짜 (만든 날: 2026-11-11) */
 const koreanDate = (value: Date | string) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date(value));
+/** 두 날짜 사이 일수 (만든 날: 2026-11-11) */
 const daysBetween = (a: string, b: string) => Math.round((new Date(a).getTime() - new Date(b).getTime()) / 86_400_000);
 
 // ── 예시 모드 데이터 ──────────────────────────────────────────────
 const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000).toISOString();
+/** 모의 모드 메모리 데이터 (신고 처리·후원·작업 기록) (만든 날: 2026-11-11) */
 const mock = {
   nextId: 100,
   actions: [] as (AdminAction & { targetType: string; targetId: string })[],
@@ -122,10 +144,12 @@ const mock = {
   facilityRooms: new Map<number, number>(),
 };
 
+/** 모의 모드 작업 기록 남기기 (만든 날: 2026-11-11) */
 function logMock(action: string, targetType: string, targetId: string, detail: Record<string, unknown>) {
   mock.actions.unshift({ id: String(mock.nextId++), action, targetType, targetId, detail, createdAt: new Date().toISOString() });
 }
 
+/** 모의 모드 현장 인증 예시 (만든 날: 2026-11-11) */
 function mockCheckins(): AdminCheckin[] {
   const sorted = [...mock.checkins].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   return sorted.map((c, index) => {
@@ -138,6 +162,7 @@ function mockCheckins(): AdminCheckin[] {
   }).reverse();
 }
 
+/** 모의 모드 후원 기업 현황 계산 (만든 날: 2026-11-11) */
 function mockSponsors(): Sponsor[] {
   const today = koreanDate(new Date());
   return mock.sponsors.map((s) => {
@@ -166,6 +191,7 @@ function settleMockWaiting(sponsorId: string) {
   }
 }
 
+/** 모의 모드 후원 대기·적자 합계 (만든 날: 2026-11-11) */
 function mockShortfall(): SponsorShortfall {
   const waiting = mock.transactions.filter((t) => t.sponsorId === null && t.kind === "payout");
   return {
@@ -175,10 +201,12 @@ function mockShortfall(): SponsorShortfall {
   };
 }
 
+/** 모의 모드 시설 목록 (만든 날: 2026-11-11) */
 async function mockFacilities(): Promise<AdminFacility[]> {
   return (await getFacilities()).map((p) => ({ ...p, district: "예시", roomCount: mock.facilityRooms.get(p.id) ?? 1 }));
 }
 
+/** 모의 모드 신고 목록 (관리자 처리 내용 반영) (만든 날: 2026-11-11) */
 function mockReports(facilities: AdminFacility[]): AdminReport[] {
   return mockReportStore.list().map((r) => {
     const facility = facilities.find((f) => f.id === r.facility_id);
@@ -198,6 +226,7 @@ type DashboardRow = {
   recent_reports: { id: number; type: ReportType; status: ReportStatus; created_at: string; facility_name: string; nickname: string | null }[];
 };
 
+/** ADMIN-01 관리자 홈 숫자 (만든 날: 2026-11-11) */
 export async function getDashboard(memberCounts: { total: number; admins: number }): Promise<AdminDashboard> {
   if (!supabase) {
     const today = koreanDate(new Date());
@@ -232,6 +261,7 @@ type ReportRow = {
   admin_reply: string | null; handled_at: string | null; created_at: string;
 };
 
+/** 전체 신고 목록 (만든 날: 2026-11-11) */
 export async function listReports(): Promise<AdminReport[]> {
   if (!supabase) return mockReports(await mockFacilities());
   const rows = await rpc<ReportRow[]>("admin_list_reports", undefined, "신고 목록을 불러오지 못했어요.");
@@ -242,6 +272,7 @@ export async function listReports(): Promise<AdminReport[]> {
   }));
 }
 
+/** 신고 처리 상태·답변 저장 (만든 날: 2026-11-11) */
 export async function updateReport(reportId: string, status: ReportStatus, reply: string): Promise<void> {
   const trimmed = reply.trim().slice(0, 500);
   if (!supabase) {
@@ -275,6 +306,7 @@ export async function listActions(targetType: "report" | "facility" | "checkin" 
 // ── ADMIN-04 리워드 모니터링 ─────────────────────────────────────
 type PointRow = { id: number; user_id: string; nickname: string | null; amount: number; reason: string; ref_id: string | null; created_at: string; sponsor_name: string | null };
 
+/** 최근 N일 포인트 적립 내역 (만든 날: 2026-11-11) */
 export async function listPointActivity(days = 7): Promise<PointActivity[]> {
   if (!supabase) {
     const since = Date.now() - days * 86_400_000;
@@ -286,12 +318,14 @@ export async function listPointActivity(days = 7): Promise<PointActivity[]> {
   return rows.map((p) => ({ id: String(p.id), userId: p.user_id, nickname: p.nickname, amount: p.amount, reason: p.reason, refId: p.ref_id, createdAt: p.created_at, sponsorName: p.sponsor_name }));
 }
 
+/** admin_list_checkins() 결과 한 행 (만든 날: 2026-11-11) */
 type CheckinRow = {
   id: number; user_id: string; nickname: string | null; facility_id: number; facility_name: string; photo_path: string | null;
   distance_m: number | null; location_accuracy_m: number | null; points_awarded: number; created_at: string;
   quick_repeat: boolean; same_place_days: number; flagged: boolean; review_status: CheckinReview; review_note: string | null; reviewed_at: string | null;
 };
 
+/** 현장 인증 목록과 의심 사유 (만든 날: 2026-11-11) */
 export async function listCheckins(): Promise<AdminCheckin[]> {
   if (!supabase) return mockCheckins();
   const rows = await rpc<CheckinRow[]>("admin_list_checkins", undefined, "현장 인증 기록을 불러오지 못했어요.");
@@ -302,6 +336,7 @@ export async function listCheckins(): Promise<AdminCheckin[]> {
   }));
 }
 
+/** 현장 인증 검토 결과 저장 (만든 날: 2026-11-11) */
 export async function reviewCheckin(checkinId: string, status: CheckinReview, note: string): Promise<void> {
   const trimmed = note.trim().slice(0, 300);
   if (!supabase) {
@@ -315,6 +350,7 @@ export async function reviewCheckin(checkinId: string, status: CheckinReview, no
 // ── ADMIN-06 흡연시설 ───────────────────────────────────────────
 type FacilityRow = { id: number; district: string; name: string; address: string; category: string; room_count: number; latitude: number | null; longitude: number | null };
 
+/** 관리자용 시설 목록 (만든 날: 2026-11-11) */
 export async function listFacilities(): Promise<AdminFacility[]> {
   if (!supabase) return mockFacilities();
   const { data, error } = await supabase
@@ -326,6 +362,7 @@ export async function listFacilities(): Promise<AdminFacility[]> {
   return data.map((f) => ({ id: f.id, district: f.district, name: f.name, address: f.address, category: f.category, roomCount: f.room_count, latitude: f.latitude, longitude: f.longitude }));
 }
 
+/** 시설 정보 수정 (만든 날: 2026-11-11) */
 export async function updateFacility(facilityId: number, input: FacilityInput): Promise<void> {
   const { name, address, category, roomCount, latitude, longitude } = input;
   if (!name.trim() || !address.trim() || !category.trim()) throw new Error("시설명, 주소, 업종을 모두 입력해 주세요.");
@@ -350,12 +387,14 @@ export async function updateFacility(facilityId: number, input: FacilityInput): 
 // ── ADMIN-07 가상 후원 예산 ──────────────────────────────────────
 type SponsorRow = { id: number; name: string; description: string; starts_on: string; ends_on: string; active: boolean; budget: number; paid: number; remaining: number; created_at: string };
 
+/** 후원 기업 목록과 예산 현황 (만든 날: 2026-11-11) */
 export async function listSponsors(): Promise<Sponsor[]> {
   if (!supabase) return mockSponsors();
   const rows = await rpc<SponsorRow[]>("admin_list_sponsors", undefined, "후원 기업을 불러오지 못했어요.");
   return rows.map((s) => ({ id: String(s.id), name: s.name, description: s.description, startsOn: s.starts_on, endsOn: s.ends_on, active: s.active, budget: s.budget, paid: s.paid, remaining: s.remaining, createdAt: s.created_at }));
 }
 
+/** 후원 기업 등록·수정 (만든 날: 2026-11-11) */
 export async function saveSponsor(sponsorId: string | null, input: SponsorInput): Promise<void> {
   if (!input.name.trim() || !input.startsOn || !input.endsOn) throw new Error("기업명과 후원 기간을 입력해 주세요.");
   if (input.endsOn < input.startsOn) throw new Error("종료일이 시작일보다 빠를 수 없어요.");
@@ -380,6 +419,7 @@ export async function saveSponsor(sponsorId: string | null, input: SponsorInput)
   }, "후원 기업을 저장하지 못했어요.");
 }
 
+/** 후원 예산 추가·감액 (추가하면 후원 대기분 자동 정산) (만든 날: 2026-11-11) */
 export async function adjustSponsorBudget(sponsorId: string, amount: number, note: string): Promise<void> {
   if (!Number.isInteger(amount) || amount === 0) throw new Error("조정할 포인트를 정수로 입력해 주세요.");
   if (!supabase) {
@@ -394,6 +434,7 @@ export async function adjustSponsorBudget(sponsorId: string, amount: number, not
   await rpc<null>("admin_adjust_sponsor_budget", { p_sponsor_id: Number(sponsorId), p_amount: amount, p_note: note }, "예산을 조정하지 못했어요.");
 }
 
+/** 후원이 필요한 포인트 합계 (만든 날: 2026-11-11) */
 export async function getSponsorShortfall(): Promise<SponsorShortfall> {
   if (!supabase) return mockShortfall();
   const row = await rpc<{ waiting_points: number; waiting_count: number; deficit_points: number }>("admin_sponsor_shortfall", undefined, "후원 필요 포인트를 불러오지 못했어요.");

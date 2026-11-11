@@ -1,3 +1,7 @@
+/**
+ * ADMIN-02/03 신고 관리: 상태별 신고 목록, 신고 상세에서 처리 상태·답변 저장과 처리 기록.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReportStatus, ReportType } from "../reports/mockReports";
 import { getReportPhotoUrl } from "../reports/reportService";
@@ -5,6 +9,7 @@ import type { AdminNavigate } from "./AdminApp";
 import { listActions, listReports, updateReport, type AdminAction, type AdminReport } from "./adminService";
 import { actionLabels, errorText, formatDateTime, reportStatusLabels, reportTypeLabels } from "./adminLabels";
 
+/** 신고 목록 상태 필터 (전체 + 4가지 상태) (만든 날: 2026-11-11) */
 const statusFilters: Array<ReportStatus | "all"> = ["all", "received", "reviewing", "accepted", "rejected"];
 
 /** ADMIN-02 신고 관리 목록 */

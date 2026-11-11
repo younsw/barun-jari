@@ -1,6 +1,11 @@
+/**
+ * ADMIN-06 회원 관리: 회원 목록과 관리자 지정·해제.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { useCallback, useEffect, useState } from "react";
 import { useAuth, type Member } from "../auth";
 
+/** 가입일 표시 (만든 날: 2026-11-11) */
 const formatDate = (value: string) => new Date(value).toLocaleDateString("ko-KR");
 
 /** ADMIN-05 회원 관리: 회원 목록, 관리자 지정·해제 (db/migrations/013_admin_roles.sql)

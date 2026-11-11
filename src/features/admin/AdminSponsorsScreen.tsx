@@ -1,3 +1,7 @@
+/**
+ * ADMIN-07 기업 후원·예산 관리: 후원 기업 등록·수정, 예산 추가·감액, 지급 내역, 예산 부족·후원 대기 알림.
+ * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ */
 import { useCallback, useEffect, useState } from "react";
 import {
   adjustSponsorBudget, getSponsorShortfall, listSponsors, listSponsorTransactions, LOW_BUDGET_RATIO, saveSponsor, WAITING_SPONSOR_ID,
@@ -5,8 +9,11 @@ import {
 } from "./adminService";
 import { errorText, formatDateTime, pointReasonLabels } from "./adminLabels";
 
+/** 한국 시간 오늘 날짜 (YYYY-MM-DD) (만든 날: 2026-11-11) */
 const today = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+/** 진행 중인데 남은 예산이 20% 아래인지 (만든 날: 2026-11-11) */
 const isLow = (s: Sponsor) => s.active && s.budget > 0 && s.remaining < s.budget * LOW_BUDGET_RATIO;
+/** 열려 있는 입력 창: 새 기업·수정·예산 조정 (만든 날: 2026-11-11) */
 type Panel = { kind: "new" } | { kind: "edit"; sponsor: Sponsor } | { kind: "adjust"; sponsor: Sponsor } | { kind: "history"; sponsor: Sponsor } | null;
 
 /** ADMIN-07 기업 후원 및 리워드 예산 관리 (가상 시뮬레이션) */
@@ -109,6 +116,7 @@ export default function AdminSponsorsScreen() {
   );
 }
 
+/** 후원 기업 등록·수정 폼 (만든 날: 2026-11-11) */
 function SponsorForm({ sponsor, onCancel, onDone }: { sponsor?: Sponsor; onCancel: () => void; onDone: () => Promise<void> }) {
   const [form, setForm] = useState<SponsorInput & { budgetText: string }>({
     name: sponsor?.name ?? "", description: sponsor?.description ?? "",
@@ -148,6 +156,7 @@ function SponsorForm({ sponsor, onCancel, onDone }: { sponsor?: Sponsor; onCance
   );
 }
 
+/** 예산 추가·감액 폼 (만든 날: 2026-11-11) */
 function BudgetForm({ sponsor, onCancel, onDone }: { sponsor: Sponsor; onCancel: () => void; onDone: () => Promise<void> }) {
   const [mode, setMode] = useState<"add" | "cut">("add");
   const [amount, setAmount] = useState("");
@@ -186,6 +195,7 @@ function BudgetForm({ sponsor, onCancel, onDone }: { sponsor: Sponsor; onCancel:
   );
 }
 
+/** 기업 하나의 예산·지급 내역 (후원 대기 포함) (만든 날: 2026-11-11) */
 function SponsorHistory({ sponsorId }: { sponsorId: string }) {
   const [rows, setRows] = useState<SponsorTransaction[] | null>(null);
   const [error, setError] = useState("");

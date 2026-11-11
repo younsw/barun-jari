@@ -65,7 +65,7 @@ export default function RewardsScreen({
             </div>
             {error && <p className="inline-error">{error}</p>}
             <div className="demo-notice reward-policy">
-              현장 인증 1번에 2P(같은 장소는 하루 한 번), 오류 신고가 반영되면 3P가 적립돼요. 하루(한국 시간)에 최대
+              현장 인증 1번에 1P(같은 장소는 하루 한 번), 오류 신고가 반영되면 2P가 적립돼요. 하루(한국 시간)에 최대
               {` ${limit}P`}까지 받을 수 있어요.
               {isMockData && " 지금은 Supabase 키가 없어 예시 내역을 보여줘요."}
             </div>

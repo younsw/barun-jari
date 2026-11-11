@@ -7,10 +7,6 @@
 .auth-tabs button.active { color: #176345; background: white; box-shadow: 0 2px 8px rgba(30, 74, 53, .09); }
 
 .auth-step { display: flex; flex-direction: column; gap: 12px; }
-.auth-steps { margin: 0 0 4px; padding: 0; display: flex; gap: 6px; list-style: none; }
-.auth-steps li { flex: 1; padding: 8px 0; border-radius: 10px; color: #99a39e; background: #f1f5f2; font-size: 10px; font-weight: 700; text-align: center; }
-.auth-steps li.active { color: white; background: #176345; }
-.auth-steps li.done { color: #176345; background: #dff1e7; }
 
 .auth-notice { padding: 14px; border-radius: 13px; color: #6b562b; background: #fff7e7; }
 .auth-notice strong { display: block; font-size: 12px; }
@@ -23,7 +19,6 @@
 .auth-field input:focus, .auth-field select:focus { border-color: #397d60; box-shadow: 0 0 0 3px rgba(57, 125, 96, .1); }
 .auth-field small { color: #8b9690; font-size: 9px; }
 
-.auth-verified { align-self: flex-start; padding: 6px 10px; border-radius: 8px; color: #176345; background: #dff1e7; font-size: 10px; font-weight: 800; }
 
 .auth-agree { padding: 12px; display: flex; flex-direction: column; gap: 9px; border: 1px solid #e2e9e5; border-radius: 13px; background: white; }
 .auth-agree label { display: flex; align-items: center; gap: 8px; color: #59665f; font-size: 11px; }

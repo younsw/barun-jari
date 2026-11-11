@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { RequireAdult, useAuth } from "./features/auth";
+import { RequireLogin, useAuth } from "./features/auth";
 import { isMockData } from "./features/auth/supabaseClient";
 import KakaoMap from "./features/places/KakaoMap";
 import NearbyMap from "./features/places/NearbyMap";
@@ -12,9 +12,10 @@ import {
 } from "./features/reports/ReportScreens";
 import RewardsScreen from "./features/rewards/RewardsScreen";
 import CheckinScreen from "./features/checkin/CheckinScreen";
-import { CHECKIN_RADIUS_M, findNearest } from "./features/checkin/checkinService";
+import { CHECKIN_POINTS, CHECKIN_RADIUS_M, findNearest } from "./features/checkin/checkinService";
 import "./features/checkin/checkin.css";
 import ProfileScreen from "./features/profile/ProfileScreen";
+import AdminMembersScreen from "./features/admin/AdminMembersScreen";
 import {
   BottomNavigation,
   type MainTab,
@@ -31,7 +32,8 @@ type AppScreen =
   | "reportList"
   | "reportDetail"
   | "rewards"
-  | "profile";
+  | "profile"
+  | "adminMembers";
 
 /** 화면 표시용: 장소 + 현재 위치에서의 거리 */
 type PlaceView = Place & { meters: number | null };
@@ -102,7 +104,7 @@ function EmptyState({ message = "검색 결과가 없습니다" }: { message?: s
 function ListAnnotation({ state, onState }: { state: PreviewState; onState: (state: PreviewState) => void }) {
   const notes = [
     ["화면 ID·화면명", "UI-01 흡연구역 목록"],
-    ["진입 경로", "서비스 첫 화면 (로그인·성인 인증 후)"],
+    ["진입 경로", "서비스 첫 화면 (로그인 후)"],
     ["구성 요소", "검색창, 위치 버튼, 업종 필터, 지도 미리보기, 장소 카드"],
     ["표시 데이터", "smoking_facilities.name, address, category, latitude, longitude 및 계산된 거리"],
     ["사용자 동작", "검색, 필터 선택, 현재 위치 확인, 상세 이동"],
@@ -201,7 +203,7 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
         </div>
 
         <button className="checkin-button" onClick={onCheckin} disabled={!coords}>
-          <Icon name="location" size={19} />{coords ? "현장 인증하기" : "좌표 준비 중이라 인증할 수 없어요"}{coords && <small>위치 + 사진 · 2P</small>}
+          <Icon name="location" size={19} />{coords ? "현장 인증하기" : "좌표 준비 중이라 인증할 수 없어요"}{coords && <small>위치 + 사진 · {CHECKIN_POINTS}P</small>}
         </button>
 
         <button className="route-button" onClick={openDirections} disabled={routing}>
@@ -222,17 +224,17 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
   </section>;
 }
 
-/** 로그인 + 성인 인증 전에는 인증 화면만 보여준다 (src/features/auth/RequireAdult.tsx) */
-function AdultGate({ children }: { children: ReactNode }) {
-  const { loading, isLoggedIn, isAdultVerified, passwordRecovery } = useAuth();
-  if (loading || !isLoggedIn || !isAdultVerified || passwordRecovery) {
-    return <main className="prototype-stage"><div className="prototype-pair"><RequireAdult>{null}</RequireAdult></div></main>;
+/** 로그인 전에는 로그인·회원가입 화면만 보여준다 (src/features/auth/RequireLogin.tsx) */
+function LoginGate({ children }: { children: ReactNode }) {
+  const { loading, isLoggedIn, passwordRecovery } = useAuth();
+  if (loading || !isLoggedIn || passwordRecovery) {
+    return <main className="prototype-stage"><div className="prototype-pair"><RequireLogin>{null}</RequireLogin></div></main>;
   }
   return <>{children}</>;
 }
 
 export default function App() {
-  return <AdultGate><MainApp /></AdultGate>;
+  return <LoginGate><MainApp /></LoginGate>;
 }
 
 function MainApp() {
@@ -372,7 +374,11 @@ function MainApp() {
   }
 
   if (activeScreen === "profile") {
-    return <main className="prototype-stage"><ProfileScreen onTab={selectTab} /></main>;
+    return <main className="prototype-stage"><ProfileScreen onTab={selectTab} onOpenAdmin={() => navigate("adminMembers")} /></main>;
+  }
+
+  if (activeScreen === "adminMembers") {
+    return <main className="prototype-stage"><AdminMembersScreen onBack={goBack} onTab={selectTab} /></main>;
   }
 
   return <main className="prototype-stage">

@@ -1,7 +1,8 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import type { AdultVerificationSuccess, AppUser, AuthService } from "./types";
+import type { AppUser, AuthService, Member } from "./types";
 
-type UsersRow = { id: string; nickname: string; is_adult_verified: boolean; verified_at: string | null; created_at: string };
+type UsersRow = { id: string; nickname: string; is_admin: boolean; created_at: string };
+type MemberRow = { user_id: string; email: string; nickname: string; is_admin: boolean; joined_at: string; points: number };
 
 function toAppUser(user: User, row: UsersRow | null): AppUser {
   const meta = user.user_metadata ?? {};
@@ -9,9 +10,8 @@ function toAppUser(user: User, row: UsersRow | null): AppUser {
     id: user.id,
     email: user.email ?? "",
     nickname: row?.nickname ?? meta.nickname ?? "",
-    // 메타데이터는 사용자가 바꿀 수 있으므로 인증 여부는 users 행만 믿는다.
-    isAdultVerified: row?.is_adult_verified === true,
-    verifiedAt: row?.verified_at ?? null,
+    // 메타데이터는 사용자가 바꿀 수 있으므로 관리자 여부는 users 행만 믿는다.
+    isAdmin: row?.is_admin === true,
     createdAt: row?.created_at ?? user.created_at,
   };
 }
@@ -25,21 +25,15 @@ function toKoreanError(message: string): Error {
   if (/rate limit/i.test(message)) return new Error("인증 메일을 너무 많이 보냈어요. 잠시 후(최대 1시간) 다시 시도해 주세요.");
   if (/should be different/i.test(message)) return new Error("이전과 다른 비밀번호를 입력해 주세요.");
   if (/password should be at least/i.test(message)) return new Error("비밀번호는 8자 이상이어야 해요.");
+  const admin = message.match(/admin: (.+)/);
+  if (admin) return new Error(admin[1]);
   return new Error(message);
 }
 
 export function createSupabaseAuthService(supabase: SupabaseClient): AuthService {
   async function loadUser(user: User): Promise<AppUser> {
-    const { data } = await supabase.from("users").select("id, nickname, is_adult_verified, verified_at, created_at").eq("id", user.id).maybeSingle<UsersRow>();
+    const { data } = await supabase.from("users").select("id, nickname, is_admin, created_at").eq("id", user.id).maybeSingle<UsersRow>();
     return toAppUser(user, data);
-  }
-
-  // users 행은 가입 시 DB 트리거가 만들고, 성인 인증 여부는 화면에서 직접 쓸 수 없다(RLS).
-  // 서버 함수가 출생연도를 다시 판단해서 저장한다. (db/migrations/006_adult_verification.sql)
-  async function saveVerification(verification: AdultVerificationSuccess) {
-    if (verification.mockBirthYear === undefined) throw new Error("성인 인증 정보가 없어요. 다시 인증해 주세요.");
-    const { error } = await supabase.rpc("complete_adult_verification", { p_birth_year: verification.mockBirthYear });
-    if (error) throw toKoreanError(error.message);
   }
 
   return {
@@ -48,15 +42,13 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
       return data.user ? loadUser(data.user) : null;
     },
 
-    async signUp({ email, password, nickname, verification }) {
-      // 닉네임은 메타데이터로 넘기면 DB 트리거(handle_new_user)가 users 행에 넣는다.
-      // 이메일 확인을 켜 두면 세션이 없어 인증을 저장할 수 없다 → 로그인 후 RequireAdult에서 다시 인증한다.
+    async signUp({ email, password, nickname }) {
+      // 닉네임은 메타데이터로 넘기면 DB 트리거(handle_new_user)가 users 행에 넣는다. 새 회원은 일반 회원이다.
       const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { nickname } } });
       if (error) throw toKoreanError(error.message);
       // 이메일 확인이 켜져 있으면 이미 가입된 이메일도 오류 없이 identities가 빈 사용자를 돌려준다(가입 여부 노출 방지).
       if (data.user && data.user.identities?.length === 0) throw new Error("이미 가입된 이메일이에요. 로그인하거나 비밀번호 찾기를 이용해 주세요.");
       if (!data.user || !data.session) return null;
-      await saveVerification(verification);
       return loadUser(data.user);
     },
 
@@ -69,13 +61,6 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
     async signOut() {
       const { error } = await supabase.auth.signOut();
       if (error) throw toKoreanError(error.message);
-    },
-
-    async saveAdultVerification(verification) {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) throw new Error("로그인이 필요해요.");
-      await saveVerification(verification);
-      return loadUser(data.user);
     },
 
     async requestPasswordReset(email) {
@@ -101,6 +86,25 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
       const { error } = await supabase.rpc("delete_my_account");
       if (error) throw new Error("탈퇴하지 못했어요. 잠시 후 다시 시도해 주세요.");
       await supabase.auth.signOut({ scope: "local" });
+    },
+
+    // 관리자 기능: 서버 함수가 관리자인지 다시 확인한다 (db/migrations/013_admin_roles.sql)
+    async listMembers() {
+      const { data, error } = await supabase.rpc("admin_list_members");
+      if (error) throw toKoreanError(error.message);
+      return ((data ?? []) as MemberRow[]).map((row): Member => ({
+        id: row.user_id,
+        email: row.email,
+        nickname: row.nickname,
+        isAdmin: row.is_admin,
+        joinedAt: row.joined_at,
+        points: row.points,
+      }));
+    },
+
+    async setMemberAdmin(userId, isAdmin) {
+      const { error } = await supabase.rpc("admin_set_member_role", { p_user_id: userId, p_is_admin: isAdmin });
+      if (error) throw toKoreanError(error.message);
     },
 
     onAuthChange(callback) {

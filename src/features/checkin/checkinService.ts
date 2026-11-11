@@ -5,11 +5,11 @@ import { mockPoints } from "../rewards/mockPoints";
 
 // 현장 인증: 흡연시설 현장에서 위치 + 앱 카메라 사진으로 "이 장소가 실제로 있다"를 확인하고 포인트를 받는다.
 // 규칙은 서버 함수 complete_onsite_checkin(009, 반경은 011)이 다시 확인한다:
-// 성인 인증 회원, GPS 정확도 30m 이내, 시설에서 30m 이내, 같은 장소 하루 1번, 1회 2P (하루 최대 10P).
+// 로그인 회원, GPS 정확도 30m 이내, 시설에서 30m 이내, 같은 장소 하루 1번, 1회 1P (012, 하루 최대 10P).
 
 export const CHECKIN_RADIUS_M = 30;
 export const CHECKIN_MAX_ACCURACY_M = 30;
-export const CHECKIN_POINTS = 2;
+export const CHECKIN_POINTS = 1;
 
 const PHOTO_BUCKET = "report-photos";
 

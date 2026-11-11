@@ -17,7 +17,7 @@ export const reasonLabels: Record<string, string> = {
 
 /** Supabase 키가 없을 때만 쓰는 예시 적립 내역 */
 export const mockPoints: PointLedgerRecord[] = [
-  { id: "mock-p3", user_id: "mock", amount: 3, reason: "report_accepted", ref_id: "report:mock-2", created_at: "2026-10-28T09:10:00+09:00" },
-  { id: "mock-p2", user_id: "mock", amount: 3, reason: "report_accepted", ref_id: "report:mock-5", created_at: "2026-10-28T08:40:00+09:00" },
-  { id: "mock-p1", user_id: "mock", amount: 3, reason: "report_accepted", ref_id: "report:mock-4", created_at: "2026-10-21T17:40:00+09:00" },
+  { id: "mock-p3", user_id: "mock", amount: 2, reason: "report_accepted", ref_id: "report:mock-2", created_at: "2026-10-28T09:10:00+09:00" },
+  { id: "mock-p2", user_id: "mock", amount: 2, reason: "report_accepted", ref_id: "report:mock-5", created_at: "2026-10-28T08:40:00+09:00" },
+  { id: "mock-p1", user_id: "mock", amount: 2, reason: "report_accepted", ref_id: "report:mock-4", created_at: "2026-10-21T17:40:00+09:00" },
 ];

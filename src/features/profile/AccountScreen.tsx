@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../auth";
 import { getMyReports } from "../reports/reportService";
 import { getMyPoints, getPointHistory, type PointSummary } from "../rewards/rewardService";
-import { BottomNavigation, ScreenAnnotation, ScreenHeader, type MainTab } from "./AppShell";
+import { BottomNavigation, ScreenHeader, type MainTab } from "./AppShell";
 import "./profile.css";
 
 const formatDate = (value: string) =>
@@ -132,14 +132,6 @@ export default function AccountScreen({ onBack, onTab }: { onBack: () => void; o
           <BottomNavigation active="profile" onSelect={onTab} />
         </div>
       </section>
-      <ScreenAnnotation
-        screen="UI-11 계정 정보"
-        path="마이페이지 > 계정 정보"
-        elements="닉네임(변경), 이메일, 로그인 방식, 가입일, 회원 구분, 포인트·활동 요약, 비밀번호 변경"
-        data="users.nickname·is_admin·created_at, auth 이메일, get_my_point_summary(), reports·point_ledger(내 것)"
-        action="닉네임 변경, 비밀번호 변경"
-        link="useAuth().updateNickname / updatePassword, UI-10 마이페이지"
-      />
     </div>
   );
 }

@@ -23,7 +23,6 @@ import {
 } from "./features/profile/AppShell";
 import "./features/profile/appShell.css";
 
-type PreviewState = "default" | "empty" | "denied";
 
 type AppScreen =
   | "list"
@@ -101,50 +100,6 @@ function EmptyState({ message = "검색 결과가 없습니다" }: { message?: s
     <strong>{message}</strong>
     <p>다른 지역명이나 장소명으로 검색해 보세요.</p>
   </div>;
-}
-
-function ListAnnotation({ state, onState }: { state: PreviewState; onState: (state: PreviewState) => void }) {
-  const notes = [
-    ["화면 ID·화면명", "UI-01 흡연구역 목록"],
-    ["진입 경로", "서비스 첫 화면 (로그인 후)"],
-    ["구성 요소", "검색창, 위치 버튼, 업종 필터, 지도 미리보기, 장소 카드"],
-    ["표시 데이터", "smoking_facilities.name, address, category, latitude, longitude 및 계산된 거리"],
-    ["사용자 동작", "검색, 필터 선택, 현재 위치 확인, 상세 이동"],
-    ["연계 기능", "FR-01, FR-02 (임시 번호)"],
-  ];
-  return <aside className="annotation">
-    <div className="annotation-kicker">DEVELOPER NOTE</div>
-    <div className="annotation-title">화면 정의</div>
-    <div className="annotation-list">{notes.map(([title, body], index) =>
-      <div className="annotation-row" key={title}><span>{index + 1}</span><div><strong>{title}</strong><p>{body}</p></div></div>
-    )}</div>
-    <div className="state-preview">
-      <strong>상태 미리보기</strong>
-      <div>{([["default", "기본"], ["empty", "결과 없음"], ["denied", "위치 권한 없음"]] as const).map(([value, label]) =>
-        <button className={state === value ? "active" : ""} key={value} onClick={() => onState(value)}>{label}</button>
-      )}</div>
-    </div>
-    <p className="annotation-foot">{isMockData ? "Supabase 키가 없어 예시 장소 5곳을 보여줍니다." : "Supabase smoking_facilities 테이블의 실제 데이터입니다."}</p>
-  </aside>;
-}
-
-function DetailAnnotation() {
-  const notes = [
-    ["화면 ID·화면명", "UI-02 흡연구역 상세"],
-    ["진입 경로", "UI-01 장소 카드 선택"],
-    ["구성 요소", "장소명, 주소, 업종, 카카오 지도, 길찾기, 오류 신고"],
-    ["표시 데이터", "smoking_facilities.name, address, category, room_count, latitude, longitude 및 계산된 거리"],
-    ["사용자 동작", "뒤로가기, 카카오맵 길찾기, 오류 신고"],
-    ["연계 기능", "FR-02, FR-03 (임시 번호), UI-06 오류 신고"],
-  ];
-  return <aside className="annotation">
-    <div className="annotation-kicker">DEVELOPER NOTE</div>
-    <div className="annotation-title">UI-02 화면 정의</div>
-    <div className="annotation-list">{notes.map(([title, body], index) =>
-      <div className="annotation-row" key={title}><span>{index + 1}</span><div><strong>{title}</strong><p>{body}</p></div></div>
-    )}</div>
-    <p className="annotation-foot">지도는 VITE_KAKAO_MAP_JS_KEY가 있을 때 카카오 지도로 바뀝니다. 좌표가 없는 장소는 카카오맵 주소 검색으로 연결합니다.</p>
-  </aside>;
 }
 
 function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { place: PlaceView; userLocation: LatLng | null; onBack: () => void; onReport: () => void; onCheckin: () => void }) {
@@ -249,7 +204,6 @@ function MainApp() {
   const [searchMessage, setSearchMessage] = useState("");
   const [searching, setSearching] = useState(false);
   const [filter, setFilter] = useState("전체");
-  const [previewState, setPreviewState] = useState<PreviewState>("default");
   const [refreshing, setRefreshing] = useState(false);
   const [notice, setNotice] = useState("");
   const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
@@ -264,14 +218,13 @@ function MainApp() {
   }, []);
 
   const refreshLocation = async () => {
-    if (previewState === "denied") return;
     setRefreshing(true);
     setUserLocation(await getCurrentPosition());
     setRefreshing(false);
   };
   useEffect(() => { void refreshLocation(); }, []);
 
-  const located = previewState !== "denied" ? userLocation : null;
+  const located = userLocation;
   const placeViews = useMemo<PlaceView[]>(() => (places ?? []).map((place) => {
     const coords = placeCoords(place);
     return { ...place, meters: coords && located ? distanceMeters(located, coords) : null };
@@ -285,7 +238,6 @@ function MainApp() {
   }, [placeViews]);
 
   const filtered = useMemo(() => {
-    if (previewState === "empty") return [];
     const byCategory = placeViews.filter((place) => filter === "전체" || place.category === filter);
     if (searchArea) {
       // 검색한 위치 기준: 이름이 달라도 그 근처 시설을 가까운 순으로
@@ -299,7 +251,7 @@ function MainApp() {
     return byCategory
       .filter((place) => !keyword || `${place.name} ${place.address}`.toLowerCase().includes(keyword))
       .sort((a, b) => (a.meters ?? Infinity) - (b.meters ?? Infinity));
-  }, [placeViews, filter, previewState, query, searchArea]);
+  }, [placeViews, filter, query, searchArea]);
 
   const runLocationSearch = async () => {
     const keyword = query.trim();
@@ -374,7 +326,6 @@ function MainApp() {
     try {
       const fix = await getGpsFix();
       setUserLocation(fix);
-      if (previewState === "denied") setPreviewState("default");
       const nearest = findNearest(places ?? [], fix);
       if (!nearest) {
         setFinding({ message: "위치 정보가 있는 흡연구역이 없어요.", done: true });
@@ -431,7 +382,7 @@ function MainApp() {
   }
 
   return <main className="prototype-stage">
-    <div className={`prototype-pair ${activeScreen !== "list" ? "mobile-hidden" : ""}`} id="ui-01">
+    <div className={`prototype-pair ${activeScreen !== "list" ? "screen-hidden" : ""}`} id="ui-01">
     <section className="phone-frame" aria-label="UI-01 흡연구역 목록 모바일 화면">
       <div className="phone-content with-bottom-navigation">
         <header className="service-header">
@@ -446,9 +397,9 @@ function MainApp() {
           <button className={refreshing ? "spin" : ""} onClick={() => void refreshLocation()} aria-label="현재 위치 새로고침"><Icon name="refresh" size={19} /></button>
         </div>
 
-        {(previewState === "denied" || (!located && !refreshing)) && <div className="permission-state">
+        {!located && !refreshing && <div className="permission-state">
           <Icon name="info" size={19} /><div><strong>위치 권한이 필요합니다</strong><p>브라우저 설정에서 위치 권한을 허용하면 가까운 순으로 확인할 수 있어요.</p></div>
-          <button onClick={() => { setPreviewState("default"); void refreshLocation(); }}>다시 시도</button>
+          <button onClick={() => void refreshLocation()}>다시 시도</button>
         </div>}
 
         <form className="search-field" role="search" onSubmit={(event) => { event.preventDefault(); void runLocationSearch(); }}>
@@ -500,14 +451,12 @@ function MainApp() {
         {finding.done && <button onClick={() => setFinding(null)}>닫기</button>}
       </div>}
     </section>
-    <ListAnnotation state={previewState} onState={setPreviewState} />
     </div>
-    {selectedPlace && <div className={`prototype-pair ${activeScreen !== "detail" ? "mobile-hidden" : ""}`} id="ui-02">
+    {selectedPlace && <div className={`prototype-pair ${activeScreen !== "detail" ? "screen-hidden" : ""}`} id="ui-02">
       <DetailScreen place={selectedPlace} userLocation={located} onReport={() => navigate("reportCreate")} onCheckin={() => navigate("checkin")} onBack={() => {
         goBack();
         window.setTimeout(() => document.getElementById("ui-01")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
       }} />
-      <DetailAnnotation />
     </div>}
   </main>;
 }

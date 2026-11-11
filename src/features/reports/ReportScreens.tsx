@@ -3,7 +3,6 @@ import { isMockData } from "../auth/supabaseClient";
 import {
   AppIcon,
   BottomNavigation,
-  ScreenAnnotation,
   ScreenHeader,
   type MainTab,
 } from "../profile/AppShell";
@@ -225,14 +224,6 @@ export function ReportCreateScreen({
           )}
         </div>
       </section>
-      <ScreenAnnotation
-        screen="UI-06 오류 신고 작성"
-        path="UI-02 정보 수정 요청"
-        elements="시설 선택, 신고 유형, 상세 내용, 현재 위치 확인, 앱 내 카메라 촬영(갤러리 불가), 제출"
-        data="reports.user_id, facility_id, type, content, status, photo_path, reporter_latitude·longitude, location_accuracy_m / Storage report-photos"
-        action="시설·유형 선택, 내용 입력, 위치 확인, 현장 사진 촬영·다시 찍기, 제출 (위치·사진 둘 다 있어야 제출)"
-        link="createReport(), UI-07 내 신고 목록"
-      />
     </div>
   );
 }
@@ -325,14 +316,6 @@ export function ReportListScreen({
           <BottomNavigation active="profile" onSelect={onTab} />
         </div>
       </section>
-      <ScreenAnnotation
-        screen="UI-07 내 신고 목록"
-        path="마이페이지 > 내 신고 내역, UI-06 제출 완료"
-        elements="상태 필터, 신고 카드, 상태 배지, 빈 화면"
-        data="reports 중 로그인한 회원의 신고 (RLS로 내 신고만 조회)"
-        action="상태 필터, 신고 상세보기, 하단 메뉴 이동"
-        link="getMyReports(), UI-08 신고 상세"
-      />
     </div>
   );
 }
@@ -435,14 +418,6 @@ export function ReportDetailScreen({
           </div>
         </div>
       </section>
-      <ScreenAnnotation
-        screen="UI-08 신고 상세"
-        path="UI-07 신고 상세보기"
-        elements="시설 정보, 유형, 내용, 날짜, 상태, 첨부 영역, 관리자 답변"
-        data="reports 단건과 smoking_facilities 표시 정보"
-        action="내용 확인, 목록으로 돌아가기"
-        link="getReportDetail(), UI-07 내 신고 목록"
-      />
     </div>
   );
 }

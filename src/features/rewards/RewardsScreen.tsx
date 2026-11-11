@@ -3,7 +3,6 @@ import { isMockData } from "../auth/supabaseClient";
 import {
   AppIcon,
   BottomNavigation,
-  ScreenAnnotation,
   ScreenHeader,
   type MainTab,
 } from "../profile/AppShell";
@@ -101,14 +100,6 @@ export default function RewardsScreen({
           <BottomNavigation active="rewards" onSelect={onTab} />
         </div>
       </section>
-      <ScreenAnnotation
-        screen="UI-09 리워드·포인트"
-        path="하단 리워드, 마이페이지 내 리워드"
-        elements="보유 포인트, 오늘 진행 상태, 적립 내역, 이용 안내"
-        data="get_my_point_summary(), point_ledger.amount, reason, ref_id, created_at"
-        action="내역 확인, 하단 메뉴 이동"
-        link="getMyPoints(), getPointHistory(), UI-10 마이페이지"
-      />
     </div>
   );
 }

@@ -9,7 +9,7 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; }
+body { margin: 0; min-width: 320px; min-height: 100vh; min-height: 100dvh; }
 button, input { font: inherit; }
 button { color: inherit; cursor: pointer; }
 
@@ -133,29 +133,6 @@ button { color: inherit; cursor: pointer; }
 .empty-state p { margin: 5px 0 0; color: #8b9690; font-size: 9px; }
 .toast { position: absolute; z-index: 10; left: 20px; right: 20px; bottom: 22px; padding: 13px 16px; border-radius: 12px; color: white; background: rgba(20, 42, 32, .94); box-shadow: 0 8px 24px rgba(12, 34, 23, .2); font-size: 10px; text-align: center; }
 
-.annotation {
-  width: 340px;
-  margin-top: 42px;
-  padding: 25px;
-  border: 1px solid #dce5e0;
-  border-radius: 20px;
-  background: rgba(255,255,255,.92);
-  box-shadow: 0 18px 50px rgba(30, 65, 49, .1);
-}
-.annotation-kicker { color: #397d60; font-size: 9px; font-weight: 800; letter-spacing: .15em; }
-.annotation-title { margin: 7px 0 21px; font-size: 21px; font-weight: 800; letter-spacing: -.03em; }
-.annotation-list { display: flex; flex-direction: column; gap: 16px; }
-.annotation-row { display: grid; grid-template-columns: 23px 1fr; gap: 10px; }
-.annotation-row > span { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 7px; color: #176345; background: #e4f3ea; font-size: 9px; font-weight: 800; }
-.annotation-row strong { display: block; margin-bottom: 4px; color: #55635c; font-size: 10px; }
-.annotation-row p { margin: 0; color: #17251f; font-size: 11px; line-height: 1.55; word-break: break-word; }
-.state-preview { margin-top: 22px; padding-top: 18px; border-top: 1px solid #e4ebe7; }
-.state-preview > strong { display: block; margin-bottom: 9px; font-size: 10px; }
-.state-preview > div { display: flex; flex-wrap: wrap; gap: 6px; }
-.state-preview button { padding: 7px 9px; border: 1px solid #dce5e0; border-radius: 8px; color: #66736c; background: white; font-size: 9px; }
-.state-preview button.active { border-color: #176345; color: white; background: #176345; }
-.annotation-foot { margin: 18px 0 0; padding: 11px; border-radius: 9px; color: #68756e; background: #f3f7f5; font-size: 9px; line-height: 1.5; }
-
 .detail-frame { background: #f9fbfa; }
 .detail-screen { height: 100%; position: relative; display: flex; flex-direction: column; overflow: hidden; }
 .detail-header { height: 62px; padding: 0 18px; display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; border-bottom: 1px solid #e8eeeb; background: white; }
@@ -197,14 +174,6 @@ button { color: inherit; cursor: pointer; }
 .detail-bottom > button { width: 100%; height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; border-radius: 15px; color: white; background: #176345; box-shadow: 0 9px 22px rgba(23, 99, 69, .22); font-size: 14px; font-weight: 800; }
 .detail-bottom small { color: rgba(255,255,255,.72); font-size: 8px; font-weight: 500; }
 
-@media (max-width: 820px) {
-  .prototype-stage { padding: 0; display: block; background: white; }
-  .prototype-pair { display: block; }
-  .prototype-pair.mobile-hidden { display: none; }
-  .phone-frame { width: 100%; height: 100vh; min-height: 700px; border: 0; border-radius: 0; box-shadow: none; }
-  .phone-content { padding-top: 24px; }
-  .annotation { display: none; }
-}
 .map-preview.live { height: 220px; }
 /* 지도 전체 화면: 확대 버튼을 누르면 화면 전체를 덮는다 */
 .map-preview.fullscreen { position: fixed; z-index: 1000; inset: 0; height: auto; border-radius: 0; }

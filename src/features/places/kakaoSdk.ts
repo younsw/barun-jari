@@ -22,7 +22,7 @@ export function loadKakaoMaps(): Promise<any> {
 
   sdkPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(JS_KEY)}&autoload=false`;
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(JS_KEY)}&autoload=false&libraries=services`;
     script.async = true;
     script.onload = () => window.kakao.maps.load(() => resolve(window.kakao));
     script.onerror = () => {
@@ -32,6 +32,29 @@ export function loadKakaoMaps(): Promise<any> {
     document.head.appendChild(script);
   });
   return sdkPromise;
+}
+
+export type SearchedArea = LatLng & { label: string };
+
+/** 검색어(지역명·장소명·주소)를 카카오 장소 검색 → 주소 검색 순서로 찾아 좌표를 돌려준다. 없으면 null */
+export async function searchLocation(query: string): Promise<SearchedArea | null> {
+  const keyword = query.trim();
+  if (!keyword) return null;
+  const kakao = await loadKakaoMaps();
+  const { services } = kakao.maps;
+  const fromPlaces = await new Promise<SearchedArea | null>((resolve) => {
+    new services.Places().keywordSearch(keyword, (result: any[], status: string) => {
+      const first = status === services.Status.OK ? result[0] : null;
+      resolve(first ? { latitude: Number(first.y), longitude: Number(first.x), label: first.place_name } : null);
+    }, { size: 1 });
+  });
+  if (fromPlaces) return fromPlaces;
+  return new Promise((resolve) => {
+    new services.Geocoder().addressSearch(keyword, (result: any[], status: string) => {
+      const first = status === services.Status.OK ? result[0] : null;
+      resolve(first ? { latitude: Number(first.y), longitude: Number(first.x), label: first.address_name } : null);
+    });
+  });
 }
 
 // 링크 형식: https://map.kakao.com/link/by/{이동수단}/출발이름,위도,경도/도착이름,위도,경도

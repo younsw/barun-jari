@@ -104,6 +104,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPasswordRecovery(false);
       setUser(null);
     },
+    async updateNickname(nickname) {
+      const trimmed = nickname.trim();
+      if (!NICKNAME_PATTERN.test(trimmed)) throw new Error("닉네임은 한글·영문·숫자 2~12자로 입력해 주세요.");
+      await authService.updateNickname(trimmed);
+      await refresh();
+    },
     listMembers: () => authService.listMembers(),
     async setMemberAdmin(userId, isAdmin) {
       await authService.setMemberAdmin(userId, isAdmin);

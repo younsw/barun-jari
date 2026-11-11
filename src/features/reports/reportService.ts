@@ -64,7 +64,10 @@ export async function createReport(input: { facility_id: number; type: ReportTyp
 
 export async function getMyReports(): Promise<ReportRecord[]> {
   if (!supabase) return [...memoryReports].sort((a, b) => b.created_at.localeCompare(a.created_at));
-  const { data, error } = await supabase.from("reports").select(SELECT).order("created_at", { ascending: false }).returns<ReportRow[]>();
+  // 관리자는 DB 권한상 모든 신고를 볼 수 있으므로, 내 신고 내역에서는 내 것만 고른다 (전체 신고는 관리자 모드에서)
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error("로그인이 필요해요.");
+  const { data, error } = await supabase.from("reports").select(SELECT).eq("user_id", auth.user.id).order("created_at", { ascending: false }).returns<ReportRow[]>();
   if (error) throw new Error("신고 내역을 불러오지 못했어요.");
   return data.map(toRecord);
 }

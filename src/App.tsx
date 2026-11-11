@@ -3,7 +3,7 @@ import { RequireLogin, useAuth } from "./features/auth";
 import { isMockData } from "./features/auth/supabaseClient";
 import KakaoMap from "./features/places/KakaoMap";
 import NearbyMap from "./features/places/NearbyMap";
-import { buildDirectionsUrl, buildSearchUrl, getCurrentPosition, getGpsFix, hasKakaoMapKey, type LatLng } from "./features/places/kakaoSdk";
+import { buildDirectionsUrl, buildSearchUrl, getCurrentPosition, getGpsFix, hasKakaoMapKey, searchLocation, type LatLng, type SearchedArea } from "./features/places/kakaoSdk";
 import { distanceMeters, formatDistance, getFacilities, placeCoords, type Place } from "./features/places/placeService";
 import {
   ReportCreateScreen,
@@ -15,6 +15,7 @@ import CheckinScreen from "./features/checkin/CheckinScreen";
 import { CHECKIN_POINTS, CHECKIN_RADIUS_M, findNearest } from "./features/checkin/checkinService";
 import "./features/checkin/checkin.css";
 import ProfileScreen from "./features/profile/ProfileScreen";
+import AccountScreen from "./features/profile/AccountScreen";
 import AdminApp from "./features/admin/AdminApp";
 import {
   BottomNavigation,
@@ -33,7 +34,8 @@ type AppScreen =
   | "reportDetail"
   | "rewards"
   | "profile"
-  | "admin";
+  | "admin"
+  | "account";
 
 /** 화면 표시용: 장소 + 현재 위치에서의 거리 */
 type PlaceView = Place & { meters: number | null };
@@ -54,7 +56,7 @@ function Icon({ name, size = 20 }: { name: "search" | "location" | "refresh" | "
 }
 
 // 첫 화면 지도: 키가 있으면 내 위치 중심 카카오 지도, 없거나 실패하면 기존 목업
-function MapPreview({ userLocation, places, onSelect }: { userLocation: LatLng | null; places: PlaceView[]; onSelect: (id: number) => void }) {
+function MapPreview({ userLocation, focus, places, onSelect }: { userLocation: LatLng | null; focus: SearchedArea | null; places: PlaceView[]; onSelect: (id: number) => void }) {
   const [mapAvailable, setMapAvailable] = useState(hasKakaoMapKey);
   const [fullscreen, setFullscreen] = useState(false);
   // 전체 화면일 때 Esc로 닫고, 뒤 화면이 스크롤되지 않게 막는다
@@ -75,11 +77,11 @@ function MapPreview({ userLocation, places, onSelect }: { userLocation: LatLng |
   }), [places]);
   if (mapAvailable) {
     return <div className={`map-preview live ${fullscreen ? "fullscreen" : ""}`}>
-      <NearbyMap userLocation={userLocation} places={nearby} onSelect={(id) => { setFullscreen(false); onSelect(id); }} onUnavailable={() => setMapAvailable(false)} />
+      <NearbyMap userLocation={userLocation} focus={focus} places={nearby} onSelect={(id) => { setFullscreen(false); onSelect(id); }} onUnavailable={() => setMapAvailable(false)} />
       <button className="map-fullscreen-toggle" onClick={() => setFullscreen(!fullscreen)} aria-label={fullscreen ? "전체 화면 닫기" : "지도 전체 화면으로 보기"}>
         <Icon name={fullscreen ? "close" : "expand"} size={fullscreen ? 20 : 17} />
       </button>
-      {!userLocation && <span className="map-hint">위치 권한을 허용하면 내 위치 중심으로 보여드려요</span>}
+      {!userLocation && !focus && <span className="map-hint">위치 권한을 허용하면 내 위치 중심으로 보여드려요</span>}
     </div>;
   }
   return <div className="map-preview" aria-label="목업 지도 미리보기">
@@ -242,6 +244,10 @@ function MainApp() {
   const [loadError, setLoadError] = useState("");
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [query, setQuery] = useState("");
+  // 검색어로 찾은 위치: 지도를 그곳으로 옮기고 목록을 그 위치에서 가까운 순으로 보여준다
+  const [searchArea, setSearchArea] = useState<(SearchedArea & { query: string }) | null>(null);
+  const [searchMessage, setSearchMessage] = useState("");
+  const [searching, setSearching] = useState(false);
   const [filter, setFilter] = useState("전체");
   const [previewState, setPreviewState] = useState<PreviewState>("default");
   const [refreshing, setRefreshing] = useState(false);
@@ -280,12 +286,51 @@ function MainApp() {
 
   const filtered = useMemo(() => {
     if (previewState === "empty") return [];
+    const byCategory = placeViews.filter((place) => filter === "전체" || place.category === filter);
+    if (searchArea) {
+      // 검색한 위치 기준: 이름이 달라도 그 근처 시설을 가까운 순으로
+      const fromArea = (place: PlaceView) => {
+        const coords = placeCoords(place);
+        return coords ? distanceMeters(searchArea, coords) : Infinity;
+      };
+      return [...byCategory].sort((a, b) => fromArea(a) - fromArea(b));
+    }
     const keyword = query.trim().toLowerCase();
-    return placeViews
-      .filter((place) => (filter === "전체" || place.category === filter)
-        && (!keyword || `${place.name} ${place.address}`.toLowerCase().includes(keyword)))
+    return byCategory
+      .filter((place) => !keyword || `${place.name} ${place.address}`.toLowerCase().includes(keyword))
       .sort((a, b) => (a.meters ?? Infinity) - (b.meters ?? Infinity));
-  }, [placeViews, filter, previewState, query]);
+  }, [placeViews, filter, previewState, query, searchArea]);
+
+  const runLocationSearch = async () => {
+    const keyword = query.trim();
+    if (!keyword) return;
+    if (!hasKakaoMapKey) {
+      setSearchMessage("지도 키가 없어 이름·주소로만 걸러 보여드려요.");
+      return;
+    }
+    setSearching(true);
+    setSearchMessage("");
+    try {
+      const area = await searchLocation(keyword);
+      if (area) {
+        setSearchArea({ ...area, query: keyword });
+      } else {
+        setSearchArea(null);
+        setSearchMessage(`'${keyword}' 위치를 찾지 못해 이름·주소로 걸러 보여드려요.`);
+      }
+    } catch {
+      setSearchArea(null);
+      setSearchMessage("위치 검색을 하지 못했어요. 이름·주소로 걸러 보여드려요.");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const changeQuery = (value: string) => {
+    setQuery(value);
+    setSearchMessage("");
+    if (searchArea && value.trim() !== searchArea.query) setSearchArea(null);
+  };
 
   const selectedPlace = placeViews.find((place) => place.id === selectedPlaceId) ?? null;
   const hasDistance = filtered.some((place) => place.meters !== null);
@@ -374,7 +419,11 @@ function MainApp() {
   }
 
   if (activeScreen === "profile") {
-    return <main className="prototype-stage"><ProfileScreen onTab={selectTab} onOpenAdmin={() => navigate("admin")} /></main>;
+    return <main className="prototype-stage"><ProfileScreen onTab={selectTab} onOpenAdmin={() => navigate("admin")} onOpenAccount={() => navigate("account")} /></main>;
+  }
+
+  if (activeScreen === "account") {
+    return <main className="prototype-stage"><AccountScreen onBack={goBack} onTab={selectTab} /></main>;
   }
 
   if (activeScreen === "admin") {
@@ -402,22 +451,28 @@ function MainApp() {
           <button onClick={() => { setPreviewState("default"); void refreshLocation(); }}>다시 시도</button>
         </div>}
 
-        <label className="search-field">
+        <form className="search-field" role="search" onSubmit={(event) => { event.preventDefault(); void runLocationSearch(); }}>
           <Icon name="search" size={20} />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="지역명 또는 장소명을 검색하세요" />
-          {query && <button onClick={() => setQuery("")} aria-label="검색어 지우기">×</button>}
-        </label>
+          <input value={query} onChange={(event) => changeQuery(event.target.value)} placeholder="지역명 또는 장소명을 검색하세요" enterKeyHint="search" aria-label="지역명 또는 장소명 검색" />
+          {query && <button type="button" onClick={() => changeQuery("")} aria-label="검색어 지우기">×</button>}
+          <button type="submit" className="search-go" disabled={!query.trim() || searching}>{searching ? "찾는 중" : "지도 이동"}</button>
+        </form>
+        {searchArea && <div className="search-area">
+          <span><b>{searchArea.label}</b> 주변을 보여드려요</span>
+          <button onClick={() => changeQuery("")}>검색 해제</button>
+        </div>}
+        {searchMessage && <p className="search-message">{searchMessage}</p>}
 
         <div className="filters">{categories.slice(0, 4).map((item) =>
           <button key={item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)}>{item}</button>
         )}</div>
 
-        <MapPreview userLocation={located} places={filtered} onSelect={(id) => {
+        <MapPreview userLocation={located} focus={searchArea} places={filtered} onSelect={(id) => {
           const place = filtered.find((item) => item.id === id);
           if (place) openDetail(place);
         }} />
 
-        <div className="list-heading"><div><strong>주변 흡연시설</strong><span>{filtered.length}곳</span></div><small>{hasDistance ? "가까운 순" : "좌표 준비 중"}</small></div>
+        <div className="list-heading"><div><strong>주변 흡연시설</strong><span>{filtered.length}곳</span></div><small>{searchArea ? "검색 위치에서 가까운 순" : hasDistance ? "가까운 순" : "좌표 준비 중"}</small></div>
         <div className="place-list">
           {loadError ? <EmptyState message={loadError} />
             : places === null ? <EmptyState message="흡연시설을 불러오는 중…" />

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  adjustSponsorBudget, listSponsors, listSponsorTransactions, LOW_BUDGET_RATIO, saveSponsor,
-  type Sponsor, type SponsorInput, type SponsorTransaction,
+  adjustSponsorBudget, getSponsorShortfall, listSponsors, listSponsorTransactions, LOW_BUDGET_RATIO, saveSponsor, WAITING_SPONSOR_ID,
+  type Sponsor, type SponsorInput, type SponsorShortfall, type SponsorTransaction,
 } from "./adminService";
 import { errorText, formatDateTime, pointReasonLabels } from "./adminLabels";
 
@@ -13,12 +13,16 @@ type Panel = { kind: "new" } | { kind: "edit"; sponsor: Sponsor } | { kind: "adj
 export default function AdminSponsorsScreen() {
   const [sponsors, setSponsors] = useState<Sponsor[] | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
+  const [shortfall, setShortfall] = useState<SponsorShortfall | null>(null);
+  const [waitingOpen, setWaitingOpen] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     setError("");
     try {
-      setSponsors(await listSponsors());
+      const [list, short] = await Promise.all([listSponsors(), getSponsorShortfall()]);
+      setSponsors(list);
+      setShortfall(short);
     } catch (caught) {
       setError(errorText(caught, "후원 기업을 불러오지 못했어요."));
       setSponsors([]);
@@ -29,17 +33,34 @@ export default function AdminSponsorsScreen() {
   const active = (sponsors ?? []).filter((s) => s.active);
   const total = active.reduce((sum, s) => sum + s.budget, 0);
   const paid = active.reduce((sum, s) => sum + s.paid, 0);
-  const low = (sponsors ?? []).filter(isLow);
+  const low = (sponsors ?? []).filter((s) => isLow(s) && s.remaining >= 0);
+  const deficit = (sponsors ?? []).filter((s) => s.remaining < 0);
+  const needed = shortfall ? shortfall.waitingPoints + shortfall.deficitPoints : 0;
   const done = async () => { setPanel(null); await load(); };
 
   return (
     <>
-      <p className="admin-hint strong">실제 협찬이 아닌 가상 시뮬레이션이에요. 회원에게 포인트가 적립되면 진행 중이고 예산이 남은 기업(종료일이 빠른 순)에서 차감한 것으로 기록해요.</p>
+      <p className="admin-hint strong">실제 협찬이 아닌 가상 시뮬레이션이에요. 포인트는 예산이 모자라도 먼저 지급하고 진행 중인 기업 예산에서 차감해요(마이너스 가능). 진행 중인 기업이 없으면 "후원 대기"로 쌓였다가, 예산을 추가하거나 새 기업을 등록하면 오래된 것부터 그 예산으로 옮겨져요.</p>
       <div className="admin-summary">
         <div><span>진행 중 총예산</span><strong>{total.toLocaleString()}P</strong></div>
         <div><span>지급</span><strong>{paid.toLocaleString()}P</strong></div>
-        <div><span>잔여</span><strong>{(total - paid).toLocaleString()}P</strong></div>
+        <div><span>잔여</span><strong className={total - paid < 0 ? "minus" : ""}>{(total - paid).toLocaleString()}P</strong></div>
+        <div><span>후원 필요</span><strong className={needed > 0 ? "minus" : ""}>{shortfall === null ? "-" : `${needed.toLocaleString()}P`}</strong></div>
       </div>
+      {deficit.length > 0 && (
+        <div className="admin-alert-box static danger">
+          <strong>예산 초과 (적자)</strong>
+          <span>{deficit.map((s) => `${s.name} ${s.remaining}P`).join(", ")} — 지급은 계속되고 있어요. 예산을 추가하면 적자가 메워져요.</span>
+        </div>
+      )}
+      {shortfall && shortfall.waitingCount > 0 && (
+        <div className="admin-alert-box static">
+          <strong>후원 대기 {shortfall.waitingPoints.toLocaleString()}P ({shortfall.waitingCount}건)</strong>
+          <span>진행 중인 후원 기업이 없을 때 지급된 포인트예요. 예산을 추가하면 자동으로 배정돼요.</span>
+          <button className="admin-link" onClick={() => setWaitingOpen(!waitingOpen)}>{waitingOpen ? "내역 닫기" : "대기 내역 보기"}</button>
+          {waitingOpen && <SponsorHistory sponsorId={WAITING_SPONSOR_ID} />}
+        </div>
+      )}
       {low.length > 0 && (
         <div className="admin-alert-box static">
           <strong>예산 부족 알림</strong>
@@ -70,7 +91,7 @@ export default function AdminSponsorsScreen() {
               <small>{sponsor.startsOn} ~ {sponsor.endsOn}</small>
               <div className="admin-budget">
                 <div className="bar"><i style={{ width: `${rate}%` }} className={isLow(sponsor) ? "low" : ""} /></div>
-                <span>총 {sponsor.budget.toLocaleString()}P · 지급 {sponsor.paid.toLocaleString()}P · 잔여 <b>{sponsor.remaining.toLocaleString()}P</b> · 소진 {rate}%</span>
+                <span>총 {sponsor.budget.toLocaleString()}P · 지급 {sponsor.paid.toLocaleString()}P · 잔여 <b className={sponsor.remaining < 0 ? "minus" : ""}>{sponsor.remaining.toLocaleString()}P</b> · 소진 {sponsor.budget > 0 ? Math.round((sponsor.paid / sponsor.budget) * 100) : 0}%</span>
               </div>
               <div className="admin-actions three">
                 <button className="ghost" onClick={() => setPanel(open === "edit" ? null : { kind: "edit", sponsor })}>정보 수정</button>
@@ -154,7 +175,7 @@ function BudgetForm({ sponsor, onCancel, onDone }: { sponsor: Sponsor; onCancel:
         <button className={mode === "add" ? "active accepted" : ""} onClick={() => setMode("add")}>예산 추가</button>
         <button className={mode === "cut" ? "active rejected" : ""} onClick={() => setMode("cut")}>예산 감액</button>
       </div>
-      <label className="admin-field"><span>포인트 (잔여 {sponsor.remaining}P)</span><input inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))} placeholder="예: 500" /></label>
+      <label className="admin-field"><span>포인트 (잔여 {sponsor.remaining}P{sponsor.remaining < 0 ? " · 추가하면 적자부터 메워져요" : ""})</span><input inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))} placeholder="예: 500" /></label>
       <label className="admin-field"><span>사유</span><input value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} placeholder="예: 2차 후원금 입금 (가상)" /></label>
       {error && <p className="admin-error" role="alert">{error}</p>}
       <div className="admin-actions">

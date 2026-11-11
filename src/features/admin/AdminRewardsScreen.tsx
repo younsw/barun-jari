@@ -97,7 +97,7 @@ export default function AdminRewardsScreen() {
             <div className="row" key={p.id}>
               <div>
                 <strong>{p.nickname ?? "탈퇴 회원"} · {pointReasonLabels[p.reason] ?? p.reason}</strong>
-                <small>{formatDateTime(p.createdAt)}{p.sponsorName ? ` · ${p.sponsorName} 예산` : " · 후원 예산 미차감"}</small>
+                <small>{formatDateTime(p.createdAt)}{p.sponsorName ? ` · ${p.sponsorName} 예산` : " · 후원 대기"}</small>
               </div>
               <b className="plus">+{p.amount}P</b>
             </div>

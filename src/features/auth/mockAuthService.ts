@@ -104,6 +104,12 @@ export function createMockAuthService(): AuthService {
       saveUsers(memoryUsers.map((user) => (user.id === updated.id ? updated : user)));
     },
 
+    async updateNickname(nickname) {
+      const current = findCurrent();
+      if (!current) throw new Error("로그인이 필요해요.");
+      saveUsers(memoryUsers.map((user) => (user.id === current.id ? { ...user, nickname } : user)));
+    },
+
     async deleteAccount() {
       const current = findCurrent();
       if (!current) throw new Error("로그인이 필요해요.");

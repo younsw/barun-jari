@@ -59,6 +59,13 @@ export default function AdminDashboardScreen({ navigate }: { navigate: AdminNavi
         </button>
       )}
 
+      {data && data.sponsorNeededPoints > 0 && (
+        <button className="admin-alert-box" onClick={() => navigate({ kind: "sponsors" })}>
+          <strong>후원 필요 {data.sponsorNeededPoints.toLocaleString()}P</strong>
+          <span>예산이 모자라도 포인트는 먼저 지급했어요. 이만큼 후원 예산을 채워야 해요. 눌러서 확인</span>
+        </button>
+      )}
+
       <div className="admin-section-title"><strong>바로가기</strong></div>
       <div className="admin-quick">
         <button onClick={() => navigate({ kind: "reports" })}>신고 관리</button>

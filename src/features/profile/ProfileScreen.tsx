@@ -13,7 +13,7 @@ import "./profile.css";
 
 // 앱 전체가 RequireLogin 안에 있으므로 이 화면은 항상 로그인한 회원이 본다.
 // 관리자에게만 관리자 메뉴와 "사용자 화면으로 보기" 스위치가 보인다.
-export default function ProfileScreen({ onTab, onOpenAdmin }: { onTab: (tab: MainTab) => void; onOpenAdmin: () => void }) {
+export default function ProfileScreen({ onTab, onOpenAdmin, onOpenAccount }: { onTab: (tab: MainTab) => void; onOpenAdmin: () => void; onOpenAccount: () => void }) {
   const { user, isAdmin, viewAsUser, setViewAsUser, showAdminTools, signOut, deleteAccount } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
@@ -87,7 +87,7 @@ export default function ProfileScreen({ onTab, onOpenAdmin }: { onTab: (tab: Mai
                   <b>›</b>
                 </button>
               )}
-              <button disabled>
+              <button onClick={onOpenAccount}>
                 <AppIcon name="person" />
                 <span>
                   <strong>계정 정보</strong>

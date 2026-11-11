@@ -19,6 +19,8 @@ export type AdminDashboard = {
   todayCheckins: number;
   suspiciousCheckins: number;
   lowBudgetSponsors: number;
+  /** 후원 대기 + 적자: 앞으로 후원받아 메워야 할 포인트 */
+  sponsorNeededPoints: number;
   recentReports: AdminRecentReport[];
 };
 
@@ -69,7 +71,10 @@ export type FacilityInput = Omit<AdminFacility, "id" | "district">;
 
 export type Sponsor = { id: string; name: string; description: string; startsOn: string; endsOn: string; active: boolean; budget: number; paid: number; remaining: number; createdAt: string };
 export type SponsorInput = { name: string; description: string; startsOn: string; endsOn: string; initialBudget?: number };
-export type SponsorTransaction = { id: string; sponsorId: string; kind: "budget" | "payout"; amount: number; note: string; createdAt: string };
+export type SponsorShortfall = { waitingPoints: number; waitingCount: number; deficitPoints: number };
+/** 어느 기업에도 배정되지 않은 지급분(후원 대기)을 볼 때 쓰는 id */
+export const WAITING_SPONSOR_ID = "waiting";
+export type SponsorTransaction = { id: string; sponsorId: string | null; kind: "budget" | "payout"; amount: number; note: string; createdAt: string };
 
 /** 잔여 예산이 전체의 20% 아래면 부족 알림 */
 export const LOW_BUDGET_RATIO = 0.2;
@@ -112,6 +117,7 @@ const mock = {
     { id: "t2", sponsorId: "s2", kind: "budget" as const, amount: 100, note: "첫 후원 예산", createdAt: hoursAgo(24 * 10) },
     { id: "t3", sponsorId: "s2", kind: "payout" as const, amount: 85, note: "onsite_checkin", createdAt: hoursAgo(24) },
     { id: "t4", sponsorId: "s1", kind: "payout" as const, amount: 6, note: "report_accepted", createdAt: hoursAgo(5) },
+    { id: "t5", sponsorId: null, kind: "payout" as const, amount: 3, note: "onsite_checkin", createdAt: hoursAgo(24 * 40) },
   ] as SponsorTransaction[],
   facilityRooms: new Map<number, number>(),
 };
@@ -142,10 +148,31 @@ function mockSponsors(): Sponsor[] {
   }).sort((a, b) => Number(b.active) - Number(a.active) || a.endsOn.localeCompare(b.endsOn));
 }
 
-/** 예시 모드: 포인트가 적립되면 진행 중이고 예산이 남은 가상 기업에서 차감 (DB 트리거와 같은 규칙) */
+/** 예시 모드: DB 트리거(015)와 같은 규칙. 예산이 넉넉한 진행 중 기업 → 없으면 진행 중 기업(마이너스) → 없으면 후원 대기 */
 function chargeMockSponsor(amount: number, reason: string) {
-  const sponsor = mockSponsors().find((s) => s.active && s.remaining >= amount);
-  if (sponsor) mock.transactions.unshift({ id: `t${mock.nextId++}`, sponsorId: sponsor.id, kind: "payout", amount, note: reason, createdAt: new Date().toISOString() });
+  const sponsors = mockSponsors().filter((s) => s.active).sort((a, b) => a.endsOn.localeCompare(b.endsOn));
+  const sponsor = sponsors.find((s) => s.remaining >= amount) ?? sponsors[0] ?? null;
+  mock.transactions.unshift({ id: `t${mock.nextId++}`, sponsorId: sponsor?.id ?? null, kind: "payout", amount, note: reason, createdAt: new Date().toISOString() });
+}
+
+/** 예시 모드: 예산이 들어오면 후원 대기분을 오래된 것부터 남은 예산 안에서 옮긴다 */
+function settleMockWaiting(sponsorId: string) {
+  let remaining = mockSponsors().find((s) => s.id === sponsorId)?.remaining ?? 0;
+  const waiting = mock.transactions.filter((t) => t.sponsorId === null && t.kind === "payout").sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  for (const row of waiting) {
+    if (remaining < row.amount) break;
+    row.sponsorId = sponsorId;
+    remaining -= row.amount;
+  }
+}
+
+function mockShortfall(): SponsorShortfall {
+  const waiting = mock.transactions.filter((t) => t.sponsorId === null && t.kind === "payout");
+  return {
+    waitingPoints: waiting.reduce((sum, t) => sum + t.amount, 0),
+    waitingCount: waiting.length,
+    deficitPoints: mockSponsors().filter((s) => s.remaining < 0).reduce((sum, s) => sum - s.remaining, 0),
+  };
 }
 
 async function mockFacilities(): Promise<AdminFacility[]> {
@@ -167,7 +194,7 @@ function mockReports(facilities: AdminFacility[]): AdminReport[] {
 // ── ADMIN-01 대시보드 ────────────────────────────────────────────
 type DashboardRow = {
   total_users: number; admin_users: number; today_reports: number; unresolved_reports: number; today_points: number;
-  today_checkins: number; suspicious_checkins: number; low_budget_sponsors: number;
+  today_checkins: number; suspicious_checkins: number; low_budget_sponsors: number; sponsor_needed_points?: number;
   recent_reports: { id: number; type: ReportType; status: ReportStatus; created_at: string; facility_name: string; nickname: string | null }[];
 };
 
@@ -185,6 +212,7 @@ export async function getDashboard(memberCounts: { total: number; admins: number
       todayCheckins: mock.checkins.filter((c) => koreanDate(c.createdAt) === today).length,
       suspiciousCheckins: mockCheckins().filter((c) => c.flagged && c.reviewStatus === "none").length,
       lowBudgetSponsors: mockSponsors().filter((s) => s.active && s.budget > 0 && s.remaining < s.budget * LOW_BUDGET_RATIO).length,
+      sponsorNeededPoints: mockShortfall().waitingPoints + mockShortfall().deficitPoints,
       recentReports: reports.slice(0, 5).map((r) => ({ id: r.id, type: r.type, status: r.status, createdAt: r.createdAt, facilityName: r.facilityName, nickname: r.nickname })),
     };
   }
@@ -192,6 +220,7 @@ export async function getDashboard(memberCounts: { total: number; admins: number
   return {
     totalUsers: row.total_users, adminUsers: row.admin_users, todayReports: row.today_reports, unresolvedReports: row.unresolved_reports,
     todayPoints: row.today_points, todayCheckins: row.today_checkins, suspiciousCheckins: row.suspicious_checkins, lowBudgetSponsors: row.low_budget_sponsors,
+    sponsorNeededPoints: row.sponsor_needed_points ?? 0,
     recentReports: row.recent_reports.map((r) => ({ id: String(r.id), type: r.type, status: r.status, createdAt: r.created_at, facilityName: r.facility_name, nickname: r.nickname })),
   };
 }
@@ -337,7 +366,10 @@ export async function saveSponsor(sponsorId: string | null, input: SponsorInput)
     } else {
       sponsorId = `s${mock.nextId++}`;
       mock.sponsors.push({ id: sponsorId, name: input.name.trim(), description: input.description.trim(), startsOn: input.startsOn, endsOn: input.endsOn, createdAt: new Date().toISOString() });
-      if (budget > 0) mock.transactions.unshift({ id: `t${mock.nextId++}`, sponsorId, kind: "budget", amount: budget, note: "첫 후원 예산", createdAt: new Date().toISOString() });
+      if (budget > 0) {
+        mock.transactions.unshift({ id: `t${mock.nextId++}`, sponsorId, kind: "budget", amount: budget, note: "첫 후원 예산", createdAt: new Date().toISOString() });
+        settleMockWaiting(sponsorId);
+      }
     }
     logMock("sponsor_save", "sponsor", sponsorId, { name: input.name.trim(), starts_on: input.startsOn, ends_on: input.endsOn });
     return;
@@ -353,23 +385,35 @@ export async function adjustSponsorBudget(sponsorId: string, amount: number, not
   if (!supabase) {
     const sponsor = mockSponsors().find((s) => s.id === sponsorId);
     if (!sponsor) throw new Error("후원 기업을 찾을 수 없어요.");
-    if (sponsor.remaining + amount < 0) throw new Error(`남은 예산(${sponsor.remaining}P)보다 많이 줄일 수 없어요.`);
+    if (amount < 0 && sponsor.remaining + amount < 0) throw new Error(`남은 예산(${sponsor.remaining}P)보다 많이 줄일 수 없어요.`);
     mock.transactions.unshift({ id: `t${mock.nextId++}`, sponsorId, kind: "budget", amount, note: note.trim(), createdAt: new Date().toISOString() });
+    if (amount > 0) settleMockWaiting(sponsorId);
     logMock("sponsor_budget", "sponsor", sponsorId, { amount, note });
     return;
   }
   await rpc<null>("admin_adjust_sponsor_budget", { p_sponsor_id: Number(sponsorId), p_amount: amount, p_note: note }, "예산을 조정하지 못했어요.");
 }
 
+export async function getSponsorShortfall(): Promise<SponsorShortfall> {
+  if (!supabase) return mockShortfall();
+  const row = await rpc<{ waiting_points: number; waiting_count: number; deficit_points: number }>("admin_sponsor_shortfall", undefined, "후원 필요 포인트를 불러오지 못했어요.");
+  return { waitingPoints: row.waiting_points, waitingCount: row.waiting_count, deficitPoints: row.deficit_points };
+}
+
+/** sponsorId = WAITING_SPONSOR_ID 이면 후원 대기(배정 안 된 지급분) 내역 */
 export async function listSponsorTransactions(sponsorId: string): Promise<SponsorTransaction[]> {
-  if (!supabase) return mock.transactions.filter((t) => t.sponsorId === sponsorId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  const { data, error } = await supabase
+  const waiting = sponsorId === WAITING_SPONSOR_ID;
+  if (!supabase) {
+    return mock.transactions.filter((t) => (waiting ? t.sponsorId === null : t.sponsorId === sponsorId))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+  let request = supabase
     .from("sponsor_transactions")
     .select("id, sponsor_id, kind, amount, note, created_at")
-    .eq("sponsor_id", Number(sponsorId))
     .order("created_at", { ascending: false })
-    .limit(50)
-    .returns<{ id: number; sponsor_id: number; kind: "budget" | "payout"; amount: number; note: string; created_at: string }[]>();
+    .limit(50);
+  request = waiting ? request.is("sponsor_id", null) : request.eq("sponsor_id", Number(sponsorId));
+  const { data, error } = await request.returns<{ id: number; sponsor_id: number | null; kind: "budget" | "payout"; amount: number; note: string; created_at: string }[]>();
   if (error) throw toAdminError(error.message, "지급·조정 내역을 불러오지 못했어요.");
-  return data.map((t) => ({ id: String(t.id), sponsorId: String(t.sponsor_id), kind: t.kind, amount: t.amount, note: t.note, createdAt: t.created_at }));
+  return data.map((t) => ({ id: String(t.id), sponsorId: t.sponsor_id === null ? null : String(t.sponsor_id), kind: t.kind, amount: t.amount, note: t.note, createdAt: t.created_at }));
 }

@@ -1,3 +1,7 @@
+/**
+ * UI-11 현장 인증: 흡연시설 30m 안에서 GPS 위치 + 앱 카메라 사진으로 장소를 확인하고 포인트를 받는다.
+ * 만든 날: 2026-11-04 · 마지막 수정: 2026-11-11
+ */
 import { useEffect, useState } from "react";
 import { isMockData } from "../auth/supabaseClient";
 import { AppIcon, ScreenHeader } from "../profile/AppShell";
@@ -14,6 +18,7 @@ import {
   type CheckinResult,
 } from "./checkinService";
 
+/** 인증할 장소 (id·이름·주소·좌표) (만든 날: 2026-11-04) */
 type CheckinPlace = { id: number; name: string; address: string; latitude: number | null; longitude: number | null };
 
 // UI-11 현장 인증: 장소 상세의 "현장 인증하기"에서 들어온다. 위치 확인 + 앱 카메라 촬영 → 서버 확인 → 포인트

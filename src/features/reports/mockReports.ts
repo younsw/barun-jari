@@ -1,4 +1,10 @@
+/**
+ * 신고 타입 정의와 모의 모드용 예시 신고 데이터.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
+/** 신고 종류: 없어짐·위치 틀림·정보 틀림·기타 (만든 날: 2026-10-28) */
 export type ReportType = "closed" | "wrong_location" | "wrong_info" | "etc";
+/** 처리 상태: 접수·확인 중·반영됨·반려 (만든 날: 2026-10-28) */
 export type ReportStatus = "received" | "reviewing" | "accepted" | "rejected";
 
 /** reports 테이블 한 행 + 화면 표시용 시설 이름·주소 */

@@ -1,3 +1,7 @@
+/**
+ * 앱 안 카메라 촬영 (갤러리 업로드 없이 현장에서 직접 찍은 사진만). 신고·현장 인증에서 쓴다.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-10-28
+ */
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -8,11 +12,15 @@ import { useEffect, useRef, useState } from "react";
  * 캔버스로 다시 만든 JPEG라서 원본 사진의 위치(GPS)·기기 정보(EXIF)도 남지 않는다.
  */
 
+/** 찍은 사진: 파일(blob), 미리보기 주소, 찍은 시각 (만든 날: 2026-10-28) */
 export type CapturedPhoto = { blob: Blob; url: string; capturedAt: string };
 
+/** 사진 긴 변 최대 픽셀 (용량 줄이기) (만든 날: 2026-10-28) */
 const MAX_EDGE = 1600;
+/** JPEG 저장 화질 (만든 날: 2026-10-28) */
 const JPEG_QUALITY = 0.85;
 
+/** 카메라 오류를 한국어 안내로 바꾼다 (만든 날: 2026-10-28) */
 function cameraErrorMessage(error: unknown): string {
   const name = error instanceof DOMException ? error.name : "";
   if (name === "NotAllowedError") return "카메라 권한이 거부됐어요. 브라우저 설정에서 카메라를 허용해 주세요.";
@@ -21,6 +29,7 @@ function cameraErrorMessage(error: unknown): string {
   return "카메라를 열 수 없어요.";
 }
 
+/** 카메라 미리보기 + 촬영 버튼 화면 (만든 날: 2026-10-28) */
 export function CameraCapture({ onCapture, onClose }: { onCapture: (photo: CapturedPhoto) => void; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);

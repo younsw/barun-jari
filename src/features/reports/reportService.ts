@@ -1,3 +1,7 @@
+/**
+ * 오류 신고 데이터: 신고 저장(사진 업로드 포함), 내 신고 목록·상세, 사진 보기 주소. 모의 모드는 메모리 저장소 사용.
+ * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ */
 import { supabase } from "../auth/supabaseClient";
 import type { GpsFix } from "../places/kakaoSdk";
 import { mockReports, type ReportRecord, type ReportType } from "./mockReports";
@@ -7,21 +11,27 @@ import { mockReports, type ReportRecord, type ReportType } from "./mockReports";
 // 현장 인증: 앱 내 카메라(CameraCapture) 사진과 GPS 위치가 둘 다 있어야 하고,
 // 서버 트리거(008)가 사진 업로드 여부·GPS 정확도·시설까지 거리를 다시 확인한다.
 
+/** 신고 사진을 저장하는 Supabase Storage 버킷 (만든 날: 2026-10-28) */
 const PHOTO_BUCKET = "report-photos";
+/** 사진 보기 링크 유효 시간(초) (만든 날: 2026-10-28) */
 const PHOTO_URL_SECONDS = 60 * 60;
 
+/** reports 테이블 한 행 (+시설 이름·주소) (만든 날: 2026-10-28) */
 type ReportRow = Omit<ReportRecord, "id" | "facility_name" | "facility_address"> & {
   id: number;
   smoking_facilities: { name: string; address: string } | null;
 };
 
+/** 신고를 불러올 때 고르는 열 (만든 날: 2026-10-28) */
 const SELECT = "id, user_id, facility_id, type, content, status, created_at, photo_path, reporter_latitude, reporter_longitude, location_accuracy_m, distance_m, location_verified, admin_reply, handled_at, smoking_facilities(name, address)";
 
+/** DB 행 → 화면용 신고 (만든 날: 2026-10-28) */
 function toRecord(row: ReportRow): ReportRecord {
   const { smoking_facilities: facility, ...rest } = row;
   return { ...rest, id: String(row.id), facility_name: facility?.name, facility_address: facility?.address };
 }
 
+/** 서버 오류를 한국어 안내로 바꾼다 (만든 날: 2026-10-28) */
 function toKoreanError(message: string): Error {
   const onsite = message.match(/onsite: (.+)/);
   if (onsite) return new Error(onsite[1]);
@@ -33,6 +43,7 @@ function toKoreanError(message: string): Error {
 
 let memoryReports = [...mockReports];
 
+/** 신고 저장: 사진을 올리고 위치와 함께 reports에 넣는다 (만든 날: 2026-10-28) */
 export async function createReport(input: { facility_id: number; type: ReportType; content: string; photo: Blob; location: GpsFix }): Promise<ReportRecord> {
   const { photo, location, ...base } = input;
   const fields = {
@@ -62,6 +73,7 @@ export async function createReport(input: { facility_id: number; type: ReportTyp
   return toRecord(data);
 }
 
+/** 내가 쓴 신고 목록 (관리자도 본인 것만) (만든 날: 2026-10-28) */
 export async function getMyReports(): Promise<ReportRecord[]> {
   if (!supabase) return [...memoryReports].sort((a, b) => b.created_at.localeCompare(a.created_at));
   // 관리자는 DB 권한상 모든 신고를 볼 수 있으므로, 내 신고 내역에서는 내 것만 고른다 (전체 신고는 관리자 모드에서)
@@ -72,6 +84,7 @@ export async function getMyReports(): Promise<ReportRecord[]> {
   return data.map(toRecord);
 }
 
+/** 신고 한 건 상세 (만든 날: 2026-10-28) */
 export async function getReportDetail(reportId: string): Promise<ReportRecord | null> {
   if (!supabase) return memoryReports.find((report) => report.id === reportId) ?? null;
   const { data, error } = await supabase.from("reports").select(SELECT).eq("id", Number(reportId)).maybeSingle<ReportRow>();

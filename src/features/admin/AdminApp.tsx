@@ -1,6 +1,6 @@
 /**
  * 관리자 모드 틀 (ADMIN-01~07): 상단 제목·뒤로가기·'사용자 화면으로', 화면 이동 스택, 하단 관리자 메뉴 5개.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-11-11
  */
 import { useState, type ReactNode } from "react";
 import { useAuth } from "../auth";
@@ -61,7 +61,7 @@ const navItems: Array<[AdminTab, "map" | "document" | "gift" | "person" | "shiel
   ["more", "shield", "더보기"],
 ];
 
-/** 관리자 모드 (ADMIN-01 ~ 07). 마이페이지 > 관리자 모드로 전환에서 들어온다. */
+/** 관리자 모드 (ADMIN-01 ~ 07). 마이페이지 > 관리자 모드로 전환에서 들어온다. (만든 날: 2026-11-11) */
 export default function AdminApp({ onExit, onFacilitiesChanged }: { onExit: () => void; onFacilitiesChanged: () => void }) {
   const { showAdminTools } = useAuth();
   const [stack, setStack] = useState<AdminPage[]>([{ kind: "home" }]);

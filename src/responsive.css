@@ -1,6 +1,6 @@
 /*
  * 기기별 화면 전환: 휴대폰은 앱 화면, PC는 웹 화면 (+ 사파리 하단 메뉴 가림 방지).
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-11-11
  */
 /*
  * 기기에 따라 화면 구성을 자동으로 바꾼다.
@@ -46,8 +46,9 @@
   }
   .phone-content { padding-top: max(24px, env(safe-area-inset-top)); }
   .feature-header,
-  .detail-header,
-  .admin-header { padding-top: env(safe-area-inset-top); height: auto; min-height: calc(62px + env(safe-area-inset-top)); }
+  .detail-header { padding-top: env(safe-area-inset-top); height: auto; min-height: calc(62px + env(safe-area-inset-top)); }
+  /* 관리자 헤더는 원래 위아래 여백 10px이 있어 그보다 줄이지 않는다 */
+  .admin-header { padding-top: max(10px, env(safe-area-inset-top)); min-height: calc(64px + env(safe-area-inset-top)); }
 }
 
 /* ───────── PC·웹 ───────── */

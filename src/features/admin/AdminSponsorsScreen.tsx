@@ -1,6 +1,6 @@
 /**
  * ADMIN-07 기업 후원·예산 관리: 후원 기업 등록·수정, 예산 추가·감액, 지급 내역, 예산 부족·후원 대기 알림.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-11-11
  */
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -16,7 +16,7 @@ const isLow = (s: Sponsor) => s.active && s.budget > 0 && s.remaining < s.budget
 /** 열려 있는 입력 창: 새 기업·수정·예산 조정 (만든 날: 2026-11-11) */
 type Panel = { kind: "new" } | { kind: "edit"; sponsor: Sponsor } | { kind: "adjust"; sponsor: Sponsor } | { kind: "history"; sponsor: Sponsor } | null;
 
-/** ADMIN-07 기업 후원 및 리워드 예산 관리 (가상 시뮬레이션) */
+/** ADMIN-07 기업 후원 및 리워드 예산 관리 (가상 시뮬레이션) (만든 날: 2026-11-11) */
 export default function AdminSponsorsScreen() {
   const [sponsors, setSponsors] = useState<Sponsor[] | null>(null);
   const [panel, setPanel] = useState<Panel>(null);

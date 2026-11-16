@@ -1,6 +1,6 @@
 /**
  * 회원가입 폼: 이메일·비밀번호·닉네임·필수 동의(서비스 안내, 개인정보).
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { useState, type FormEvent } from "react";
 import { useAuth } from "./useAuth";

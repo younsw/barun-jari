@@ -1,6 +1,6 @@
 /**
  * 로그인 상태를 앱 전체에 나눠 주는 React Context와 그 값의 모양.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { createContext } from "react";
 import type { AppUser, Member, SignInInput, SignUpInput } from "./types";

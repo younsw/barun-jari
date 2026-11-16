@@ -1,11 +1,12 @@
 /**
  * 포인트 데이터: 내 적립 내역과 요약(보유·오늘 적립·하루 한도).
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { supabase } from "../auth/supabaseClient";
 import { mockPoints, type PointLedgerRecord } from "./mockPoints";
 
 // 포인트 적립은 화면에서 하지 않는다. 현장 인증(+1)과 신고 반영(+2) (012)을 DB가 적립하고 하루 10P에서 멈춘다.
+// 만든 날: 2026-10-28
 const DAILY_POINT_LIMIT = 10;
 
 /** 포인트 요약 (만든 날: 2026-10-28) */

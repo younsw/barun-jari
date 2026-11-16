@@ -1,6 +1,6 @@
 /**
  * ADMIN-02/03 신고 관리: 상태별 신고 목록, 신고 상세에서 처리 상태·답변 저장과 처리 기록.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-11-11
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReportStatus, ReportType } from "../reports/mockReports";
@@ -12,7 +12,7 @@ import { actionLabels, errorText, formatDateTime, reportStatusLabels, reportType
 /** 신고 목록 상태 필터 (전체 + 4가지 상태) (만든 날: 2026-11-11) */
 const statusFilters: Array<ReportStatus | "all"> = ["all", "received", "reviewing", "accepted", "rejected"];
 
-/** ADMIN-02 신고 관리 목록 */
+/** ADMIN-02 신고 관리 목록 (만든 날: 2026-11-11) */
 export default function AdminReportsScreen({ navigate }: { navigate: AdminNavigate }) {
   const [reports, setReports] = useState<AdminReport[] | null>(null);
   const [error, setError] = useState("");
@@ -70,7 +70,7 @@ export default function AdminReportsScreen({ navigate }: { navigate: AdminNaviga
   );
 }
 
-/** ADMIN-03 신고 상세 및 처리. 상태와 답변은 신고자의 "내 신고 내역"에도 보인다. */
+/** ADMIN-03 신고 상세 및 처리. 상태와 답변은 신고자의 "내 신고 내역"에도 보인다. (만든 날: 2026-11-11) */
 export function AdminReportDetail({ reportId, navigate }: { reportId: string; navigate: AdminNavigate }) {
   const [report, setReport] = useState<AdminReport | null | undefined>(undefined);
   const [history, setHistory] = useState<AdminAction[]>([]);

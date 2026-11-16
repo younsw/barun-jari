@@ -1,6 +1,6 @@
 /**
- * ADMIN-06 회원 관리: 회원 목록과 관리자 지정·해제.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * ADMIN-05 회원 관리: 회원 목록과 관리자 지정·해제.
+ * 만든 날: 2026-11-11
  */
 import { useCallback, useEffect, useState } from "react";
 import { useAuth, type Member } from "../auth";
@@ -9,6 +9,7 @@ import { useAuth, type Member } from "../auth";
 const formatDate = (value: string) => new Date(value).toLocaleDateString("ko-KR");
 
 /** ADMIN-05 회원 관리: 회원 목록, 관리자 지정·해제 (db/migrations/013_admin_roles.sql)
+ * 만든 날: 2026-11-11
  *  성인 인증은 지금 가입 시 자동 처리된다. 실제 승인은 추후 외부 본인확인 결과로 하고, 관리자는 조회만 한다. */
 export default function AdminMembersScreen() {
   const { user, showAdminTools, listMembers, setMemberAdmin } = useAuth();

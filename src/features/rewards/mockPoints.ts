@@ -1,8 +1,8 @@
 /**
  * 포인트 내역 타입, 적립 사유 이름, 모의 모드용 예시 포인트.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
-/** point_ledger 테이블 한 행 */
+/** point_ledger 테이블 한 행 (만든 날: 2026-10-28) */
 export type PointLedgerRecord = {
   id: string;
   user_id: string;
@@ -12,14 +12,14 @@ export type PointLedgerRecord = {
   created_at: string;
 };
 
-/** DB의 reason 코드를 화면 문구로 바꾼다 (db/migrations/004_point_ledger.sql) */
+/** DB의 reason 코드를 화면 문구로 바꾼다 (db/migrations/004_point_ledger.sql) (만든 날: 2026-10-28) */
 export const reasonLabels: Record<string, string> = {
   report_accepted: "오류 신고 반영",
   onsite_checkin: "현장 인증",
   attendance: "출석",
 };
 
-/** Supabase 키가 없을 때만 쓰는 예시 적립 내역 */
+/** Supabase 키가 없을 때만 쓰는 예시 적립 내역 (만든 날: 2026-10-28) */
 export const mockPoints: PointLedgerRecord[] = [
   { id: "mock-p3", user_id: "mock", amount: 2, reason: "report_accepted", ref_id: "report:mock-2", created_at: "2026-10-28T09:10:00+09:00" },
   { id: "mock-p2", user_id: "mock", amount: 2, reason: "report_accepted", ref_id: "report:mock-5", created_at: "2026-10-28T08:40:00+09:00" },

@@ -1,6 +1,6 @@
 /**
  * 오류 신고 데이터: 신고 저장(사진 업로드 포함), 내 신고 목록·상세, 사진 보기 주소. 모의 모드는 메모리 저장소 사용.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { supabase } from "../auth/supabaseClient";
 import type { GpsFix } from "../places/kakaoSdk";
@@ -92,14 +92,14 @@ export async function getReportDetail(reportId: string): Promise<ReportRecord | 
   return data ? toRecord(data) : null;
 }
 
-/** 비공개 버킷이라 1시간짜리 임시 주소를 만든다. 본인 또는 관리자만 성공한다. */
+/** 비공개 버킷이라 1시간짜리 임시 주소를 만든다. 본인 또는 관리자만 성공한다. (만든 날: 2026-10-28) */
 export async function getReportPhotoUrl(photoPath: string): Promise<string | null> {
   if (!supabase) return photoPath;
   const { data, error } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrl(photoPath, PHOTO_URL_SECONDS);
   return error ? null : data.signedUrl;
 }
 
-/** 예시 모드 전용: 관리자 화면이 같은 메모리 신고를 보고 처리하도록 연결한다 (실제 DB에서는 admin_* 함수가 처리) */
+/** 예시 모드 전용: 관리자 화면이 같은 메모리 신고를 보고 처리하도록 연결한다 (실제 DB에서는 admin_* 함수가 처리) (만든 날: 2026-11-11) */
 export const mockReportStore = {
   list: () => [...memoryReports].sort((a, b) => b.created_at.localeCompare(a.created_at)),
   update(reportId: string, status: ReportRecord["status"], reply: string | null) {

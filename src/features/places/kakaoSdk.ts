@@ -1,8 +1,7 @@
 /**
  * 카카오맵 SDK 불러오기, 장소·주소 검색, 길찾기 링크, 현재 위치(GPS) 얻기.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
-// 카카오맵 JavaScript SDK 로더와 길찾기 링크
 // 키: .env의 VITE_KAKAO_MAP_JS_KEY (카카오 개발자 콘솔 > 앱 키 > JavaScript 키)
 // 콘솔의 JavaScript SDK 도메인에 접속 주소(예: http://localhost:8443)를 등록해야 지도가 뜹니다.
 
@@ -45,7 +44,7 @@ export function loadKakaoMaps(): Promise<any> {
 /** 위치 검색 결과: 좌표 + 화면에 보일 이름 (만든 날: 2026-11-11) */
 export type SearchedArea = LatLng & { label: string };
 
-/** 검색어(지역명·장소명·주소)를 카카오 장소 검색 → 주소 검색 순서로 찾아 좌표를 돌려준다. 없으면 null */
+/** 검색어(지역명·장소명·주소)를 카카오 장소 검색 → 주소 검색 순서로 찾아 좌표를 돌려준다. 없으면 null (만든 날: 2026-11-11) */
 export async function searchLocation(query: string): Promise<SearchedArea | null> {
   const keyword = query.trim();
   if (!keyword) return null;
@@ -68,6 +67,7 @@ export async function searchLocation(query: string): Promise<SearchedArea | null
 
 // 링크 형식: https://map.kakao.com/link/by/{이동수단}/출발이름,위도,경도/도착이름,위도,경도
 // 이름에 쉼표·슬래시가 있으면 링크가 깨지므로 공백으로 바꿉니다.
+// 만든 날: 2026-10-28
 function linkPoint(name: string, point: LatLng): string {
   const safeName = encodeURIComponent(name.replace(/[,/]/g, " ").trim());
   return `${safeName},${point.latitude},${point.longitude}`;
@@ -85,6 +85,7 @@ export function buildDirectionsUrl(
 }
 
 // 좌표가 아직 없는 장소는 주소로 카카오맵 검색을 연다.
+// 만든 날: 2026-10-28
 export function buildSearchUrl(address: string): string {
   return `https://map.kakao.com/?q=${encodeURIComponent(address)}`;
 }
@@ -104,7 +105,7 @@ export function getCurrentPosition(timeoutMs = 5000): Promise<LatLng | null> {
 /** 정확도(m)가 포함된 GPS 위치 (현장 인증·신고용) (만든 날: 2026-11-04) */
 export type GpsFix = LatLng & { accuracy: number };
 
-/** 신고 현장 인증용: 정확도(m)까지 받고, 실패 사유를 한국어로 돌려준다. 캐시된 위치는 쓰지 않는다. */
+/** 신고 현장 인증용: 정확도(m)까지 받고, 실패 사유를 한국어로 돌려준다. 캐시된 위치는 쓰지 않는다. (만든 날: 2026-11-04) */
 export function getGpsFix(timeoutMs = 15000): Promise<GpsFix> {
   if (!("geolocation" in navigator)) return Promise.reject(new Error("이 기기에서는 위치를 확인할 수 없어요."));
   return new Promise((resolve, reject) => {

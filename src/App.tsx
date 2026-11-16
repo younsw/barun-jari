@@ -1,9 +1,9 @@
 /**
  * 앱 진입 화면과 화면 이동 관리.
  * UI-01 흡연구역 목록(검색·필터·지도·리스트), UI-02 흡연구역 상세, 하단 메뉴로 각 기능 화면(인증·신고·리워드·마이페이지·관리자) 전환.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { RequireLogin, useAuth } from "./features/auth";
 import { isMockData } from "./features/auth/supabaseClient";
 import KakaoMap from "./features/places/KakaoMap";
@@ -42,7 +42,7 @@ type AppScreen =
   | "admin"
   | "account";
 
-/** 화면 표시용: 장소 + 현재 위치에서의 거리 */
+/** 화면 표시용: 장소 + 현재 위치에서의 거리 (만든 날: 2026-10-28) */
 type PlaceView = Place & { meters: number | null };
 
 /** 목록·상세 화면에서 쓰는 SVG 아이콘 (만든 날: 2026-10-28) */
@@ -62,6 +62,7 @@ function Icon({ name, size = 20 }: { name: "search" | "location" | "refresh" | "
 }
 
 // 첫 화면 지도: 키가 있으면 내 위치 중심 카카오 지도, 없거나 실패하면 기존 목업
+// 만든 날: 2026-10-28
 function MapPreview({ userLocation, focus, places, onSelect }: { userLocation: LatLng | null; focus: SearchedArea | null; places: PlaceView[]; onSelect: (id: number) => void }) {
   const [mapAvailable, setMapAvailable] = useState(hasKakaoMapKey);
   const [fullscreen, setFullscreen] = useState(false);
@@ -190,7 +191,7 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
   </section>;
 }
 
-/** 로그인 전에는 로그인·회원가입 화면만 보여준다 (src/features/auth/RequireLogin.tsx) */
+/** 로그인 전에는 로그인·회원가입 화면만 보여준다 (src/features/auth/RequireLogin.tsx) (만든 날: 2026-11-11) */
 function LoginGate({ children }: { children: ReactNode }) {
   const { loading, isLoggedIn, passwordRecovery } = useAuth();
   if (loading || !isLoggedIn || passwordRecovery) {
@@ -264,9 +265,13 @@ function MainApp() {
       .sort((a, b) => (a.meters ?? Infinity) - (b.meters ?? Infinity));
   }, [placeViews, filter, query, searchArea]);
 
+  // 검색 요청 번호: 응답을 기다리는 동안 검색어를 바꾸거나 다시 검색하면 늦게 온 이전 응답은 버린다
+  const searchSeq = useRef(0);
+
   const runLocationSearch = async () => {
     const keyword = query.trim();
     if (!keyword) return;
+    const seq = ++searchSeq.current;
     if (!hasKakaoMapKey) {
       setSearchMessage("지도 키가 없어 이름·주소로만 걸러 보여드려요.");
       return;
@@ -275,6 +280,7 @@ function MainApp() {
     setSearchMessage("");
     try {
       const area = await searchLocation(keyword);
+      if (seq !== searchSeq.current) return;
       if (area) {
         setSearchArea({ ...area, query: keyword });
       } else {
@@ -282,14 +288,17 @@ function MainApp() {
         setSearchMessage(`'${keyword}' 위치를 찾지 못해 이름·주소로 걸러 보여드려요.`);
       }
     } catch {
+      if (seq !== searchSeq.current) return;
       setSearchArea(null);
       setSearchMessage("위치 검색을 하지 못했어요. 이름·주소로 걸러 보여드려요.");
     } finally {
-      setSearching(false);
+      if (seq === searchSeq.current) setSearching(false);
     }
   };
 
   const changeQuery = (value: string) => {
+    searchSeq.current += 1; // 진행 중인 검색 결과는 무시
+    setSearching(false);
     setQuery(value);
     setSearchMessage("");
     if (searchArea && value.trim() !== searchArea.query) setSearchArea(null);
@@ -325,7 +334,6 @@ function MainApp() {
     navigate("detail");
     setNotice(`${place.name} 선택됨 · UI-02에 반영`);
     window.setTimeout(() => setNotice(""), 1800);
-    window.setTimeout(() => document.getElementById("ui-02")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
   };
 
   const facilities = (places ?? []).map(({ id, name, address }) => ({ id, name, address }));
@@ -350,7 +358,6 @@ function MainApp() {
         setFinding(null);
         setSelectedPlaceId(nearest.place.id);
         setScreenStack(["list", "detail"]);
-        window.setTimeout(() => document.getElementById("ui-02")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
       }
     } catch (caught) {
       setFinding({ message: caught instanceof Error ? caught.message : "현재 위치를 확인하지 못했어요.", done: true });
@@ -464,10 +471,7 @@ function MainApp() {
     </section>
     </div>
     {selectedPlace && <div className={`prototype-pair ${activeScreen !== "detail" ? "screen-hidden" : ""}`} id="ui-02">
-      <DetailScreen place={selectedPlace} userLocation={located} onReport={() => navigate("reportCreate")} onCheckin={() => navigate("checkin")} onBack={() => {
-        goBack();
-        window.setTimeout(() => document.getElementById("ui-01")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
-      }} />
+      <DetailScreen place={selectedPlace} userLocation={located} onReport={() => navigate("reportCreate")} onCheckin={() => navigate("checkin")} onBack={goBack} />
     </div>}
   </main>;
 }

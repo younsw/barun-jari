@@ -1,6 +1,6 @@
 /**
  * Supabase 키가 없을 때 쓰는 가짜 로그인. 회원·세션을 브라우저 localStorage에 저장한다 (개발·테스트용).
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import type { AppUser, AuthService, Member } from "./types";
 
@@ -9,6 +9,7 @@ import type { AppUser, AuthService, Member } from "./types";
  * 비밀번호는 SHA-256 해시로만 남긴다. 실제 서비스에서는 쓰지 않는다.
  *
  * 관리자 기능을 시험할 수 있도록 이 브라우저에서 처음 가입한 계정을 관리자로 만든다.
+ * 만든 날: 2026-10-28
  */
 const USERS_KEY = "barunjari.mockAuth.users";
 /** 가짜 로그인 세션 저장 키 (만든 날: 2026-10-28) */
@@ -48,7 +49,7 @@ function strip({ passwordHash: _passwordHash, ...user }: StoredUser): AppUser {
   return user;
 }
 
-/** 예전 형식(성인 인증 필드)으로 저장된 가짜 회원도 읽을 수 있게 맞춘다 */
+/** 예전 형식(성인 인증 필드)으로 저장된 가짜 회원도 읽을 수 있게 맞춘다 (만든 날: 2026-11-11) */
 function normalize(user: StoredUser & { isAdmin?: boolean }): StoredUser {
   return { id: user.id, email: user.email, nickname: user.nickname, isAdmin: user.isAdmin === true, createdAt: user.createdAt, passwordHash: user.passwordHash };
 }

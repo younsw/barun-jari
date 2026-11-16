@@ -1,6 +1,6 @@
 /**
  * 로그인 상태 관리. 가입·로그인·로그아웃·비밀번호 찾기/변경·닉네임 변경·탈퇴, 관리자의 '사용자 화면으로 보기'.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { AuthContext, type AuthContextValue } from "./AuthContext";
@@ -8,6 +8,7 @@ import { authService } from "./authService";
 import type { AppUser, SignUpInput } from "./types";
 
 // 메일 링크로 들어온 주소(#type=recovery, #error_code=...)는 Supabase가 곧 지우므로 처음에 읽어 둔다
+// 만든 날: 2026-11-04
 const initialHash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
 /** 비밀번호 재설정 메일 링크로 들어왔는지 (만든 날: 2026-11-04) */
 const openedFromRecoveryLink = initialHash.get("type") === "recovery";
@@ -30,6 +31,7 @@ function validateSignUp(input: SignUpInput) {
 }
 
 // "사용자 화면으로 보기"는 이 브라우저에만 기억한다 (권한은 바뀌지 않고 화면만 숨김)
+// 만든 날: 2026-11-11
 const viewAsUserKey = (userId: string) => `barunjari.viewAsUser.${userId}`;
 /** 관리자가 '사용자 화면으로 보기'를 켜 두었는지 브라우저에서 읽는다 (만든 날: 2026-11-11) */
 function readViewAsUser(userId: string | undefined) {

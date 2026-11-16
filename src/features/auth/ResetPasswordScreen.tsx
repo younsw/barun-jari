@@ -1,12 +1,12 @@
 /**
  * 메일 링크로 들어와 새 비밀번호를 정하는 화면.
- * 만든 날: 2026-11-04 · 마지막 수정: 2026-11-04
+ * 만든 날: 2026-11-04
  */
 import { useState, type FormEvent } from "react";
 import { AuthFrame } from "./AuthScreen";
 import { useAuth } from "./useAuth";
 
-/** 비밀번호 재설정 메일 링크로 들어왔을 때 새 비밀번호 정하기 */
+/** 비밀번호 재설정 메일 링크로 들어왔을 때 새 비밀번호 정하기 (만든 날: 2026-11-04) */
 export function ResetPasswordScreen() {
   const { updatePassword, signOut } = useAuth();
   const [password, setPassword] = useState("");

@@ -1,6 +1,6 @@
 /**
  * 오류 신고 화면 3개: UI-06 신고 작성(위치+사진 필수), UI-07 내 신고 목록, UI-08 신고 상세(관리자 답변 포함).
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { useEffect, useState } from "react";
 import { isMockData } from "../auth/supabaseClient";

@@ -1,6 +1,6 @@
 /**
  * Supabase Auth를 쓰는 실제 로그인 서비스. users 테이블의 닉네임·관리자 여부를 함께 읽는다.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { AppUser, AuthService, Member } from "./types";

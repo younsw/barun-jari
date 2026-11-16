@@ -1,6 +1,6 @@
 /*
  * 마이페이지·계정 정보 화면 스타일.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 .profile-card {
   padding: 17px;
@@ -62,7 +62,7 @@
 .view-as-user input:checked { background: #176345; }
 .view-as-user input:checked::after { transform: translateX(18px); }
 
-/* UI-11 계정 정보 */
+/* UI-12 계정 정보 */
 .account-section-title { margin: 20px 2px 8px; color: #44524a; font-size: 13px; }
 .account-section-title:first-child { margin-top: 0; }
 .account-list { margin: 0; padding: 2px 14px; border: 1px solid #e1e8e4; border-radius: 15px; background: #fff; }

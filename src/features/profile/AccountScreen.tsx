@@ -1,6 +1,6 @@
 /**
- * UI-11 계정 정보 (마이페이지 > 계정 정보): 닉네임 변경, 이메일·가입일·회원 구분, 포인트·활동 요약, 비밀번호 변경.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * UI-12 계정 정보 (마이페이지 > 계정 정보): 닉네임 변경, 이메일·가입일·회원 구분, 포인트·활동 요약, 비밀번호 변경.
+ * 만든 날: 2026-11-11
  */
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth";
@@ -16,7 +16,7 @@ const formatDate = (value: string) =>
 /** 활동 요약: 신고 수, 반영된 신고 수, 현장 인증 횟수 (만든 날: 2026-11-11) */
 type Activity = { reports: number; acceptedReports: number; checkins: number };
 
-/** UI-11 계정 정보: 마이페이지 > 계정 정보 */
+/** UI-12 계정 정보: 마이페이지 > 계정 정보 (만든 날: 2026-11-11) */
 export default function AccountScreen({ onBack, onTab }: { onBack: () => void; onTab: (tab: MainTab) => void }) {
   const { user, isAdmin, viewAsUser, updateNickname, updatePassword } = useAuth();
   const [points, setPoints] = useState<PointSummary | null>(null);
@@ -81,7 +81,7 @@ export default function AccountScreen({ onBack, onTab }: { onBack: () => void; o
 
   return (
     <div className="feature-pair">
-      <section className="phone-frame" aria-label="UI-11 계정 정보 모바일 화면">
+      <section className="phone-frame" aria-label="UI-12 계정 정보 모바일 화면">
         <div className="feature-screen">
           <ScreenHeader title="계정 정보" onBack={onBack} />
           <div className="feature-body">

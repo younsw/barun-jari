@@ -1,6 +1,6 @@
 -- 001: 회원 정보 (Supabase Auth의 auth.users와 1:1)
--- 만든 날: 2026-10-28
 -- 성인 인증 결과만 저장합니다. 주민번호·생년월일 원본은 저장하지 않습니다.
+-- 만든 날: 2026-10-28
 
 create table public.users (
   id                uuid primary key references auth.users (id) on delete cascade,

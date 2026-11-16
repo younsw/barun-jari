@@ -1,6 +1,6 @@
 /**
  * 로그인하지 않았으면 로그인 화면을, 비밀번호 재설정 링크로 왔으면 재설정 화면을 보여주는 문지기.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-11-11
  */
 import type { ReactNode } from "react";
 import { AuthFrame, AuthScreen } from "./AuthScreen";
@@ -12,6 +12,7 @@ import { useAuth } from "./useAuth";
  * (성인 인증 단계는 없앴다 — db/migrations/013_admin_roles.sql)
  *
  * <RequireLogin><장소 화면 /></RequireLogin>
+ * 만든 날: 2026-11-11
  */
 export function RequireLogin({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
   const { loading, isLoggedIn, passwordRecovery } = useAuth();

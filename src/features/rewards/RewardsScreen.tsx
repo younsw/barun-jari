@@ -1,6 +1,6 @@
 /**
  * UI-09 리워드 포인트: 보유 포인트, 오늘 적립/하루 한도, 적립 내역, 적립 방법 안내.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { useEffect, useState } from "react";
 import { isMockData } from "../auth/supabaseClient";

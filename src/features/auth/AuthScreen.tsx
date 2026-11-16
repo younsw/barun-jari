@@ -1,6 +1,6 @@
 /**
  * 로그인·회원가입 화면 틀(AuthFrame)과 로그인/가입 탭 전환.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { useState, type ReactNode } from "react";
 import { LoginScreen } from "./LoginScreen";
@@ -8,7 +8,7 @@ import { SignUpScreen } from "./SignUpScreen";
 import { isMockAuth } from "./authService";
 import "./auth.css";
 
-/** 모바일 프레임 + 바른자리 헤더. 인증 관련 화면 공통 틀 */
+/** 모바일 프레임 + 바른자리 헤더. 인증 관련 화면 공통 틀 (만든 날: 2026-10-28) */
 export function AuthFrame({ title, description, children, onBack }: { title: string; description: string; children: ReactNode; onBack?: () => void }) {
   return <section className="phone-frame" aria-label={`${title} 모바일 화면`}>
     <div className="phone-content auth-screen">

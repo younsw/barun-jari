@@ -41,7 +41,7 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/017_security_hardening.sql` | 보안 강화: 테이블 권한 최소화(신고 작성 때 관리자 답변 위조 차단), 사진 재사용 금지(10분 안에 찍은 사진만, 한 번만), 신고 하루 10건·사진 하루 30장 제한, 함수 search_path 고정 |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~015와 seed가 적용되어 있습니다(016·017은 아직 적용 전). 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~017과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`

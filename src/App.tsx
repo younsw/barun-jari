@@ -126,6 +126,7 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
   // 좌표가 아직 없는 장소는 주소 검색으로 엽니다.
   const openDirections = async () => {
     const routeWindow = window.open("", "_blank");  // 팝업 차단을 피하려고 클릭 즉시 창을 엽니다
+    if (routeWindow) routeWindow.opener = null;  // 새 창(카카오맵)이 이 페이지를 조작하지 못하게 연결을 끊습니다
     let url = buildSearchUrl(place.address);
     let origin: LatLng | null = null;
     if (coords) {

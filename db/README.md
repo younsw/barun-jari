@@ -38,9 +38,10 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/014_admin_mode.sql` | 관리자 모드: 대시보드·신고 처리(답변, 사용자 신고 내역에 표시)·인증 검토·시설 수정·가상 후원 예산(포인트 적립 시 자동 차감)과 관리자 처리 기록(admin_actions) |
 | `migrations/015_sponsor_deficit.sql` | 후원 예산이 모자라도 진행 중 기업에서 차감(마이너스 허용), 진행 중 기업이 없으면 후원 대기로 쌓고 예산 추가 시 오래된 것부터 정산 |
 | `migrations/016_dashboard_low_budget.sql` | 관리자 홈 '예산 부족' 수에서 적자 기업 제외 (후원 관리 화면과 같은 기준) |
+| `migrations/017_security_hardening.sql` | 보안 강화: 테이블 권한 최소화(신고 작성 때 관리자 답변 위조 차단), 사진 재사용 금지(10분 안에 찍은 사진만, 한 번만), 신고 하루 10건·사진 하루 30장 제한, 함수 search_path 고정 |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~015와 seed가 적용되어 있습니다(016은 아직 적용 전). 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~015와 seed가 적용되어 있습니다(016·017은 아직 적용 전). 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`
@@ -63,3 +64,12 @@ python3 db/export_seed.py  # seed.sql에도 좌표 반영
 ## 출처
 
 서울특별시 중랑구 흡연시설 현황 (2026-02-12), 공공데이터포털
+
+## 보안 규칙 (017 이후)
+
+- 화면(anon·authenticated)은 테이블에 직접 쓰지 못한다. 예외: `users.nickname` 수정, `reports` 작성(사용자 칸만).
+  나머지 쓰기는 모두 `security definer` 함수가 안에서 권한(`is_admin()`, `auth.uid()`)을 다시 확인한 뒤 처리한다.
+- 새 테이블을 만들면 Supabase가 기본으로 anon·authenticated에 모든 권한을 주므로, 마이그레이션에서 꼭
+  `enable row level security`와 `revoke insert, update, delete, truncate ... from anon, authenticated`를 같이 쓴다.
+- 새 `security definer` 함수는 `set search_path = ''`로 만들고 테이블 이름에 `public.`을 붙인다.
+- 화면에서 부를 필요 없는 함수는 `revoke execute ... from public, anon, authenticated`.

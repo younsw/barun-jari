@@ -1,6 +1,6 @@
 /**
  * 관리자 데이터: Supabase 관리자 함수(admin_*) 호출. 모의 모드에서는 같은 동작을 메모리 데이터로 흉내 낸다.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-11-11
  */
 import { supabase } from "../auth/supabaseClient";
 import { getFacilities, updateMockPlace } from "../places/placeService";
@@ -88,12 +88,12 @@ export type Sponsor = { id: string; name: string; description: string; startsOn:
 export type SponsorInput = { name: string; description: string; startsOn: string; endsOn: string; initialBudget?: number };
 /** 후원이 필요한 포인트: 후원 대기 + 적자 (만든 날: 2026-11-11) */
 export type SponsorShortfall = { waitingPoints: number; waitingCount: number; deficitPoints: number };
-/** 어느 기업에도 배정되지 않은 지급분(후원 대기)을 볼 때 쓰는 id */
+/** 어느 기업에도 배정되지 않은 지급분(후원 대기)을 볼 때 쓰는 id (만든 날: 2026-11-11) */
 export const WAITING_SPONSOR_ID = "waiting";
 /** 후원 예산 추가·지급 한 건 (만든 날: 2026-11-11) */
 export type SponsorTransaction = { id: string; sponsorId: string | null; kind: "budget" | "payout"; amount: number; note: string; createdAt: string };
 
-/** 잔여 예산이 전체의 20% 아래면 부족 알림 */
+/** 잔여 예산이 전체의 20% 아래면 부족 알림 (만든 날: 2026-11-11) */
 export const LOW_BUDGET_RATIO = 0.2;
 
 /** 서버의 'admin: ...' 오류를 화면용 문구로 바꾼다 (만든 날: 2026-11-11) */
@@ -118,6 +118,7 @@ const koreanDate = (value: Date | string) => new Intl.DateTimeFormat("en-CA", { 
 const daysBetween = (a: string, b: string) => Math.round((new Date(a).getTime() - new Date(b).getTime()) / 86_400_000);
 
 // ── 예시 모드 데이터 ──────────────────────────────────────────────
+// 만든 날: 2026-11-11
 const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000).toISOString();
 /** 모의 모드 메모리 데이터 (신고 처리·후원·작업 기록) (만든 날: 2026-11-11) */
 const mock = {
@@ -173,14 +174,14 @@ function mockSponsors(): Sponsor[] {
   }).sort((a, b) => Number(b.active) - Number(a.active) || a.endsOn.localeCompare(b.endsOn));
 }
 
-/** 예시 모드: DB 트리거(015)와 같은 규칙. 예산이 넉넉한 진행 중 기업 → 없으면 진행 중 기업(마이너스) → 없으면 후원 대기 */
+/** 예시 모드: DB 트리거(015)와 같은 규칙. 예산이 넉넉한 진행 중 기업 → 없으면 진행 중 기업(마이너스) → 없으면 후원 대기 (만든 날: 2026-11-11) */
 function chargeMockSponsor(amount: number, reason: string) {
   const sponsors = mockSponsors().filter((s) => s.active).sort((a, b) => a.endsOn.localeCompare(b.endsOn));
   const sponsor = sponsors.find((s) => s.remaining >= amount) ?? sponsors[0] ?? null;
   mock.transactions.unshift({ id: `t${mock.nextId++}`, sponsorId: sponsor?.id ?? null, kind: "payout", amount, note: reason, createdAt: new Date().toISOString() });
 }
 
-/** 예시 모드: 예산이 들어오면 후원 대기분을 오래된 것부터 남은 예산 안에서 옮긴다 */
+/** 예시 모드: 예산이 들어오면 후원 대기분을 오래된 것부터 남은 예산 안에서 옮긴다 (만든 날: 2026-11-11) */
 function settleMockWaiting(sponsorId: string) {
   let remaining = mockSponsors().find((s) => s.id === sponsorId)?.remaining ?? 0;
   const waiting = mock.transactions.filter((t) => t.sponsorId === null && t.kind === "payout").sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -220,6 +221,7 @@ function mockReports(facilities: AdminFacility[]): AdminReport[] {
 }
 
 // ── ADMIN-01 대시보드 ────────────────────────────────────────────
+// 만든 날: 2026-11-11
 type DashboardRow = {
   total_users: number; admin_users: number; today_reports: number; unresolved_reports: number; today_points: number;
   today_checkins: number; suspicious_checkins: number; low_budget_sponsors: number; sponsor_needed_points?: number;
@@ -240,7 +242,7 @@ export async function getDashboard(memberCounts: { total: number; admins: number
         + mock.checkins.filter((c) => koreanDate(c.createdAt) === today).reduce((sum, c) => sum + c.pointsAwarded, 0),
       todayCheckins: mock.checkins.filter((c) => koreanDate(c.createdAt) === today).length,
       suspiciousCheckins: mockCheckins().filter((c) => c.flagged && c.reviewStatus === "none").length,
-      lowBudgetSponsors: mockSponsors().filter((s) => s.active && s.budget > 0 && s.remaining < s.budget * LOW_BUDGET_RATIO).length,
+      lowBudgetSponsors: mockSponsors().filter((s) => s.active && s.budget > 0 && s.remaining >= 0 && s.remaining < s.budget * LOW_BUDGET_RATIO).length,
       sponsorNeededPoints: mockShortfall().waitingPoints + mockShortfall().deficitPoints,
       recentReports: reports.slice(0, 5).map((r) => ({ id: r.id, type: r.type, status: r.status, createdAt: r.createdAt, facilityName: r.facilityName, nickname: r.nickname })),
     };
@@ -255,6 +257,7 @@ export async function getDashboard(memberCounts: { total: number; admins: number
 }
 
 // ── ADMIN-02/03 신고 ────────────────────────────────────────────
+// 만든 날: 2026-11-11
 type ReportRow = {
   id: number; user_id: string | null; nickname: string | null; facility_id: number; facility_name: string; facility_address: string;
   type: ReportType; content: string; status: ReportStatus; photo_path: string | null; distance_m: number | null; location_verified: boolean;
@@ -288,7 +291,7 @@ export async function updateReport(reportId: string, status: ReportStatus, reply
   await rpc<null>("admin_update_report", { p_report_id: Number(reportId), p_status: status, p_reply: trimmed }, "신고를 처리하지 못했어요.");
 }
 
-/** 처리 이력 / 변경 이력 (admin_actions) */
+/** 처리 이력 / 변경 이력 (admin_actions) (만든 날: 2026-11-11) */
 export async function listActions(targetType: "report" | "facility" | "checkin" | "sponsor", targetId: string): Promise<AdminAction[]> {
   if (!supabase) return mock.actions.filter((a) => a.targetType === targetType && a.targetId === targetId);
   const { data, error } = await supabase
@@ -304,6 +307,7 @@ export async function listActions(targetType: "report" | "facility" | "checkin" 
 }
 
 // ── ADMIN-04 리워드 모니터링 ─────────────────────────────────────
+// 만든 날: 2026-11-11
 type PointRow = { id: number; user_id: string; nickname: string | null; amount: number; reason: string; ref_id: string | null; created_at: string; sponsor_name: string | null };
 
 /** 최근 N일 포인트 적립 내역 (만든 날: 2026-11-11) */
@@ -348,6 +352,7 @@ export async function reviewCheckin(checkinId: string, status: CheckinReview, no
 }
 
 // ── ADMIN-06 흡연시설 ───────────────────────────────────────────
+// 만든 날: 2026-11-11
 type FacilityRow = { id: number; district: string; name: string; address: string; category: string; room_count: number; latitude: number | null; longitude: number | null };
 
 /** 관리자용 시설 목록 (만든 날: 2026-11-11) */
@@ -385,6 +390,7 @@ export async function updateFacility(facilityId: number, input: FacilityInput): 
 }
 
 // ── ADMIN-07 가상 후원 예산 ──────────────────────────────────────
+// 만든 날: 2026-11-11
 type SponsorRow = { id: number; name: string; description: string; starts_on: string; ends_on: string; active: boolean; budget: number; paid: number; remaining: number; created_at: string };
 
 /** 후원 기업 목록과 예산 현황 (만든 날: 2026-11-11) */
@@ -441,7 +447,7 @@ export async function getSponsorShortfall(): Promise<SponsorShortfall> {
   return { waitingPoints: row.waiting_points, waitingCount: row.waiting_count, deficitPoints: row.deficit_points };
 }
 
-/** sponsorId = WAITING_SPONSOR_ID 이면 후원 대기(배정 안 된 지급분) 내역 */
+/** sponsorId = WAITING_SPONSOR_ID 이면 후원 대기(배정 안 된 지급분) 내역 (만든 날: 2026-11-11) */
 export async function listSponsorTransactions(sponsorId: string): Promise<SponsorTransaction[]> {
   const waiting = sponsorId === WAITING_SPONSOR_ID;
   if (!supabase) {

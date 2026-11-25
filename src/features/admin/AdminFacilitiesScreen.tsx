@@ -1,6 +1,6 @@
 /**
- * ADMIN-05 흡연시설 관리: 시설 검색·목록, 시설 상세에서 이름·주소·업종·좌표 수정과 관련 신고·수정 기록.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * ADMIN-06 흡연시설 관리: 시설 검색·목록, 시설 상세에서 이름·주소·업종·좌표 수정과 관련 신고·수정 기록.
+ * 만든 날: 2026-11-11
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AdminNavigate } from "./AdminApp";
@@ -12,7 +12,7 @@ const PAGE_SIZE = 30;
 /** 아직 처리 안 된 신고인지 (접수·확인 중) (만든 날: 2026-11-11) */
 const isOpen = (r: AdminReport) => r.status === "received" || r.status === "reviewing";
 
-/** ADMIN-06 흡연시설 정보 관리: 목록 */
+/** ADMIN-06 흡연시설 정보 관리: 목록 (만든 날: 2026-11-11) */
 export default function AdminFacilitiesScreen({ navigate }: { navigate: AdminNavigate }) {
   const [facilities, setFacilities] = useState<AdminFacility[] | null>(null);
   const [reports, setReports] = useState<AdminReport[]>([]);
@@ -76,7 +76,7 @@ const toForm = (f: AdminFacility) => ({
   latitude: f.latitude === null ? "" : String(f.latitude), longitude: f.longitude === null ? "" : String(f.longitude),
 });
 
-/** ADMIN-06 흡연시설 정보 수정 + 연결된 신고 + 변경 이력 */
+/** ADMIN-06 흡연시설 정보 수정 + 연결된 신고 + 변경 이력 (만든 날: 2026-11-11) */
 export function AdminFacilityDetail({ facilityId, navigate, onSaved }: { facilityId: number; navigate: AdminNavigate; onSaved: () => void }) {
   const [facility, setFacility] = useState<AdminFacility | null | undefined>(undefined);
   const [form, setForm] = useState<ReturnType<typeof toForm> | null>(null);

@@ -1,12 +1,13 @@
 /**
  * UI-02 상세 화면의 카카오 지도. 장소 한 곳을 가운데에 핀으로 보여준다.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-10-28
+ * 만든 날: 2026-10-28
  */
 import { useEffect, useRef, useState } from "react";
 import { hasKakaoMapKey, loadKakaoMaps, type LatLng } from "./kakaoSdk";
 
 // 장소 한 곳을 마커로 보여주는 카카오 지도.
 // 키가 없거나 SDK를 못 불러오면 아무것도 그리지 않고 onUnavailable을 호출합니다(기존 목업이 보이게).
+// 만든 날: 2026-10-28
 export default function KakaoMap({ center, level = 3, onUnavailable }: {
   center: LatLng;
   level?: number;

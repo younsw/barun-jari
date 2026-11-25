@@ -1,6 +1,6 @@
 /**
  * 관리자 화면 공통: 상태·사유·작업 한국어 이름, 날짜 표시, 오류 문구.
- * 만든 날: 2026-11-11 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-11-11
  */
 import type { ReportStatus, ReportType } from "../reports/mockReports";
 

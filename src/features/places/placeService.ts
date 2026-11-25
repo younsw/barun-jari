@@ -1,11 +1,11 @@
 /**
  * 흡연시설 데이터. Supabase smoking_facilities에서 불러오고, 키가 없으면 예시 데이터를 쓴다. 거리 계산 도구 포함.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
 import { supabase } from "../auth/supabaseClient";
 import type { LatLng } from "./kakaoSdk";
 
-/** smoking_facilities 한 행. 좌표는 지오코딩(db/geocode.py) 전이면 null */
+/** smoking_facilities 한 행. 좌표는 지오코딩(db/geocode.py) 전이면 null (만든 날: 2026-10-28) */
 export type Place = {
   id: number;
   name: string;
@@ -15,7 +15,7 @@ export type Place = {
   longitude: number | null;
 };
 
-/** Supabase 키가 없을 때만 쓰는 예시 장소 */
+/** Supabase 키가 없을 때만 쓰는 예시 장소 (만든 날: 2026-11-11) */
 let mockPlaces: Place[] = [
   { id: 1, name: "예시 데이터 · 중앙광장 흡연구역", address: "예시 데이터 · 중앙광장 인근", category: "공공청사", latitude: 37.6066, longitude: 127.0927 },
   { id: 2, name: "예시 데이터 · 1번 출구 흡연부스", address: "예시 데이터 · 1번 출구 앞", category: "복합건축물", latitude: 37.5966, longitude: 127.0851 },
@@ -41,7 +41,7 @@ export function placeCoords(place: Place): LatLng | null {
   return place.latitude === null || place.longitude === null ? null : { latitude: place.latitude, longitude: place.longitude };
 }
 
-/** 두 좌표 사이 직선거리(m) */
+/** 두 좌표 사이 직선거리(m) (만든 날: 2026-10-28) */
 export function distanceMeters(a: LatLng, b: LatLng): number {
   const rad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = rad(b.latitude - a.latitude);
@@ -56,7 +56,7 @@ export function formatDistance(meters: number | null): string {
   return meters < 1000 ? `${Math.round(meters / 10) * 10}m` : `${(meters / 1000).toFixed(1)}km`;
 }
 
-/** 예시 모드 전용: 관리자 시설 수정 화면이 예시 장소를 고친다 */
+/** 예시 모드 전용: 관리자 시설 수정 화면이 예시 장소를 고친다 (만든 날: 2026-11-11) */
 export function updateMockPlace(place: Place) {
   mockPlaces = mockPlaces.map((item) => (item.id === place.id ? place : item));
 }

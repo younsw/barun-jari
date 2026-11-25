@@ -1,5 +1,4 @@
 -- 008: 신고 현장 인증 (위치 + 사진 둘 다 필수)
--- 만든 날: 2026-11-04
 -- 신고할 때 앱 내 카메라 사진과 현재 GPS 위치를 반드시 함께 보내야 합니다.
 -- 서버(트리거)가 다시 확인하는 것:
 --   1) 사진이 report-photos 버킷의 내 폴더에 실제로 올라가 있는지
@@ -8,6 +7,7 @@
 -- 시설 좌표가 아직 없으면(지오코딩 전) 거리는 계산할 수 없어 location_verified = false로 저장하고,
 -- 관리자가 신고 위치(reporter_latitude/longitude)를 보고 판단합니다.
 -- 주의: 브라우저 GPS 값은 조작할 수 있어 완전한 증명은 아닙니다. 사진과 함께 보조 근거로 씁니다.
+-- 만든 날: 2026-11-04
 
 alter table public.reports
   add column reporter_latitude   double precision,

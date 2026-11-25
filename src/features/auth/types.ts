@@ -1,8 +1,8 @@
 /**
  * 로그인 기능에서 쓰는 타입: 사용자, 회원, 가입·로그인 입력, 로그인 서비스 인터페이스.
- * 만든 날: 2026-10-28 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-10-28
  */
-/** 화면에서 쓰는 로그인 사용자. users 테이블(id, nickname, is_admin, created_at) 기준. */
+/** 화면에서 쓰는 로그인 사용자. users 테이블(id, nickname, is_admin, created_at) 기준. (만든 날: 2026-10-28) */
 export type AppUser = {
   id: string;
   email: string;
@@ -12,7 +12,7 @@ export type AppUser = {
   createdAt: string;
 };
 
-/** 관리자 화면의 회원 한 명 */
+/** 관리자 화면의 회원 한 명 (만든 날: 2026-11-11) */
 export type Member = {
   id: string;
   email: string;

@@ -1,6 +1,6 @@
 -- 012: 포인트 조정 — 현장 인증 1회 +1P (009·011은 +2), 오류 신고 반영 +2P (004는 +3)
--- 만든 날: 2026-11-04
 -- 하루 최대 10P, 중복 적립 방지 규칙(award_points)은 그대로입니다. 이미 적립된 포인트는 바꾸지 않습니다.
+-- 만든 날: 2026-11-04
 
 -- 1) 신고가 accepted로 바뀌면 신고자에게 +2
 create or replace function public.reward_accepted_report()

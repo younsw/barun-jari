@@ -1,6 +1,6 @@
 /**
  * 현장 인증 처리: 가장 가까운 시설 찾기, 사진 업로드, 서버 함수로 인증·포인트 적립.
- * 만든 날: 2026-11-04 · 마지막 수정: 2026-11-11
+ * 만든 날: 2026-11-04
  */
 import { supabase } from "../auth/supabaseClient";
 import type { GpsFix, LatLng } from "../places/kakaoSdk";
@@ -27,7 +27,7 @@ export type CheckinResult = { distance: number; pointsAwarded: number; todayPoin
 /** 좌표가 있을 수 있는 장소 (만든 날: 2026-11-04) */
 type Locatable = { id: number; latitude: number | null; longitude: number | null };
 
-/** 현재 위치에서 가장 가까운 장소(좌표 있는 곳만)와 거리. 인증 버튼이 장소를 자동으로 고를 때 쓴다 */
+/** 현재 위치에서 가장 가까운 장소(좌표 있는 곳만)와 거리. 인증 버튼이 장소를 자동으로 고를 때 쓴다 (만든 날: 2026-11-04) */
 export function findNearest<T extends Locatable>(places: T[], here: LatLng): { place: T; distance: number } | null {
   let best: { place: T; distance: number } | null = null;
   for (const place of places) {

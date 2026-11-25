@@ -148,13 +148,13 @@ button { color: inherit; cursor: pointer; }
 .type-badge { display: inline-flex; padding: 6px 9px; border-radius: 7px; color: #176345; background: #dff1e7; font-size: 10px; font-weight: 800; }
 .detail-title { max-width: 320px; margin-top: 12px; font-size: 24px; line-height: 1.3; font-weight: 800; letter-spacing: -.04em; }
 .example-flag { margin: 7px 0 0; color: #8b9690; font-size: 9px; }
-.detail-meta { margin: 20px 0 15px; display: grid; grid-template-columns: 1fr 112px; border: 1px solid #e0e8e3; border-radius: 15px; background: white; }
+.detail-meta { margin: 20px 0 15px; display: grid; grid-template-columns: minmax(0, 1fr) auto; border: 1px solid #e0e8e3; border-radius: 15px; background: white; }
 .detail-meta > div { min-width: 0; padding: 13px; display: flex; align-items: center; gap: 9px; }
 .detail-meta > div + div { border-left: 1px solid #e7ede9; }
 .detail-meta > div > span { width: 31px; height: 31px; display: grid; place-items: center; flex: none; border-radius: 9px; color: #176345; background: #e8f4ed; }
 .detail-meta small, .detail-meta strong { display: block; }
-.detail-meta small { margin-bottom: 3px; color: #87928c; font-size: 8px; }
-.detail-meta strong { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.detail-meta small { margin-bottom: 3px; color: #87928c; font-size: 11px; }
+.detail-meta strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .detail-map { height: 215px; position: relative; overflow: hidden; border-radius: 17px; background: #e8efe9; background-image: linear-gradient(90deg, transparent 49%, rgba(196, 210, 201, .48) 50%, transparent 51%), linear-gradient(0deg, transparent 49%, rgba(196, 210, 201, .44) 50%, transparent 51%); background-size: 61px 61px; }
 .detail-map::after { content: ""; position: absolute; inset: 0; border: 1px solid rgba(24, 86, 59, .1); border-radius: inherit; pointer-events: none; }
 .detail-map .road-one { top: 93px; }.detail-map .road-two { top: 74px; }.detail-map .road-three { top: 145px; }
@@ -162,18 +162,26 @@ button { color: inherit; cursor: pointer; }
 .detail-map-pin svg { transform: rotate(7deg); }
 .kakao-map-canvas { position: absolute; z-index: 1; inset: 0; opacity: 0; transition: opacity .2s; }
 .kakao-map-canvas.ready { opacity: 1; }
-.route-button:disabled { cursor: progress; opacity: .7; }
-.coordinate { position: absolute; z-index: 4; left: 10px; right: 10px; bottom: 10px; padding: 9px 11px; display: flex; justify-content: space-between; border-radius: 9px; background: rgba(255,255,255,.92); font-size: 8px; }
+.coordinate { position: absolute; z-index: 4; left: 10px; right: 10px; bottom: 10px; padding: 9px 11px; display: flex; justify-content: space-between; border-radius: 9px; background: rgba(255,255,255,.92); font-size: 11px; }
 .coordinate span { color: #6e7b74; }
-.route-button { width: 100%; height: 50px; margin-top: 10px; padding: 0 14px; display: flex; align-items: center; gap: 8px; border: 0; border-radius: 13px; color: #176345; background: #e1f1e8; font-size: 12px; font-weight: 800; }
-.route-button span { margin-left: auto; color: #6e8c7e; font-size: 8px; font-weight: 600; }
+/* 상세 화면 행동 버튼: 현장 인증(주)·길찾기(보조)가 같은 형식, 색만 다름 (만든 날: 2026-11-25) */
+.detail-action { width: 100%; height: 54px; margin-top: 12px; padding: 0 16px; display: flex; align-items: center; gap: 10px; border-radius: 14px; font: inherit; text-align: left; cursor: pointer; }
+.detail-action + .detail-action { margin-top: 8px; }
+.detail-action strong { font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
+.detail-action small { margin-left: auto; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.detail-action.primary { border: 1px solid #176345; color: #fff; background: #176345; }
+.detail-action.primary small { color: #cfe6d9; }
+.detail-action.secondary { border: 1px solid #bcd9c9; color: #176345; background: #fff; }
+.detail-action.secondary small { color: #5f8a75; }
+.detail-action:disabled { cursor: not-allowed; opacity: .6; }
+.detail-action.secondary:disabled { cursor: progress; }
 .info-card { margin-top: 16px; padding: 3px 14px; border: 1px solid #e2e9e5; border-radius: 14px; background: white; }
-.info-card > div { min-height: 42px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #edf1ef; font-size: 9px; }
+.info-card > div { min-height: 42px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #edf1ef; font-size: 13px; }
 .info-card > div:last-child { border: 0; }
-.info-card span { color: #7c8982; }.info-card strong { font-size: 9px; }
-/* 오류 신고: 현장 인증 버튼과 같은 크기, 아주 연한 초록 보조 버튼 */
-.report-button { width: 100%; height: 52px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #d3e7db; border-radius: 15px; color: #176345; background: #f2f9f5; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
-.report-button small { color: #5f8a75; font-size: 11px; font-weight: 600; }
+.info-card span { color: #7c8982; }.info-card strong { font-size: 13px; }
+/* 오류 신고: 정보 카드 아래 작은 글자 링크 (만든 날: 2026-11-25) */
+.report-link { margin: 18px auto 0; display: flex; align-items: center; justify-content: center; gap: 5px; border: 0; color: #6c7c74; background: transparent; font: inherit; font-size: 13px; cursor: pointer; }
+.report-link strong { color: #176345; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
 
 .map-preview.live { height: 220px; }
 /* 지도 전체 화면: 확대 버튼을 누르면 화면 전체를 덮는다 */

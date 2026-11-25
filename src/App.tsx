@@ -170,12 +170,13 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
           <div className="coordinate"><strong>장소 좌표</strong><span>{coords ? `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}` : "주소→좌표 변환 전"}</span></div>
         </div>
 
-        <button className="checkin-button" onClick={onCheckin} disabled={!coords}>
-          <Icon name="location" size={19} />{coords ? "현장 인증하기" : "좌표 준비 중이라 인증할 수 없어요"}{coords && <small>위치 + 사진 · {CHECKIN_POINTS}P</small>}
+        {/* 현장 인증·길찾기는 같은 형식(아이콘·굵은 제목·오른쪽 설명), 색만 다르게: 인증이 주 버튼 */}
+        <button className="detail-action primary" onClick={onCheckin} disabled={!coords}>
+          <Icon name="location" size={20} /><strong>{coords ? "현장 인증하기" : "좌표 준비 중이라 인증할 수 없어요"}</strong>{coords && <small>위치 + 사진 · {CHECKIN_POINTS}P</small>}
         </button>
 
-        <button className="route-button" onClick={openDirections} disabled={routing}>
-          <Icon name="map" size={19} />{routing ? "현재 위치 확인 중…" : coords ? "카카오맵 길찾기" : "카카오맵에서 주소 검색"}<span>{coords ? "도보 · 카카오맵에서 열림" : "좌표 준비 중"}</span>
+        <button className="detail-action secondary" onClick={openDirections} disabled={routing}>
+          <Icon name="map" size={20} /><strong>{routing ? "현재 위치 확인 중…" : coords ? "카카오맵 길찾기" : "카카오맵에서 주소 검색"}</strong><small>{coords ? "도보 · 카카오맵에서 열림" : "좌표 준비 중"}</small>
         </button>
 
         <div className="info-card">
@@ -183,8 +184,8 @@ function DetailScreen({ place, userLocation, onBack, onReport, onCheckin }: { pl
           <div><span>정보 출처</span><strong>{isMockData ? "예시 데이터" : "서울 중랑구 흡연시설 현황 (2026-02-12)"}</strong></div>
         </div>
 
-        <button className="report-button" onClick={onReport}>
-          <Icon name="info" size={19} />오류 신고<small>장소 정보·위치가 잘못되었나요?</small>
+        <button className="report-link" onClick={onReport}>
+          <Icon name="info" size={16} />정보가 잘못됐나요? <strong>오류 신고</strong>
         </button>
       </div>
       {message && <div className="toast">{message}</div>}

@@ -83,8 +83,7 @@
   .service-header { margin-top: 6px; }
   .hero-title { font-size: 34px; }
   .service-header p { font-size: 15px; }
-  .location-card strong,
-  .route-button { font-size: 14px; }
+  .location-card strong { font-size: 14px; }
   .location-card small,
   .filters button,
   .place-copy > strong { font-size: 13px; }
@@ -102,10 +101,10 @@
   .feature-header { padding-right: max(18px, calc((100% - 820px) / 2 + 18px)); padding-left: max(18px, calc((100% - 820px) / 2 + 18px)); }
   .detail-title { max-width: 680px; font-size: 34px; }
   .detail-map { height: 340px; }
-  .detail-meta strong { font-size: 13px; }
-  .detail-meta small,
+  .detail-meta strong { font-size: 14px; }
+  .detail-meta small { font-size: 12px; }
   .info-card span,
-  .info-card strong { font-size: 11px; }
+  .info-card strong { font-size: 14px; }
 
   /* 기능 화면 공통 */
   .form-label { font-size: 12px; }

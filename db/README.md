@@ -42,7 +42,7 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/018_unique_nickname.sql` | 닉네임 중복 금지(대소문자 무시): 기존 중복은 나중 가입자에 숫자를 붙여 정리, 가입 전 확인 함수 `is_nickname_available()` |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~017과 seed가 적용되어 있습니다(018은 아직 적용 전). 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~018과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`

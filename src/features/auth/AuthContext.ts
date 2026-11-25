@@ -28,6 +28,8 @@ export type AuthContextValue = {
   requestPasswordReset: (email: string) => Promise<void>;
   /** 새 비밀번호 저장. 재설정 중이었다면 재설정 상태를 끝낸다 */
   updatePassword: (password: string) => Promise<void>;
+  /** 계정 정보에서 비밀번호 변경: 현재 비밀번호가 맞아야 새 비밀번호로 바뀐다 (만든 날: 2026-11-25) */
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   /** 닉네임 변경 (한글·영문·숫자 2~12자) 후 내 정보를 다시 읽는다 */
   updateNickname: (nickname: string) => Promise<void>;

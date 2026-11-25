@@ -63,6 +63,8 @@ export function createMockAuthService(): AuthService {
   const saveUsers = (users: StoredUser[]) => { memoryUsers = users; write(USERS_KEY, users); };
   const saveSession = (id: string | null) => { memorySession = id; write(SESSION_KEY, id); listeners.forEach((fn) => fn()); };
   const findCurrent = () => memoryUsers.find((user) => user.id === memorySession) ?? null;
+  const nicknameTaken = (nickname: string) =>
+    memoryUsers.some((user) => user.id !== memorySession && user.nickname.toLowerCase() === nickname.trim().toLowerCase());
   const requireAdmin = () => {
     if (!findCurrent()?.isAdmin) throw new Error("관리자만 할 수 있어요.");
   };
@@ -76,6 +78,7 @@ export function createMockAuthService(): AuthService {
     async signUp({ email, password, nickname }) {
       const normalized = email.trim().toLowerCase();
       if (memoryUsers.some((user) => user.email === normalized)) throw new Error("이미 가입된 이메일이에요.");
+      if (nicknameTaken(nickname)) throw new Error("이미 쓰는 닉네임이에요. 다른 닉네임을 입력해 주세요.");
       const user: StoredUser = {
         id: crypto.randomUUID(),
         email: normalized,
@@ -119,7 +122,20 @@ export function createMockAuthService(): AuthService {
     async updateNickname(nickname) {
       const current = findCurrent();
       if (!current) throw new Error("로그인이 필요해요.");
+      if (nicknameTaken(nickname)) throw new Error("이미 쓰는 닉네임이에요. 다른 닉네임을 입력해 주세요.");
       saveUsers(memoryUsers.map((user) => (user.id === current.id ? { ...user, nickname } : user)));
+    },
+
+    async isNicknameAvailable(nickname) {
+      return !nicknameTaken(nickname);
+    },
+
+    async changePassword(currentPassword, newPassword) {
+      const current = findCurrent();
+      if (!current) throw new Error("로그인이 필요해요.");
+      if (current.passwordHash !== (await hash(currentPassword))) throw new Error("현재 비밀번호가 맞지 않아요.");
+      const updated = { ...current, passwordHash: await hash(newPassword) };
+      saveUsers(memoryUsers.map((user) => (user.id === updated.id ? updated : user)));
     },
 
     async deleteAccount() {

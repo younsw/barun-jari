@@ -39,9 +39,10 @@ python3 db/import_csv.py db/data/seoul_jungnang_smoking_facilities_20260212.csv
 | `migrations/015_sponsor_deficit.sql` | 후원 예산이 모자라도 진행 중 기업에서 차감(마이너스 허용), 진행 중 기업이 없으면 후원 대기로 쌓고 예산 추가 시 오래된 것부터 정산 |
 | `migrations/016_dashboard_low_budget.sql` | 관리자 홈 '예산 부족' 수에서 적자 기업 제외 (후원 관리 화면과 같은 기준) |
 | `migrations/017_security_hardening.sql` | 보안 강화: 테이블 권한 최소화(신고 작성 때 관리자 답변 위조 차단), 사진 재사용 금지(10분 안에 찍은 사진만, 한 번만), 신고 하루 10건·사진 하루 30장 제한, 함수 search_path 고정 |
+| `migrations/018_unique_nickname.sql` | 닉네임 중복 금지(대소문자 무시): 기존 중복은 나중 가입자에 숫자를 붙여 정리, 가입 전 확인 함수 `is_nickname_available()` |
 | `seed.sql` | 흡연시설 242건 (`python3 db/export_seed.py`로 생성) |
 
-적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~017과 seed가 적용되어 있습니다. 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
+적용 상태: Supabase 프로젝트 `barun-jari`(tnpbliawewjtnhubcqei)에 001~017과 seed가 적용되어 있습니다(018은 아직 적용 전). 새 프로젝트에 적용할 때는 SQL Editor에서 `migrations/`를 번호 순서대로 실행한 뒤 `seed.sql`을 실행합니다.
 
 화면에서 쓰는 함수:
 - 포인트 요약: `supabase.rpc('get_my_point_summary')` → `{ total, today, daily_limit }`

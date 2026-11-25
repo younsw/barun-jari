@@ -88,7 +88,29 @@ export function createSupabaseAuthService(supabase: SupabaseClient): AuthService
       const { data } = await supabase.auth.getUser();
       if (!data.user) throw new Error("로그인이 필요해요.");
       const { error } = await supabase.from("users").update({ nickname }).eq("id", data.user.id);
+      // 23505: 확인한 뒤 다른 사람이 같은 닉네임을 먼저 가져간 경우 (db/migrations/018_unique_nickname.sql)
+      if (error?.code === "23505") throw new Error("이미 쓰는 닉네임이에요. 다른 닉네임을 입력해 주세요.");
       if (error) throw new Error("닉네임을 바꾸지 못했어요. 잠시 후 다시 시도해 주세요.");
+    },
+
+    async isNicknameAvailable(nickname) {
+      const { data, error } = await supabase.rpc("is_nickname_available", { p_nickname: nickname });
+      if (error) throw new Error("닉네임을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      return data === true;
+    },
+
+    async changePassword(currentPassword, newPassword) {
+      const { data } = await supabase.auth.getUser();
+      const email = data.user?.email;
+      if (!email) throw new Error("로그인이 필요해요.");
+      // 현재 비밀번호로 다시 로그인해 본인인지 확인한다 (같은 계정이라 세션만 새로 받는다)
+      const check = await supabase.auth.signInWithPassword({ email, password: currentPassword });
+      if (check.error) {
+        if (/invalid login credentials/i.test(check.error.message)) throw new Error("현재 비밀번호가 맞지 않아요.");
+        throw toKoreanError(check.error.message);
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw toKoreanError(error.message);
     },
 
     async deleteAccount() {

@@ -46,6 +46,10 @@ export interface AuthService {
   updatePassword(password: string): Promise<void>;
   /** 내 닉네임 바꾸기 */
   updateNickname(nickname: string): Promise<void>;
+  /** 닉네임을 쓸 수 있는지 (대소문자 무시, 내 닉네임은 쓸 수 있음) (만든 날: 2026-11-25) */
+  isNicknameAvailable(nickname: string): Promise<boolean>;
+  /** 로그인 상태에서 현재 비밀번호를 확인한 뒤 새 비밀번호로 바꾼다 (만든 날: 2026-11-25) */
+  changePassword(currentPassword: string, newPassword: string): Promise<void>;
   /** 회원 탈퇴: 사진·신고·포인트·인증 기록과 계정을 모두 지운다 */
   deleteAccount(): Promise<void>;
   /** 관리자: 전체 회원 목록 */

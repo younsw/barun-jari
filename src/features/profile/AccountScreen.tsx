@@ -18,7 +18,7 @@ type Activity = { reports: number; acceptedReports: number; checkins: number };
 
 /** UI-12 계정 정보: 마이페이지 > 계정 정보 (만든 날: 2026-11-11) */
 export default function AccountScreen({ onBack, onTab }: { onBack: () => void; onTab: (tab: MainTab) => void }) {
-  const { user, isAdmin, viewAsUser, updateNickname, updatePassword } = useAuth();
+  const { user, isAdmin, viewAsUser, updateNickname, changePassword } = useAuth();
   const [points, setPoints] = useState<PointSummary | null>(null);
   const [activity, setActivity] = useState<Activity | null>(null);
 
@@ -28,6 +28,7 @@ export default function AccountScreen({ onBack, onTab }: { onBack: () => void; o
   const [savingNickname, setSavingNickname] = useState(false);
 
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordCheck, setPasswordCheck] = useState("");
   const [passwordMessage, setPasswordMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -65,7 +66,8 @@ export default function AccountScreen({ onBack, onTab }: { onBack: () => void; o
     setSavingPassword(true);
     setPasswordMessage(null);
     try {
-      await updatePassword(password);
+      await changePassword(currentPassword, password);
+      setCurrentPassword("");
       setPassword("");
       setPasswordCheck("");
       setPasswordOpen(false);
@@ -123,11 +125,12 @@ export default function AccountScreen({ onBack, onTab }: { onBack: () => void; o
             {passwordMessage && <p className={passwordMessage.ok ? "account-ok" : "inline-error"} role="status">{passwordMessage.text}</p>}
             {passwordOpen ? (
               <div className="account-password">
+                <label><span>현재 비밀번호</span><input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} /></label>
                 <label><span>새 비밀번호 (8자 이상)</span><input type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
                 <label><span>새 비밀번호 확인</span><input type="password" autoComplete="new-password" value={passwordCheck} onChange={(event) => setPasswordCheck(event.target.value)} /></label>
                 <div className="account-actions">
-                  <button onClick={() => { setPasswordOpen(false); setPassword(""); setPasswordCheck(""); setPasswordMessage(null); }} disabled={savingPassword}>취소</button>
-                  <button className="primary" onClick={() => void savePassword()} disabled={savingPassword || password.length < 8}>{savingPassword ? "저장 중…" : "비밀번호 변경"}</button>
+                  <button onClick={() => { setPasswordOpen(false); setCurrentPassword(""); setPassword(""); setPasswordCheck(""); setPasswordMessage(null); }} disabled={savingPassword}>취소</button>
+                  <button className="primary" onClick={() => void savePassword()} disabled={savingPassword || !currentPassword || password.length < 8}>{savingPassword ? "저장 중…" : "비밀번호 변경"}</button>
                 </div>
               </div>
             ) : (

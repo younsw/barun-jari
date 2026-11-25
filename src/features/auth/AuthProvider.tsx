@@ -87,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     showAdminTools: user?.isAdmin === true && !viewAsUser,
     async signUp(input) {
       validateSignUp(input);
+      if (!(await authService.isNicknameAvailable(input.nickname.trim()))) throw new Error("이미 쓰는 닉네임이에요. 다른 닉네임을 입력해 주세요.");
       const created = await authService.signUp({ ...input, email: input.email.trim(), nickname: input.nickname.trim() });
       setUser(created);
       return created;
@@ -112,6 +113,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await authService.updatePassword(password);
       setPasswordRecovery(false);
     },
+    async changePassword(currentPassword, newPassword) {
+      if (!currentPassword) throw new Error("현재 비밀번호를 입력해 주세요.");
+      if (newPassword.length < 8) throw new Error("새 비밀번호는 8자 이상이어야 해요.");
+      if (newPassword === currentPassword) throw new Error("현재와 다른 비밀번호를 입력해 주세요.");
+      await authService.changePassword(currentPassword, newPassword);
+    },
     async deleteAccount() {
       await authService.deleteAccount();
       setPasswordRecovery(false);
@@ -120,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async updateNickname(nickname) {
       const trimmed = nickname.trim();
       if (!NICKNAME_PATTERN.test(trimmed)) throw new Error("닉네임은 한글·영문·숫자 2~12자로 입력해 주세요.");
+      if (!(await authService.isNicknameAvailable(trimmed))) throw new Error("이미 쓰는 닉네임이에요. 다른 닉네임을 입력해 주세요.");
       await authService.updateNickname(trimmed);
       await refresh();
     },

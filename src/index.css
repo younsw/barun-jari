@@ -155,6 +155,9 @@ button { color: inherit; cursor: pointer; }
 .detail-meta small, .detail-meta strong { display: block; }
 .detail-meta small { margin-bottom: 3px; color: #87928c; font-size: 11px; }
 .detail-meta strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+/* 긴 주소는 칸 밖으로 넘치지 않고 여러 줄로, 거리는 한 줄로 (만든 날: 2026-11-25) */
+.detail-meta > div > div { min-width: 0; }
+.detail-meta > div:first-child strong { overflow: visible; line-height: 1.4; white-space: normal; word-break: keep-all; overflow-wrap: anywhere; }
 .detail-map { height: 215px; position: relative; overflow: hidden; border-radius: 17px; background: #e8efe9; background-image: linear-gradient(90deg, transparent 49%, rgba(196, 210, 201, .48) 50%, transparent 51%), linear-gradient(0deg, transparent 49%, rgba(196, 210, 201, .44) 50%, transparent 51%); background-size: 61px 61px; }
 .detail-map::after { content: ""; position: absolute; inset: 0; border: 1px solid rgba(24, 86, 59, .1); border-radius: inherit; pointer-events: none; }
 .detail-map .road-one { top: 93px; }.detail-map .road-two { top: 74px; }.detail-map .road-three { top: 145px; }

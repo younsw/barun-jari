@@ -6,6 +6,7 @@ import { supabase } from "../auth/supabaseClient";
 import type { GpsFix, LatLng } from "../places/kakaoSdk";
 import { distanceMeters } from "../places/placeService";
 import { mockPoints } from "../rewards/mockPoints";
+import { PHOTO_LIMIT_MESSAGE } from "../reports/reportService";
 
 // 현장 인증: 흡연시설 현장에서 위치 + 앱 카메라 사진으로 "이 장소가 실제로 있다"를 확인하고 포인트를 받는다.
 // 규칙은 서버 함수 complete_onsite_checkin(009, 반경은 011)이 다시 확인한다:
@@ -73,7 +74,10 @@ export async function completeOnsiteCheckin(input: {
   if (!auth.user) throw new Error("로그인이 필요해요.");
   const photoPath = `${auth.user.id}/checkin-${crypto.randomUUID()}.jpg`;
   const upload = await supabase.storage.from(PHOTO_BUCKET).upload(photoPath, photo, { contentType: "image/jpeg", upsert: false });
-  if (upload.error) throw new Error("사진을 올리지 못했어요. 다시 촬영해 주세요.");
+  if (upload.error) {
+    if (/row-level security/i.test(upload.error.message)) throw new Error(PHOTO_LIMIT_MESSAGE);
+    throw new Error("사진을 올리지 못했어요. 다시 촬영해 주세요.");
+  }
 
   const { data, error } = await supabase
     .rpc("complete_onsite_checkin", {

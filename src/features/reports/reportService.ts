@@ -31,6 +31,9 @@ function toRecord(row: ReportRow): ReportRecord {
   return { ...rest, id: String(row.id), facility_name: facility?.name, facility_address: facility?.address };
 }
 
+/** 사진 하루 업로드 한도(017)에 걸렸을 때 안내 문구 (만든 날: 2026-11-25) */
+export const PHOTO_LIMIT_MESSAGE = "오늘 올릴 수 있는 사진 수(30장)를 넘었어요. 내일 다시 시도해 주세요.";
+
 /** 서버 오류를 한국어 안내로 바꾼다 (만든 날: 2026-10-28) */
 function toKoreanError(message: string): Error {
   const onsite = message.match(/onsite: (.+)/);
@@ -63,7 +66,11 @@ export async function createReport(input: { facility_id: number; type: ReportTyp
   if (!auth.user) throw new Error("로그인이 필요해요.");
   const photo_path = `${auth.user.id}/${crypto.randomUUID()}.jpg`;
   const upload = await supabase.storage.from(PHOTO_BUCKET).upload(photo_path, photo, { contentType: "image/jpeg", upsert: false });
-  if (upload.error) throw toKoreanError(upload.error.message);
+  if (upload.error) {
+    // 업로드 정책(017)은 본인 폴더·하루 30장만 허용한다. 로그인돼 있는데 막혔다면 하루 한도를 넘은 것
+    if (/row-level security/i.test(upload.error.message)) throw new Error(PHOTO_LIMIT_MESSAGE);
+    throw toKoreanError(upload.error.message);
+  }
 
   const { data, error } = await supabase.from("reports").insert({ ...fields, photo_path }).select(SELECT).single<ReportRow>();
   if (error) {
